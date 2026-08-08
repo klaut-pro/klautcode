@@ -198,13 +198,13 @@ describe("FlowchartDiagram", () => {
   B --> A`)
 
     expectDiagram(output).toEqualDiagram(`
-        ╭──────────────╮
-        │              │
-        │              │
-        ▼              │
-      ╭───╮          ╭─┴─╮
-      │ A ├─────────▶│ B │
-      ╰───╯          ╰───╯
+        ╭───────────╮
+        │           │
+        │           │
+        ▼           │
+      ╭───╮       ╭─┴─╮
+      │ A ├──────▶│ B │
+      ╰───╯       ╰───╯
     `)
   })
 
@@ -599,7 +599,7 @@ flowchart LR
     const output = renderFlowchartDiagram(content)
 
     expect(diagram.edges).toEqual([{ from: "Build", to: "Ship", label: "", style: "thick" }])
-    expect(output).toContain("━━━━━━━━━▶")
+    expect(output).toContain("━━━━━━▶")
   })
 
   test("parses and renders Mermaid dashed edges", () => {
@@ -611,7 +611,7 @@ flowchart LR
     const output = renderFlowchartDiagram(content)
 
     expect(diagram.edges).toEqual([{ from: "Build", to: "Ship", label: "", style: "dashed" }])
-    expect(output).toContain("─────────▶")
+    expect(output).toContain("──────▶")
   })
 
   test("paints horizontal and vertical dashed routes with solid terminal cells", () => {
@@ -689,11 +689,11 @@ graph LR
 `)
 
     expectDiagram(output).toEqualDiagram(`
-                                           ╭───────╮
-      ╭────────╮          ╭─────╮          ├───────┤
-      │ Client ├─────────▶│ API ├─────────▶│ Cache │
-      ╰────────╯          ╰─────╯          ├───────┤
-                                           ╰───────╯
+                                     ╭───────╮
+      ╭────────╮       ╭─────╮       ├───────┤
+      │ Client ├──────▶│ API ├──────▶│ Cache │
+      ╰────────╯       ╰─────╯       ├───────┤
+                                     ╰───────╯
     `)
   })
 
@@ -1016,6 +1016,176 @@ flowchart LR
       }
     }
   })
+
+  test("separates cross-dependent top-level subgraphs", () => {
+    const content = `flowchart TD
+  subgraph plugins["Plugins — one verb: attach"]
+    chip["pr-indicator<br/>attach(prompt.footer, { after: 'directory' })"]
+    theme["fancy-footer<br/>attach(prompt.footer, { replace: 'right' })"]
+  end
+
+  subgraph host["Host anatomy tree — published, stable part IDs"]
+    footer["prompt.footer"]
+    left["left"]
+    right["right<br/>(container)"]
+    dir["directory"]
+    model["model"]
+    tokens["tokens"]
+    footer --> left
+    footer --> right
+    right --> dir
+    right --> model
+    right --> tokens
+  end
+
+  chip -- "insert after" --> dir
+  theme == "takeover" ==> right
+  theme -. "suppresses guests<br/>in subtree" .-> chip`
+    const layout = layoutFlowchartDiagram(content)
+    const plugins = layout.subgraphBounds.get("plugins")!
+    const host = layout.subgraphBounds.get("host")!
+    const output = renderFlowchartDiagram(content)
+    const lines = output.split("\n")
+
+    expect(host.top).toBeGreaterThanOrEqual(plugins.top + plugins.height)
+    expect(lines.filter((line) => line.includes("Plugins — one verb: attach"))).toHaveLength(1)
+    expect(lines.filter((line) => line.includes("Host anatomy tree — published, stable part IDs"))).toHaveLength(1)
+    expect(lines.findIndex((line) => line.includes("Host anatomy tree"))).toBeGreaterThan(
+      lines.findIndex((line) => line.includes("Plugins — one verb")),
+    )
+    for (const route of layout.routes) {
+      for (let index = 1; index < route.points.length; index++) {
+        const from = route.points[index - 1]!
+        const to = route.points[index]!
+        expect(from.x === to.x || from.y === to.y).toBe(true)
+      }
+    }
+  })
+
+  test.each(["TD", "BT", "LR", "RL"] as const)(
+    "keeps parallel top-level subgraphs in the same rank for %s diagrams",
+    (direction) => {
+      const layout = layoutFlowchartDiagram(`flowchart ${direction}
+  subgraph source [Source]
+    A[A]
+  end
+  subgraph left [Left]
+    B[B]
+  end
+  subgraph right [Right]
+    C[C]
+  end
+  A --> B
+  A --> C`)
+      const source = layout.subgraphBounds.get("source")!
+      const left = layout.subgraphBounds.get("left")!
+      const right = layout.subgraphBounds.get("right")!
+      const leftNode = layout.bounds.get("B")!
+      const rightNode = layout.bounds.get("C")!
+      const horizontal = direction === "LR" || direction === "RL"
+      const reversed = direction === "BT" || direction === "RL"
+      const start = (bound: typeof source) => {
+        const value = horizontal ? bound.left : bound.top
+        const size = horizontal ? bound.width : bound.height
+        return reversed ? -(value + size) : value
+      }
+      const size = (bound: typeof source) => (horizontal ? bound.width : bound.height)
+
+      expect(horizontal ? leftNode.centerX : leftNode.centerY).toBe(horizontal ? rightNode.centerX : rightNode.centerY)
+      expect(Math.min(start(left), start(right))).toBeGreaterThanOrEqual(start(source) + size(source))
+    },
+  )
+
+  test.each(["TD", "BT", "LR", "RL"] as const)(
+    "separates oversized parallel subgraph labels across %s diagrams",
+    (direction) => {
+      const horizontal = direction === "LR" || direction === "RL"
+      const label = horizontal ? "one<br/>two<br/>three<br/>four<br/>five" : "A very very wide downstream subgraph title"
+      const layout = layoutFlowchartDiagram(`flowchart ${direction}
+  subgraph source [Source]
+    A[A]
+  end
+  subgraph left [${label}]
+    B[B]
+  end
+  subgraph right [Right]
+    C[C]
+  end
+  A --> B
+  A --> C`)
+      const left = layout.subgraphBounds.get("left")!
+      const right = layout.subgraphBounds.get("right")!
+      const overlap =
+        left.left < right.left + right.width &&
+        left.left + left.width > right.left &&
+        left.top < right.top + right.height &&
+        left.top + left.height > right.top
+
+      expect(overlap).toBe(false)
+    },
+  )
+
+  test.each(["TD", "BT", "LR", "RL"] as const)(
+    "ranks nested order-only subgraph dependencies for %s diagrams",
+    (direction) => {
+      const layout = layoutFlowchartDiagram(`flowchart ${direction}
+  subgraph first [First]
+    subgraph firstInner [First inner]
+      A[A]
+    end
+  end
+  subgraph second [Second]
+    subgraph secondInner [Second inner]
+      B[B]
+    end
+  end
+  firstInner ~~~ secondInner`)
+      const first = layout.subgraphBounds.get("first")!
+      const second = layout.subgraphBounds.get("second")!
+      const horizontal = direction === "LR" || direction === "RL"
+      const reversed = direction === "BT" || direction === "RL"
+      const start = (bound: typeof first) => {
+        const value = horizontal ? bound.left : bound.top
+        const size = horizontal ? bound.width : bound.height
+        return reversed ? -(value + size) : value
+      }
+      const size = horizontal ? first.width : first.height
+
+      expect(start(second)).toBeGreaterThanOrEqual(start(first) + size)
+    },
+  )
+
+  test.each(["TD", "BT", "LR", "RL"] as const)(
+    "ranks cyclic top-level subgraphs as one downstream component for %s diagrams",
+    (direction) => {
+      const layout = layoutFlowchartDiagram(`flowchart ${direction}
+  subgraph source [Source]
+    A[A]
+  end
+  subgraph first [First]
+    B[B]
+  end
+  subgraph second [Second]
+    C[C]
+  end
+  A --> B
+  B --> C
+  C --> B`)
+      const source = layout.subgraphBounds.get("source")!
+      const first = layout.subgraphBounds.get("first")!
+      const second = layout.subgraphBounds.get("second")!
+      const horizontal = direction === "LR" || direction === "RL"
+      const reversed = direction === "BT" || direction === "RL"
+      const start = (bound: typeof source) => {
+        const value = horizontal ? bound.left : bound.top
+        const size = horizontal ? bound.width : bound.height
+        return reversed ? -(value + size) : value
+      }
+      const size = (bound: typeof source) => (horizontal ? bound.width : bound.height)
+
+      expect(Math.min(start(first), start(second))).toBeGreaterThanOrEqual(start(source) + size(source))
+    },
+  )
 
   test("moves subgraph labels away from crossing routes", () => {
     const output = renderFlowchartDiagram(`
