@@ -102,10 +102,10 @@ describe("i18n parity", () => {
       const source = await dictionary(domain.source)
       for (const locale of domain.locales) {
         const target = await dictionary(domain.target(locale))
-        const missing = Object.keys(source).filter((key) => !Object.hasOwn(target, key))
         const extra = Object.keys(target)
           .filter((key) => !Object.hasOwn(source, key))
           .sort()
+        const missing = Object.keys(source).filter((key) => !Object.hasOwn(target, key))
         const expected = pluralFamilies(source)
           .flatMap((key) => (pluralCategories.get(locale) ?? []).map((category) => `${key}.${category}`))
           .sort()
@@ -200,7 +200,6 @@ describe("i18n plural parity", () => {
     }
   })
 })
-
 async function dictionary(file: string) {
   const module: unknown = await import(file)
   if (typeof module !== "object" || module === null || !("dict" in module) || !isDictionary(module.dict)) {
