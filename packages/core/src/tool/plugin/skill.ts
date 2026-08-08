@@ -26,8 +26,6 @@ export const description = [
   "The skill ID must match one of the available skills in the instructions.",
 ].join("\n")
 
-export const toModelOutput = Skill.toModelOutput
-
 const unableToLoad = (name: string, error?: unknown) =>
   new ToolFailure({ message: `Unable to load skill ${name}`, error })
 
@@ -71,7 +69,7 @@ export const Plugin = {
                   return {
                     name: skill.name,
                     directory,
-                    output: toModelOutput(skill, files),
+                    output: Skill.toModelOutput(skill, files),
                   }
                 }).pipe(Effect.mapError((error) => unableToLoad(input.id, error)))
               }).pipe(
