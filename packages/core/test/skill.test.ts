@@ -2,15 +2,17 @@ import fs from "fs/promises"
 import path from "path"
 import { describe, expect } from "bun:test"
 import { Effect, Layer } from "effect"
-import { AgentV2 } from "@opencode-ai/core/agent"
-import { AppNodeBuilder } from "@opencode-ai/core/effect/app-node-builder"
-import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { FSUtil } from "@opencode-ai/core/fs-util"
-import { AbsolutePath } from "@opencode-ai/core/schema"
-import { SkillV2 } from "@opencode-ai/core/skill"
-import { SkillDiscovery } from "@opencode-ai/core/skill/discovery"
+import { AgentV2 } from "@klautcode/core/agent"
+import { AppNodeBuilder } from "@klautcode/core/effect/app-node-builder"
+import { LayerNode } from "@klautcode/core/effect/layer-node"
+import { FSUtil } from "@klautcode/core/fs-util"
+import { AbsolutePath } from "@klautcode/core/schema"
+import { SkillV2 } from "@klautcode/core/skill"
+import { SkillDiscovery } from "@klautcode/core/skill/discovery"
 import { tmpdir } from "./fixture/tmpdir"
 import { testEffect } from "./lib/effect"
+
+const goalSkillPath = path.join(import.meta.dir, "../../../.klautcode/skills/goal/SKILL.md")
 
 const urls = new Map<string, AbsolutePath[]>()
 let pulls = 0
@@ -118,6 +120,32 @@ describe("SkillV2", () => {
           expect((yield* skill.list()).map((item) => item.name)).toEqual(["deploy"])
           expect(pulls).toBe(1)
           expect(SkillV2.available(yield* skill.list(), (yield* agents.get(AgentV2.ID.make("reviewer")))!)).toEqual([])
+        }),
+      ),
+    ),
+  )
+
+  it.live("loads the repo goal skill with valid frontmatter", () =>
+    Effect.acquireRelease(
+      Effect.promise(() => tmpdir()),
+      (tmp) => Effect.promise(() => tmp[Symbol.asyncDispose]()),
+    ).pipe(
+      Effect.flatMap((tmp) =>
+        Effect.gen(function* () {
+          yield* Effect.promise(async () => {
+            await fs.mkdir(path.join(tmp.path, "goal"), { recursive: true })
+            await fs.copyFile(goalSkillPath, path.join(tmp.path, "goal", "SKILL.md"))
+          })
+
+          const skill = yield* SkillV2.Service
+          yield* skill.transform((editor) => editor.source({ type: "directory", path: AbsolutePath.make(tmp.path) }))
+
+          const [goal] = yield* skill.list()
+          expect(goal).toBeDefined()
+          expect(goal.name).toBe("goal")
+          expect(goal.description).toContain("goal")
+          expect(goal.content).toContain("Loop protocol")
+          expect(goal.content).toContain("maxIterations")
         }),
       ),
     ),

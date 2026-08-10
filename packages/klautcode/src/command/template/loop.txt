@@ -1,0 +1,47 @@
+You are pursuing a goal to full completion. Do not stop after the first sub-goal.
+
+---
+
+Goal: $ARGUMENTS
+
+---
+
+## Protocol
+
+1. **Restate the goal** in one sentence so the definition of done is explicit.
+2. **Plan sub-goals** — break the goal into ordered, verifiable sub-goals.
+3. **Execute the next sub-goal** toward the goal.
+4. **Verify** whether the overall goal is now satisfied using concrete evidence (tests, commands, file contents), not assumption.
+5. **Decide**: continue to the next sub-goal, or stop.
+6. **Report** concise progress after every iteration: what was done, what remains, and the iteration count.
+
+## Stop conditions
+
+Stop the loop when any of these hold:
+
+- **Goal achieved** — verification shows the stated outcome is fully met.
+- **Iteration limit reached** — the default max is **5** iterations. If the user supplied a max count (e.g. `/loop --max 10` or `/loop 10`), honor that instead. Do not silently loop past the limit.
+- **Infeasible** — further iterations cannot make progress with the available tools, or the goal is contradictory; explain why and stop.
+- **User interruption** — the user interrupts mid-loop; present partial results and where you left off.
+
+## Guidance
+
+- Keep each iteration meaningful: make real progress toward the goal, then verify. Do not spin on the same failed step more than twice without changing approach.
+- When a step fails, adapt: inspect the failure, adjust the approach, and retry as part of the same goal — a failed step does not abort the goal unless it proves infeasible.
+- Verify with the best evidence available: run tests, read the actual output, check the filesystem. Do not claim completion from reasoning alone.
+- Progress reports should be short — a line or two per iteration — so output does not flood the user. Only expand detail on failure or on user request.
+- Respect tool permissions and rate limits: batch requests sensibly and do not hammer the same tool when an approach is clearly not converging.
+- Partial results matter: if the loop stops early (limit, infeasible, or interrupt), summarize what is done, what is left, and how to resume.
+
+## Example flow
+
+```
+/loop add dark mode to the settings page
+
+1. restate: dark mode is done when settings has a working dark toggle persisted across reloads
+2. plan: [theme store, toggle UI, persistence, verification]
+3. iteration 1: add theme store; verify state switches
+4. iteration 2: add toggle UI; verify it flips the theme
+5. iteration 3: persist choice; verify across reload
+6. iteration 4: run full check; goal achieved -> stop
+```

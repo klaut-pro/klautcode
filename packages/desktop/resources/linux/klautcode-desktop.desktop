@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Klautcode
+Exec=/opt/Klautcode/ai.klautcode.desktop %U
+Terminal=false
+Type=Application
+Icon=ai.klautcode.desktop
+StartupWMClass=ai.klautcode.desktop
+NoDisplay=true
+Comment=Open source AI coding agent
+Categories=Development;

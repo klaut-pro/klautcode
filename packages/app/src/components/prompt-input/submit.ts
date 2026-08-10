@@ -1,9 +1,10 @@
-import type { Message, Session } from "@opencode-ai/sdk/v2/client"
+import type { Message, Session } from "@klautcode/sdk/v2/client"
 import { showToast } from "@/utils/toast"
-import { base64Encode } from "@opencode-ai/core/util/encode"
-import { Binary } from "@opencode-ai/core/util/binary"
+import { base64Encode } from "@klautcode/core/util/encode"
+import { Binary } from "@klautcode/core/util/binary"
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router"
 import { batch, startTransition, type Accessor } from "solid-js"
+import { findInlineCommand, inlineCommandPrompt } from "./inline-command"
 import { useTabs } from "@/context/tabs"
 import { useServerSync, type ServerSync } from "@/context/server-sync"
 import { useLanguage } from "@/context/language"
@@ -21,7 +22,7 @@ import { formatServerError } from "@/utils/server-errors"
 import { ScopedKey } from "@/utils/server-scope"
 import { createPromptSubmissionState } from "./submission-state"
 import { normalizeSessionInfo } from "@/utils/session"
-import { Event } from "@opencode-ai/schema/event"
+import { Event } from "@klautcode/schema/event"
 import { blobDataUrl } from "@/utils/draft-store"
 
 type PendingPrompt = {
@@ -55,6 +56,9 @@ const draftText = (prompt: Prompt) => prompt.map((part) => ("content" in part ? 
 
 const draftImages = (prompt: Prompt) => prompt.filter((part): part is ImageAttachmentPart => part.type === "image")
 
+export { findInlineCommand, inlineCommandPrompt } from "./inline-command"
+
+
 export async function sendFollowupDraft(input: FollowupSendInput) {
   const text = draftText(input.draft.prompt)
   const images = draftImages(input.draft.prompt)
@@ -76,7 +80,13 @@ export async function sendFollowupDraft(input: FollowupSendInput) {
 
   const [head, ...tail] = text.split(" ")
   const cmd = head?.startsWith("/") ? head.slice(1) : undefined
-  if (cmd && input.sync.data.command.find((item) => item.name === cmd)) {
+  const inline = findInlineCommand(text, input.sync.data.command)
+  const resolvedCmd = inline?.name ?? cmd
+  const resolvedArgs =
+    inline && !cmd
+      ? inlineCommandPrompt(inline)
+      : tail.join(" ")
+  if (resolvedCmd && input.sync.data.command.find((item) => item.name === resolvedCmd)) {
     setBusy()
     try {
       if (!(await wait())) {
@@ -88,8 +98,8 @@ export async function sendFollowupDraft(input: FollowupSendInput) {
       await input.api.command({
         sessionID: input.draft.sessionID,
         id: messageID,
-        command: cmd,
-        arguments: tail.join(" "),
+        command: resolvedCmd,
+        arguments: resolvedArgs,
         agent: input.draft.agent,
         model: {
           id: input.draft.model.modelID,
@@ -509,39 +519,39 @@ export function createPromptSubmit(input: PromptSubmitInput) {
       return
     }
 
-    if (text.startsWith("/")) {
-      const [cmdName, ...args] = text.split(" ")
-      const commandName = cmdName.slice(1)
-      const customCommand = sync().data.command.find((c) => c.name === commandName)
-      if (customCommand) {
-        clearInput()
-        const messageID = Identifier.ascending("message")
-        serverSync().session.set("session_status", session.id, { type: "busy" })
-        sdk()
-          .api.session.command({
-            sessionID: session.id,
-            id: messageID,
-            command: commandName,
-            arguments: args.join(" "),
-            agent,
-            model: { id: model.modelID, providerID: model.providerID, variant },
-            files: await Promise.all(
-              images.map(async (attachment) => ({
-                uri: await blobDataUrl(attachment.blob, attachment.mime),
-                name: attachment.filename,
-              })),
-            ),
+    const [headToken, ...restTokens] = text.split(" ")
+    const leadingCmd = headToken?.startsWith("/") ? headToken.slice(1) : undefined
+    const inlineCmd = findInlineCommand(text, sync().data.command)
+    const commandName = inlineCmd?.name ?? leadingCmd
+    const customCommand = sync().data.command.find((c) => c.name === commandName)
+    if (customCommand) {
+      clearInput()
+      const messageID = Identifier.ascending("message")
+      serverSync().session.set("session_status", session.id, { type: "busy" })
+      sdk()
+        .api.session.command({
+          sessionID: session.id,
+          id: messageID,
+          command: commandName!,
+          arguments: inlineCmd && !leadingCmd ? inlineCommandPrompt(inlineCmd) : restTokens.join(" "),
+          agent,
+          model: { id: model.modelID, providerID: model.providerID, variant },
+          files: await Promise.all(
+            images.map(async (attachment) => ({
+              uri: await blobDataUrl(attachment.blob, attachment.mime),
+              name: attachment.filename,
+            })),
+          ),
+        })
+        .catch((err) => {
+          serverSync().session.set("session_status", session.id, { type: "idle" })
+          showToast({
+            title: language.t("prompt.toast.commandSendFailed.title"),
+            description: formatServerError(err, language.t, language.t("common.requestFailed")),
           })
-          .catch((err) => {
-            serverSync().session.set("session_status", session.id, { type: "idle" })
-            showToast({
-              title: language.t("prompt.toast.commandSendFailed.title"),
-              description: formatServerError(err, language.t, language.t("common.requestFailed")),
-            })
-            restoreInput()
-          })
-        return
-      }
+          restoreInput()
+        })
+      return
     }
 
     const commentItems = context.filter((item) => item.type === "file" && !!item.comment?.trim())

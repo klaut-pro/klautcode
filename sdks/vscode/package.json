@@ -1,12 +1,12 @@
 {
-  "name": "opencode",
-  "displayName": "opencode",
-  "description": "opencode for VS Code",
+  "name": "klautcode",
+  "displayName": "klautcode",
+  "description": "klautcode for VS Code",
   "version": "1.18.15",
   "publisher": "sst-dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/anomalyco/opencode"
+    "url": "https://github.com/klaut-pro/klautcode"
   },
   "license": "MIT",
   "icon": "images/icon.png",
@@ -25,54 +25,54 @@
   "contributes": {
     "commands": [
       {
-        "command": "opencode.openTerminal",
-        "title": "Open opencode",
+        "command": "klautcode.openTerminal",
+        "title": "Open klautcode",
         "icon": {
           "light": "images/button-dark.svg",
           "dark": "images/button-light.svg"
         }
       },
       {
-        "command": "opencode.openNewTerminal",
-        "title": "Open opencode in new tab",
+        "command": "klautcode.openNewTerminal",
+        "title": "Open klautcode in new tab",
         "icon": {
           "light": "images/button-dark.svg",
           "dark": "images/button-light.svg"
         }
       },
       {
-        "command": "opencode.addFilepathToTerminal",
+        "command": "klautcode.addFilepathToTerminal",
         "title": "Add Filepath to Terminal"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "opencode.openNewTerminal",
+          "command": "klautcode.openNewTerminal",
           "group": "navigation"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "opencode.openTerminal",
-        "title": "Run opencode",
+        "command": "klautcode.openTerminal",
+        "title": "Run klautcode",
         "key": "cmd+escape",
         "mac": "cmd+escape",
         "win": "ctrl+escape",
         "linux": "ctrl+escape"
       },
       {
-        "command": "opencode.openNewTerminal",
-        "title": "Run opencode",
+        "command": "klautcode.openNewTerminal",
+        "title": "Run klautcode",
         "key": "cmd+shift+escape",
         "mac": "cmd+shift+escape",
         "win": "ctrl+shift+escape",
         "linux": "ctrl+shift+escape"
       },
       {
-        "command": "opencode.addFilepathToTerminal",
-        "title": "opencode: Insert At-Mentioned",
+        "command": "klautcode.addFilepathToTerminal",
+        "title": "klautcode: Insert At-Mentioned",
         "key": "cmd+alt+k",
         "mac": "cmd+alt+k",
         "win": "ctrl+alt+K",

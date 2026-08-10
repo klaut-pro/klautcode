@@ -1,4 +1,4 @@
-import type { FileContent } from "@opencode-ai/sdk/v2"
+import type { FileContent } from "@klautcode/sdk/v2"
 
 export type MediaKind = "image" | "audio" | "svg"
 

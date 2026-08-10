@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router"
 import { useCommand, type CommandOption } from "@/context/command"
-import { useDialog } from "@opencode-ai/ui/context/dialog"
-import { previewSelectedLines } from "@opencode-ai/session-ui/pierre/selection-bridge"
+import { useDialog } from "@klautcode/ui/context/dialog"
+import { previewSelectedLines } from "@klautcode/session-ui/pierre/selection-bridge"
 import { useFile, selectionFromLines, type FileSelection, type SelectedLineRange } from "@/context/file"
 import { useLanguage } from "@/context/language"
 import { useLayout } from "@/context/layout"
@@ -13,10 +13,10 @@ import { useSync } from "@/context/sync"
 import { useTerminal } from "@/context/terminal"
 import { showToast } from "@/utils/toast"
 import { downloadSessionExport, fetchSessionExport, sessionExportFilename } from "@/utils/session-export"
-import { findLast } from "@opencode-ai/core/util/array"
+import { findLast } from "@klautcode/core/util/array"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { extractPromptFromParts } from "@/utils/prompt"
-import { Message, Part, UserMessage } from "@opencode-ai/sdk/v2"
+import { Message, Part, UserMessage } from "@klautcode/sdk/v2"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { createSessionOwnership } from "./session-ownership"
 import { useLocal } from "@/context/local"
@@ -444,6 +444,19 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
   }
 
   const sessionCmds = () => [
+    sessionCommand({
+      id: "session.sdd",
+      title: language.t("command.session.sdd"),
+      description: language.t("command.session.sdd.description"),
+      slash: "sdd",
+      onSelect: () => {
+        const promptSession = prompt.capture()
+        const input =
+          "Create a system design document. Start by restating the component or system to design, then cover: architecture, components, data flow, API surface, failure modes, and trade-offs. Where details are missing, ask or propose reasonable defaults."
+        promptSession.set([{ type: "text", content: input, start: 0, end: input.length }])
+        focusInput()
+      },
+    }),
     sessionCommand({
       id: "session.new",
       title: language.t("command.session.new"),

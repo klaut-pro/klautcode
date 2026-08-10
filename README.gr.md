@@ -1,17 +1,17 @@
 <p align="center">
-  <a href="https://opencode.ai">
+  <a href="https://code.klaut.pro">
     <picture>
       <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
       <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
+      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="Klautcode logo">
     </picture>
   </a>
 </p>
 <p align="center">Ο πράκτορας τεχνητής νοημοσύνης ανοικτού κώδικα για προγραμματισμό.</p>
 <p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/opencode-ai"><img alt="npm" src="https://img.shields.io/npm/v/opencode-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/publish.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://code.klaut.pro/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
+  <a href="https://www.npmjs.com/package/klautcode-ai"><img alt="npm" src="https://img.shields.io/npm/v/klautcode-ai?style=flat-square" /></a>
+  <a href="https://github.com/klaut-pro/klautcode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/klaut-pro/klautcode/publish.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@
   <a href="README.vi.md">Tiếng Việt</a>
 </p>
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+[![Klautcode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://code.klaut.pro)
 
 ---
 
@@ -47,18 +47,18 @@
 
 ```bash
 # YOLO
-curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://code.klaut.pro/install | bash
 
 # Διαχειριστές πακέτων
-npm i -g opencode-ai@latest        # ή bun/pnpm/yarn
-scoop install opencode             # Windows
-choco install opencode             # Windows
-brew install anomalyco/tap/opencode # macOS και Linux (προτείνεται, πάντα ενημερωμένο)
-brew install opencode              # macOS και Linux (επίσημος τύπος brew, λιγότερο συχνές ενημερώσεις)
-sudo pacman -S opencode            # Arch Linux (Σταθερό)
-paru -S opencode-bin               # Arch Linux (Τελευταία έκδοση από AUR)
-mise use -g opencode               # Οποιοδήποτε λειτουργικό σύστημα
-nix run nixpkgs#opencode           # ή github:anomalyco/opencode με βάση την πιο πρόσφατη αλλαγή από το dev branch
+npm i -g klautcode-ai@latest        # ή bun/pnpm/yarn
+scoop install klautcode             # Windows
+choco install klautcode             # Windows
+brew install klaut-pro/tap/klautcode # macOS και Linux (προτείνεται, πάντα ενημερωμένο)
+brew install klautcode              # macOS και Linux (επίσημος τύπος brew, λιγότερο συχνές ενημερώσεις)
+sudo pacman -S klautcode            # Arch Linux (Σταθερό)
+paru -S klautcode-bin               # Arch Linux (Τελευταία έκδοση από AUR)
+mise use -g klautcode               # Οποιοδήποτε λειτουργικό σύστημα
+nix run nixpkgs#klautcode           # ή github:klaut-pro/klautcode με βάση την πιο πρόσφατη αλλαγή από το dev branch
 ```
 
 > [!TIP]
@@ -66,40 +66,40 @@ nix run nixpkgs#opencode           # ή github:anomalyco/opencode με βάση 
 
 ### Εφαρμογή Desktop (BETA)
 
-Το OpenCode είναι επίσης διαθέσιμο ως εφαρμογή. Κατέβασε το απευθείας από τη [σελίδα εκδόσεων](https://github.com/anomalyco/opencode/releases) ή το [opencode.ai/download](https://opencode.ai/download).
+Το Klautcode είναι επίσης διαθέσιμο ως εφαρμογή. Κατέβασε το απευθείας από τη [σελίδα εκδόσεων](https://github.com/klaut-pro/klautcode/releases) ή το [code.klaut.pro/download](https://code.klaut.pro/download).
 
 | Πλατφόρμα             | Λήψη                               |
 | --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `opencode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `opencode-desktop-mac-x64.dmg`     |
-| Windows               | `opencode-desktop-windows-x64.exe` |
+| macOS (Apple Silicon) | `klautcode-desktop-mac-arm64.dmg`   |
+| macOS (Intel)         | `klautcode-desktop-mac-x64.dmg`     |
+| Windows               | `klautcode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm`, ή AppImage         |
 
 ```bash
 # macOS (Homebrew)
-brew install --cask opencode-desktop
+brew install --cask klautcode-desktop
 # Windows (Scoop)
-scoop bucket add extras; scoop install extras/opencode-desktop
+scoop bucket add extras; scoop install extras/klautcode-desktop
 ```
 
 #### Κατάλογος Εγκατάστασης
 
 Το script εγκατάστασης τηρεί την ακόλουθη σειρά προτεραιότητας για τη διαδρομή εγκατάστασης:
 
-1. `$OPENCODE_INSTALL_DIR` - Προσαρμοσμένος κατάλογος εγκατάστασης
+1. `$KLAUTCODE_INSTALL_DIR` - Προσαρμοσμένος κατάλογος εγκατάστασης
 2. `$XDG_BIN_DIR` - Διαδρομή συμβατή με τις προδιαγραφές XDG Base Directory
 3. `$HOME/bin` - Τυπικός κατάλογος εκτελέσιμων αρχείων χρήστη (εάν υπάρχει ή μπορεί να δημιουργηθεί)
-4. `$HOME/.opencode/bin` - Προεπιλεγμένη εφεδρική διαδρομή
+4. `$HOME/.klautcode/bin` - Προεπιλεγμένη εφεδρική διαδρομή
 
 ```bash
 # Παραδείγματα
-OPENCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
+KLAUTCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://code.klaut.pro/install | bash
+XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://code.klaut.pro/install | bash
 ```
 
 ### Πράκτορες
 
-Το OpenCode περιλαμβάνει δύο ενσωματωμένους πράκτορες μεταξύ των οποίων μπορείτε να εναλλάσσεστε με το πλήκτρο `Tab`.
+Το Klautcode περιλαμβάνει δύο ενσωματωμένους πράκτορες μεταξύ των οποίων μπορείτε να εναλλάσσεστε με το πλήκτρο `Tab`.
 
 - **build** - Προεπιλεγμένος πράκτορας με πλήρη πρόσβαση για εργασία πάνω σε κώδικα
 - **plan** - Πράκτορας μόνο ανάγνωσης για ανάλυση και εξερεύνηση κώδικα
@@ -110,20 +110,20 @@ XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
 Περιλαμβάνεται επίσης ένας **general** υποπράκτορας για σύνθετες αναζητήσεις και πολυβηματικές διεργασίες.
 Χρησιμοποιείται εσωτερικά και μπορεί να κληθεί χρησιμοποιώντας `@general` στα μηνύματα.
 
-Μάθετε περισσότερα για τους [πράκτορες](https://opencode.ai/docs/agents).
+Μάθετε περισσότερα για τους [πράκτορες](https://code.klaut.pro/docs/agents).
 
 ### Οδηγός Χρήσης
 
-Για περισσότερες πληροφορίες σχετικά με τη ρύθμιση του OpenCode, [**πλοηγήσου στον οδηγό χρήσης μας**](https://opencode.ai/docs).
+Για περισσότερες πληροφορίες σχετικά με τη ρύθμιση του Klautcode, [**πλοηγήσου στον οδηγό χρήσης μας**](https://code.klaut.pro/docs).
 
 ### Συνεισφορά
 
-Εάν ενδιαφέρεσαι να συνεισφέρεις στο OpenCode, διαβάστε τα [οδηγό χρήσης συνεισφοράς](./CONTRIBUTING.md) πριν υποβάλεις ένα pull request.
+Εάν ενδιαφέρεσαι να συνεισφέρεις στο Klautcode, διαβάστε τα [οδηγό χρήσης συνεισφοράς](./CONTRIBUTING.md) πριν υποβάλεις ένα pull request.
 
-### Δημιουργία πάνω στο OpenCode
+### Δημιουργία πάνω στο Klautcode
 
-Εάν εργάζεσαι σε ένα έργο σχετικό με το OpenCode και χρησιμοποιείτε το "opencode" ως μέρος του ονόματός του, για παράδειγμα "opencode-dashboard" ή "opencode-mobile", πρόσθεσε μια σημείωση στο README σας για να διευκρινίσεις ότι δεν είναι κατασκευασμένο από την ομάδα του OpenCode και δεν έχει καμία σχέση με εμάς.
+Εάν εργάζεσαι σε ένα έργο σχετικό με το Klautcode και χρησιμοποιείτε το "klautcode" ως μέρος του ονόματός του, για παράδειγμα "klautcode-dashboard" ή "klautcode-mobile", πρόσθεσε μια σημείωση στο README σας για να διευκρινίσεις ότι δεν είναι κατασκευασμένο από την ομάδα του Klautcode και δεν έχει καμία σχέση με εμάς.
 
 ---
 
-**Γίνε μέλος της κοινότητάς μας** [Discord](https://discord.gg/opencode) | [X.com](https://x.com/opencode)
+**Γίνε μέλος της κοινότητάς μας** [Discord](https://discord.gg/klautcode) | [X.com](https://x.com/klautcode)

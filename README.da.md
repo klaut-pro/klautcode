@@ -1,17 +1,17 @@
 <p align="center">
-  <a href="https://opencode.ai">
+  <a href="https://code.klaut.pro">
     <picture>
       <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
       <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
+      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="Klautcode logo">
     </picture>
   </a>
 </p>
 <p align="center">Den open source AI-kodeagent.</p>
 <p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/opencode-ai"><img alt="npm" src="https://img.shields.io/npm/v/opencode-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/publish.yml?style=flat-square&branch=dev" /></a>
+  <a href="https://code.klaut.pro/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
+  <a href="https://www.npmjs.com/package/klautcode-ai"><img alt="npm" src="https://img.shields.io/npm/v/klautcode-ai?style=flat-square" /></a>
+  <a href="https://github.com/klaut-pro/klautcode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/klaut-pro/klautcode/publish.yml?style=flat-square&branch=dev" /></a>
 </p>
 
 <p align="center">
@@ -39,7 +39,7 @@
   <a href="README.vi.md">Tiếng Việt</a>
 </p>
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+[![Klautcode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://code.klaut.pro)
 
 ---
 
@@ -47,18 +47,18 @@
 
 ```bash
 # YOLO
-curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://code.klaut.pro/install | bash
 
 # Pakkehåndteringer
-npm i -g opencode-ai@latest        # eller bun/pnpm/yarn
-scoop install opencode             # Windows
-choco install opencode             # Windows
-brew install anomalyco/tap/opencode # macOS og Linux (anbefalet, altid up to date)
-brew install opencode              # macOS og Linux (officiel brew formula, opdateres sjældnere)
-sudo pacman -S opencode            # Arch Linux (Stable)
-paru -S opencode-bin               # Arch Linux (Latest from AUR)
-mise use -g opencode               # alle OS
-nix run nixpkgs#opencode           # eller github:anomalyco/opencode for nyeste dev-branch
+npm i -g klautcode-ai@latest        # eller bun/pnpm/yarn
+scoop install klautcode             # Windows
+choco install klautcode             # Windows
+brew install klaut-pro/tap/klautcode # macOS og Linux (anbefalet, altid up to date)
+brew install klautcode              # macOS og Linux (officiel brew formula, opdateres sjældnere)
+sudo pacman -S klautcode            # Arch Linux (Stable)
+paru -S klautcode-bin               # Arch Linux (Latest from AUR)
+mise use -g klautcode               # alle OS
+nix run nixpkgs#klautcode           # eller github:klaut-pro/klautcode for nyeste dev-branch
 ```
 
 > [!TIP]
@@ -66,40 +66,40 @@ nix run nixpkgs#opencode           # eller github:anomalyco/opencode for nyeste 
 
 ### Desktop-app (BETA)
 
-OpenCode findes også som desktop-app. Download direkte fra [releases-siden](https://github.com/anomalyco/opencode/releases) eller [opencode.ai/download](https://opencode.ai/download).
+Klautcode findes også som desktop-app. Download direkte fra [releases-siden](https://github.com/klaut-pro/klautcode/releases) eller [code.klaut.pro/download](https://code.klaut.pro/download).
 
 | Platform              | Download                           |
 | --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `opencode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `opencode-desktop-mac-x64.dmg`     |
-| Windows               | `opencode-desktop-windows-x64.exe` |
+| macOS (Apple Silicon) | `klautcode-desktop-mac-arm64.dmg`   |
+| macOS (Intel)         | `klautcode-desktop-mac-x64.dmg`     |
+| Windows               | `klautcode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm`, eller AppImage     |
 
 ```bash
 # macOS (Homebrew)
-brew install --cask opencode-desktop
+brew install --cask klautcode-desktop
 # Windows (Scoop)
-scoop bucket add extras; scoop install extras/opencode-desktop
+scoop bucket add extras; scoop install extras/klautcode-desktop
 ```
 
 #### Installationsmappe
 
 Installationsscriptet bruger følgende prioriteringsrækkefølge for installationsstien:
 
-1. `$OPENCODE_INSTALL_DIR` - Tilpasset installationsmappe
+1. `$KLAUTCODE_INSTALL_DIR` - Tilpasset installationsmappe
 2. `$XDG_BIN_DIR` - Sti der følger XDG Base Directory Specification
 3. `$HOME/bin` - Standard bruger-bin-mappe (hvis den findes eller kan oprettes)
-4. `$HOME/.opencode/bin` - Standard fallback
+4. `$HOME/.klautcode/bin` - Standard fallback
 
 ```bash
 # Eksempler
-OPENCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
+KLAUTCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://code.klaut.pro/install | bash
+XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://code.klaut.pro/install | bash
 ```
 
 ### Agents
 
-OpenCode har to indbyggede agents, som du kan skifte mellem med `Tab`-tasten.
+Klautcode har to indbyggede agents, som du kan skifte mellem med `Tab`-tasten.
 
 - **build** - Standard, agent med fuld adgang til udviklingsarbejde
 - **plan** - Skrivebeskyttet agent til analyse og kodeudforskning
@@ -110,20 +110,20 @@ OpenCode har to indbyggede agents, som du kan skifte mellem med `Tab`-tasten.
 Derudover findes der en **general**-subagent til komplekse søgninger og flertrinsopgaver.
 Den bruges internt og kan kaldes via `@general` i beskeder.
 
-Læs mere om [agents](https://opencode.ai/docs/agents).
+Læs mere om [agents](https://code.klaut.pro/docs/agents).
 
 ### Dokumentation
 
-For mere info om konfiguration af OpenCode, [**se vores docs**](https://opencode.ai/docs).
+For mere info om konfiguration af Klautcode, [**se vores docs**](https://code.klaut.pro/docs).
 
 ### Bidrag
 
-Hvis du vil bidrage til OpenCode, så læs vores [contributing docs](./CONTRIBUTING.md) før du sender en pull request.
+Hvis du vil bidrage til Klautcode, så læs vores [contributing docs](./CONTRIBUTING.md) før du sender en pull request.
 
-### Bygget på OpenCode
+### Bygget på Klautcode
 
-Hvis du arbejder på et projekt der er relateret til OpenCode og bruger "opencode" som en del af navnet; f.eks. "opencode-dashboard" eller "opencode-mobile", så tilføj en note i din README, der tydeliggør at projektet ikke er bygget af OpenCode-teamet og ikke er tilknyttet os på nogen måde.
+Hvis du arbejder på et projekt der er relateret til Klautcode og bruger "klautcode" som en del af navnet; f.eks. "klautcode-dashboard" eller "klautcode-mobile", så tilføj en note i din README, der tydeliggør at projektet ikke er bygget af Klautcode-teamet og ikke er tilknyttet os på nogen måde.
 
 ---
 
-**Bliv en del af vores community** [Discord](https://discord.gg/opencode) | [X.com](https://x.com/opencode)
+**Bliv en del af vores community** [Discord](https://discord.gg/klautcode) | [X.com](https://x.com/klautcode)
