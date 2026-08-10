@@ -4,6 +4,7 @@ import { describe, expect, test } from "bun:test"
 import type { JSX } from "solid-js"
 import { DottedWordmark } from "../../../src/component/dotted-wordmark"
 import { ThinkingOrbs } from "../../../src/component/thinking-orbs"
+import { MiniOrbs } from "../../../src/component/mini-orbs"
 import { TuiConfigProvider } from "../../../src/config"
 import { KVProvider } from "../../../src/context/kv"
 import { ThemeProvider } from "../../../src/context/theme"
@@ -46,6 +47,14 @@ describe("DottedWordmark", () => {
 describe("ThinkingOrbs", () => {
   test("renders orb dots when animations enabled", async () => {
     const frame = await renderSettledFrame(() => <ThinkingOrbs />, 60, 12)
+    expect(frame).toContain("·")
+    expect(frame).toContain("●")
+  })
+})
+
+describe("MiniOrbs", () => {
+  test("renders compact orb dots when animations enabled", async () => {
+    const frame = await renderSettledFrame(() => <MiniOrbs />, 20, 3)
     expect(frame).toContain("·")
     expect(frame).toContain("●")
   })
