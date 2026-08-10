@@ -6,6 +6,8 @@ import { SessionQuestionDock } from "@/pages/session/composer/session-question-d
 import { SessionFollowupDock } from "@/pages/session/composer/session-followup-dock"
 import { SessionRevertDock } from "@/pages/session/composer/session-revert-dock"
 import { SessionTodoDock } from "@/pages/session/composer/session-todo-dock"
+import { SessionSubagentDock } from "@/pages/session/composer/session-subagent-dock"
+import { SessionQueueDock } from "@/pages/session/composer/session-queue-dock"
 import type { SessionComposerRegionController } from "./session-composer-region-controller"
 
 export function SessionComposerRegion(props: {
@@ -139,6 +141,8 @@ export function SessionComposerRegion(props: {
                   onEdit={controller.followup()!.onEdit}
                 />
               </Show>
+              <SessionSubagentDock />
+              <SessionQueueDock />
               <Show
                 when={controller.child()}
                 fallback={<Show when={!controller.state.blocked()}>{props.promptInput}</Show>}

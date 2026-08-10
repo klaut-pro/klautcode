@@ -705,6 +705,8 @@ export const dict = {
   "session.context.addToContext": "Add {{selection}} to context",
   "session.todo.title": "Todos",
   "session.todo.collapse": "Collapse",
+  "session.subagents.active": "Active subagents",
+  "session.queue.busy": "Agent is working — new prompts are queued and will run when it's free",
   "session.todo.expand": "Expand",
   "session.todo.progress": "{{done}} of {{total}} todos completed",
   "session.question.progress": "{{current}} of {{total}} questions",
