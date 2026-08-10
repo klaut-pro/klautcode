@@ -1758,17 +1758,45 @@ PART_MAPPING["text"] = function TextPartDisplay(props) {
 
 PART_MAPPING["reasoning"] = function ReasoningPartDisplay(props) {
   const data = useData()
+  const i18n = useI18n()
   const part = () => props.part as ReasoningPart
   const streaming = createMemo(
     () => props.message.role === "assistant" && typeof (props.message as AssistantMessage).time.completed !== "number",
   )
   const text = () => readPartText(data.store.part_text_accum_delta, part())
+  const [open, setOpen] = createSignal(true)
+
+  // Auto-expand while streaming; stay expanded on completion so the user can
+  // collapse it with the toggle once the reasoning step is done.
+  createEffect(() => {
+    if (streaming()) setOpen(true)
+  })
+
+  const handleOpenChange = (next: boolean) => setOpen(next)
 
   return (
     <Show when={text()}>
-      <div data-component="reasoning-part" data-timeline-part-id={part().id}>
-        <PacedMarkdown text={text()} cacheKey={part().id} streaming={streaming()} />
-      </div>
+      <Collapsible
+        open={open()}
+        onOpenChange={handleOpenChange}
+        variant="ghost"
+        data-component="reasoning-part"
+        data-timeline-part-id={part().id}
+      >
+        <Collapsible.Trigger>
+          <div data-slot="reasoning-trigger">
+            <span data-slot="reasoning-label">
+              {streaming() ? i18n.t("ui.messagePart.thinking") : i18n.t("ui.messagePart.thinkingDone")}
+            </span>
+            <Collapsible.Arrow />
+          </div>
+        </Collapsible.Trigger>
+        <Collapsible.Content>
+          <div data-slot="reasoning-content">
+            <PacedMarkdown text={text()} cacheKey={part().id} streaming={streaming()} />
+          </div>
+        </Collapsible.Content>
+      </Collapsible>
     </Show>
   )
 }

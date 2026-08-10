@@ -85,6 +85,8 @@ export const dict: Record<string, string> = {
   "ui.sessionTurn.status.delegating": "Delegating work",
   "ui.sessionTurn.status.planning": "Planning next steps",
   "ui.sessionTurn.status.gatheringContext": "Exploring",
+  "ui.messagePart.thinking": "Thinking…",
+  "ui.messagePart.thinkingDone": "Thought process",
   "ui.sessionTurn.status.gatheredContext": "Explored",
   "ui.sessionTurn.status.searchingCodebase": "Searching the codebase",
   "ui.sessionTurn.status.searchingWeb": "Searching the web",
