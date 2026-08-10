@@ -1,6 +1,6 @@
-# OpenCode Desktop
+# Klautcode Desktop
 
-The OpenCode Desktop app, built with Electron.
+The Klautcode Desktop app, built with Electron.
 
 ## Development
 

@@ -35,7 +35,7 @@ async function mountPrompt(input: {
     { ThemeProvider },
     { TuiConfigProvider },
     { ToastProvider },
-    { OpencodeKeymapProvider, registerOpencodeKeymap },
+    { KlautcodeKeymapProvider, registerKlautcodeKeymap },
   ] = await Promise.all([
     import("../../../src/ui/dialog"),
     import("../../../src/ui/dialog-prompt"),
@@ -53,7 +53,7 @@ async function mountPrompt(input: {
       keybinds: input.keybinds,
       leader_timeout: 1000,
     })
-    const off = registerOpencodeKeymap(keymap, renderer, resolvedConfig)
+    const off = registerKlautcodeKeymap(keymap, renderer, resolvedConfig)
     onCleanup(off)
 
     return (
@@ -65,7 +65,7 @@ async function mountPrompt(input: {
           worktree: input.root,
         }}
       >
-        <OpencodeKeymapProvider keymap={keymap}>
+        <KlautcodeKeymapProvider keymap={keymap}>
           <TuiConfigProvider config={resolvedConfig}>
             <KVProvider>
               <ThemeProvider mode="dark">
@@ -77,7 +77,7 @@ async function mountPrompt(input: {
               </ThemeProvider>
             </KVProvider>
           </TuiConfigProvider>
-        </OpencodeKeymapProvider>
+        </KlautcodeKeymapProvider>
       </TestTuiContexts>
     )
   }

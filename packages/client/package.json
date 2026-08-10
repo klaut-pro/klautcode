@@ -1,11 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "@opencode-ai/client",
+  "name": "@klautcode/client",
   "private": true,
   "type": "module",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
+    "./promise": "./src/index.ts",
     "./effect": "./src/effect.ts"
   },
   "scripts": {
@@ -15,8 +16,8 @@
     "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
-    "@opencode-ai/schema": "workspace:*",
-    "@opencode-ai/protocol": "workspace:*"
+    "@klautcode/schema": "workspace:*",
+    "@klautcode/protocol": "workspace:*"
   },
   "peerDependencies": {
     "effect": "4.0.0-beta.83"
@@ -28,9 +29,9 @@
   },
   "devDependencies": {
     "@effect/platform-node": "catalog:",
-    "@opencode-ai/core": "workspace:*",
-    "@opencode-ai/httpapi-codegen": "workspace:*",
-    "@opencode-ai/server": "workspace:*",
+    "@klautcode/core": "workspace:*",
+    "@klautcode/httpapi-codegen": "workspace:*",
+    "@klautcode/server": "workspace:*",
     "@tsconfig/bun": "catalog:",
     "@types/bun": "catalog:",
     "@typescript/native-preview": "catalog:",

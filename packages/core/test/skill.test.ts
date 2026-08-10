@@ -2,17 +2,17 @@ import fs from "fs/promises"
 import path from "path"
 import { describe, expect } from "bun:test"
 import { Effect, Layer } from "effect"
-import { AgentV2 } from "@opencode-ai/core/agent"
-import { AppNodeBuilder } from "@opencode-ai/core/effect/app-node-builder"
-import { LayerNode } from "@opencode-ai/core/effect/layer-node"
-import { FSUtil } from "@opencode-ai/core/fs-util"
-import { AbsolutePath } from "@opencode-ai/core/schema"
-import { SkillV2 } from "@opencode-ai/core/skill"
-import { SkillDiscovery } from "@opencode-ai/core/skill/discovery"
+import { AgentV2 } from "@klautcode/core/agent"
+import { AppNodeBuilder } from "@klautcode/core/effect/app-node-builder"
+import { LayerNode } from "@klautcode/core/effect/layer-node"
+import { FSUtil } from "@klautcode/core/fs-util"
+import { AbsolutePath } from "@klautcode/core/schema"
+import { SkillV2 } from "@klautcode/core/skill"
+import { SkillDiscovery } from "@klautcode/core/skill/discovery"
 import { tmpdir } from "./fixture/tmpdir"
 import { testEffect } from "./lib/effect"
 
-const goalSkillPath = path.join(import.meta.dir, "../../../.opencode/skills/goal/SKILL.md")
+const goalSkillPath = path.join(import.meta.dir, "../../../.klautcode/skills/goal/SKILL.md")
 
 const urls = new Map<string, AbsolutePath[]>()
 let pulls = 0

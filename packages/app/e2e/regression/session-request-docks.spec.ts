@@ -1,10 +1,10 @@
-import { base64Encode } from "@opencode-ai/core/util/encode"
+import { base64Encode } from "@klautcode/core/util/encode"
 import { expect, test, type Page } from "@playwright/test"
-import { mockOpenCodeServer } from "../utils/mock-server"
+import { mockKlautcodeServer } from "../utils/mock-server"
 import { installSseTransport } from "../utils/sse-transport"
 import { expectSessionTitle } from "../utils/waits"
 
-const directory = "C:/OpenCode/RequestDocks"
+const directory = "C:/Klautcode/RequestDocks"
 const projectID = "proj_request_docks"
 const sessionID = "ses_request_docks"
 const title = "Request dock regression"
@@ -172,7 +172,7 @@ async function mockServer(
     questions?: unknown[] | (() => unknown[])
   },
 ) {
-  await mockOpenCodeServer(page, {
+  await mockKlautcodeServer(page, {
     protocol: "v2",
     directory,
     project: {
@@ -186,8 +186,8 @@ async function mockServer(
     provider: {
       all: [
         {
-          id: "opencode",
-          name: "OpenCode",
+          id: "klautcode",
+          name: "Klautcode",
           models: {
             "claude-opus-4-6": {
               id: "claude-opus-4-6",
@@ -197,8 +197,8 @@ async function mockServer(
           },
         },
       ],
-      connected: ["opencode"],
-      default: { providerID: "opencode", modelID: "claude-opus-4-6" },
+      connected: ["klautcode"],
+      default: { providerID: "klautcode", modelID: "claude-opus-4-6" },
     },
     sessions: [
       {

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto"
 import { createServer } from "node:net"
 import { app } from "electron"
 import { checkHealth } from "../server"
-import { type WslCommandLine, resolveWslOpencode, shellEscape, wslArgs } from "./runtime"
+import { type WslCommandLine, resolveWslKlautcode, shellEscape, wslArgs } from "./runtime"
 import { pollWslHealth } from "./startup"
 import { nativeT } from "../native-translations"
 
@@ -18,24 +18,24 @@ export async function spawnWslSidecar(
   distro: string,
   opts: { onLine?: (line: WslCommandLine) => void; healthTimeoutMs?: number } = {},
 ): Promise<WslSidecar> {
-  const opencode = await resolveWslOpencode(distro)
-  if (!opencode) throw new Error(nativeT("desktop.wsl.error.opencodeNotInstalled", { distro }))
+  const klautcode = await resolveWslKlautcode(distro)
+  if (!klautcode) throw new Error(nativeT("desktop.wsl.error.klautcodeNotInstalled", { distro }))
 
   const port = await allocatePort()
   const password = randomUUID()
-  const username = "opencode"
+  const username = "klautcode"
   const script = [
     "set -euo pipefail",
     'cd "$HOME" || cd /',
     'PATH=$(awk -v RS=: -v ORS=: \'$0 !~ /^\\/mnt\\//\' <<<"$PATH" | sed "s/:$//")',
     "export PATH",
     "export WSLENV=",
-    "export OPENCODE_EXPERIMENTAL_DISABLE_FILEWATCHER=true",
-    "export OPENCODE_CLIENT=desktop",
-    `export OPENCODE_SERVER_USERNAME=${shellEscape(username)}`,
-    `export OPENCODE_SERVER_PASSWORD=${shellEscape(password)}`,
+    "export KLAUTCODE_EXPERIMENTAL_DISABLE_FILEWATCHER=true",
+    "export KLAUTCODE_CLIENT=desktop",
+    `export KLAUTCODE_SERVER_USERNAME=${shellEscape(username)}`,
+    `export KLAUTCODE_SERVER_PASSWORD=${shellEscape(password)}`,
     'export XDG_STATE_HOME="$HOME/.local/state"',
-    `exec ${shellEscape(opencode)} --print-logs --log-level ${app.isPackaged ? "WARN" : "INFO"} serve --hostname 0.0.0.0 --port ${port}`,
+    `exec ${shellEscape(klautcode)} --print-logs --log-level ${app.isPackaged ? "WARN" : "INFO"} serve --hostname 0.0.0.0 --port ${port}`,
   ].join("\n")
   const child = spawn("wsl", wslArgs(["bash", "-se"], distro), {
     stdio: ["pipe", "pipe", "pipe"],
