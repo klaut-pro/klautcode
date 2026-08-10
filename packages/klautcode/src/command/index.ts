@@ -9,6 +9,7 @@ import { MCP } from "../mcp"
 import { Skill } from "../skill"
 import PROMPT_INITIALIZE from "./template/initialize.txt"
 import PROMPT_REVIEW from "./template/review.txt"
+import PROMPT_LOOP from "./template/loop.txt"
 import { LegacyEvent } from "@klautcode/schema/legacy-event"
 
 type State = {
@@ -46,6 +47,7 @@ export function hints(template: string) {
 export const Default = {
   INIT: "init",
   REVIEW: "review",
+  LOOP: "loop",
 } as const
 
 export interface Interface {
@@ -85,6 +87,15 @@ const layer = Layer.effect(
         },
         subtask: true,
         hints: hints(PROMPT_REVIEW),
+      }
+      commands[Default.LOOP] = {
+        name: Default.LOOP,
+        description: "pursue a goal across iterations until achieved (default max 5)",
+        source: "command",
+        get template() {
+          return PROMPT_LOOP.replace("${path}", ctx.worktree)
+        },
+        hints: hints(PROMPT_LOOP),
       }
 
       for (const [name, command] of Object.entries(cfg.command ?? {})) {

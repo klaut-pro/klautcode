@@ -445,6 +445,19 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
 
   const sessionCmds = () => [
     sessionCommand({
+      id: "session.sdd",
+      title: language.t("command.session.sdd"),
+      description: language.t("command.session.sdd.description"),
+      slash: "sdd",
+      onSelect: () => {
+        const promptSession = prompt.capture()
+        const input =
+          "Create a system design document. Start by restating the component or system to design, then cover: architecture, components, data flow, API surface, failure modes, and trade-offs. Where details are missing, ask or propose reasonable defaults."
+        promptSession.set([{ type: "text", content: input, start: 0, end: input.length }])
+        focusInput()
+      },
+    }),
+    sessionCommand({
       id: "session.new",
       title: language.t("command.session.new"),
       keybind: "mod+shift+s",

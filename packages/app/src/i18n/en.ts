@@ -97,6 +97,8 @@ export const dict = {
   "command.session.unshare.description": "Stop sharing this session",
   "command.session.export": "Export session",
   "command.session.export.description": "Export the full session transcript as JSON",
+  "command.session.sdd": "System design document",
+  "command.session.sdd.description": "Draft a system design document for a component or system",
 
   "palette.search.placeholder": "Search files, commands, and sessions",
   "palette.search.placeholder.home": "Search commands and sessions",
