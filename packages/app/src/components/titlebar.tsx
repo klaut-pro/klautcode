@@ -29,6 +29,7 @@ import { useSettings } from "@/context/settings"
 import { WindowsAppMenu } from "./windows-app-menu"
 import { applyPath, backPath, forwardPath } from "./titlebar-history"
 import { TitlebarTabStrip } from "@/components/titlebar-tab-strip"
+import { TitlebarSessionList } from "@/components/titlebar-session-list"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { createMediaQuery } from "@solid-primitives/media"
 import { readSessionTabsRemovedDetail, SESSION_TABS_REMOVED_EVENT } from "@/components/titlebar-session-events"
@@ -237,6 +238,12 @@ export function Titlebar(props: { update?: TitlebarUpdate; debugTools?: { visibl
 
             const currentTab = () => matchRoute(layout.route())
 
+            const activeSessionDirectory = () => {
+              const s = session()
+              if (!s) return
+              return s.directory
+            }
+
             createEffect(() => {
               const route = layout.route()
               if (!tabs.ready()) return
@@ -410,6 +417,11 @@ export function Titlebar(props: { update?: TitlebarUpdate; debugTools?: { visibl
                   }}
                   onReorder={(keys) => tabsStoreActions.reorder(keys)}
                 />
+                <Show when={activeSessionDirectory()}>
+                  {(directory) => (
+                    <TitlebarSessionList directory={directory()} tabs={tabsStore} currentTab={currentTab} />
+                  )}
+                </Show>
                 <TooltipV2
                   placement="bottom"
                   value={

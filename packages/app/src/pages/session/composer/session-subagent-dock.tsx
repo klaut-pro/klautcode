@@ -6,6 +6,7 @@ import { Icon } from "@klautcode/ui/icon"
 import { useLayout } from "@/context/layout"
 import { base64Encode } from "@klautcode/core/util/encode"
 import { getFilename } from "@klautcode/core/util/path"
+import { deferredMemo } from "@/pages/layout/helpers"
 import type { Part as PartType } from "@klautcode/sdk/v2"
 
 // A subagent launched by the current session via the `task` tool. The tool part
@@ -54,7 +55,7 @@ export function SessionSubagentDock() {
   const params = useParams()
   const sessionID = () => params.id
 
-  const subagents = createMemo<ActiveSubagent[]>(() => {
+  const subagents = deferredMemo<ActiveSubagent[]>(() => {
     const id = sessionID()
     if (!id) return []
     return collectSubagents({

@@ -13,6 +13,8 @@ import { tmpdir } from "./fixture/tmpdir"
 import { testEffect } from "./lib/effect"
 
 const goalSkillPath = path.join(import.meta.dir, "../../../.klautcode/skills/goal/SKILL.md")
+const selfImproveSkillPath = path.join(import.meta.dir, "../../../.klautcode/skills/self-improve/SKILL.md")
+const designSkillPath = path.join(import.meta.dir, "../../../.klautcode/skills/design/SKILL.md")
 
 const urls = new Map<string, AbsolutePath[]>()
 let pulls = 0
@@ -146,6 +148,56 @@ describe("SkillV2", () => {
           expect(goal.description).toContain("goal")
           expect(goal.content).toContain("Loop protocol")
           expect(goal.content).toContain("maxIterations")
+        }),
+      ),
+    ),
+  )
+
+  it.live("loads the repo self-improve skill with valid frontmatter", () =>
+    Effect.acquireRelease(
+      Effect.promise(() => tmpdir()),
+      (tmp) => Effect.promise(() => tmp[Symbol.asyncDispose]()),
+    ).pipe(
+      Effect.flatMap((tmp) =>
+        Effect.gen(function* () {
+          yield* Effect.promise(async () => {
+            await fs.mkdir(path.join(tmp.path, "self-improve"), { recursive: true })
+            await fs.copyFile(selfImproveSkillPath, path.join(tmp.path, "self-improve", "SKILL.md"))
+          })
+
+          const skill = yield* SkillV2.Service
+          yield* skill.transform((editor) => editor.source({ type: "directory", path: AbsolutePath.make(tmp.path) }))
+
+          const [selfImprove] = yield* skill.list()
+          expect(selfImprove).toBeDefined()
+          expect(selfImprove.name).toBe("self-improve")
+          expect(selfImprove.description).toContain("self-improving")
+          expect(selfImprove.content).toContain("lessons.md")
+        }),
+      ),
+    ),
+  )
+
+  it.live("loads the repo design skill with valid frontmatter", () =>
+    Effect.acquireRelease(
+      Effect.promise(() => tmpdir()),
+      (tmp) => Effect.promise(() => tmp[Symbol.asyncDispose]()),
+    ).pipe(
+      Effect.flatMap((tmp) =>
+        Effect.gen(function* () {
+          yield* Effect.promise(async () => {
+            await fs.mkdir(path.join(tmp.path, "design"), { recursive: true })
+            await fs.copyFile(designSkillPath, path.join(tmp.path, "design", "SKILL.md"))
+          })
+
+          const skill = yield* SkillV2.Service
+          yield* skill.transform((editor) => editor.source({ type: "directory", path: AbsolutePath.make(tmp.path) }))
+
+          const [design] = yield* skill.list()
+          expect(design).toBeDefined()
+          expect(design.name).toBe("design")
+          expect(design.description).toContain("design mode")
+          expect(design.content).toContain("agent-browser")
         }),
       ),
     ),
