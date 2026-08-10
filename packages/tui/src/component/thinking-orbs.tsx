@@ -1,5 +1,5 @@
 import { createSignal, onCleanup, onMount, Show, type JSXElement } from "solid-js"
-import type { RGBA } from "@opentui/core"
+import { RGBA } from "@opentui/core"
 import { tint, useTheme } from "../context/theme"
 import { useKV } from "../context/kv"
 
@@ -56,7 +56,11 @@ export function ThinkingOrbs() {
     onCleanup(() => clearInterval(timer))
   })
 
-  const colors: RGBA[] = [theme.primary, theme.accent, theme.textMuted]
+  const colors: RGBA[] = [
+    RGBA.fromHex("#00e5ff"),
+    RGBA.fromHex("#ff2ec7"),
+    RGBA.fromHex("#b8ff3d"),
+  ]
 
   const renderOrb = (index: number) => {
     const lit = colors[index]
