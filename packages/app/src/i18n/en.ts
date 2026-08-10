@@ -707,6 +707,8 @@ export const dict = {
   "session.todo.collapse": "Collapse",
   "session.subagents.active": "Active subagents",
   "session.queue.busy": "Agent is working — new prompts are queued and will run when it's free",
+  "session.list.title": "All sessions",
+  "session.list.empty": "No sessions yet",
   "session.todo.expand": "Expand",
   "session.todo.progress": "{{done}} of {{total}} todos completed",
   "session.question.progress": "{{current}} of {{total}} questions",

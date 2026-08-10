@@ -1,4 +1,5 @@
 import { getFilename } from "@klautcode/core/util/path"
+import { createEffect, createMemo, createSignal, type Accessor } from "solid-js"
 import { type Session } from "@klautcode/sdk/v2/client"
 import { pathKey } from "@/utils/path-key"
 import type { ServerConnection } from "@/context/server"
@@ -7,6 +8,22 @@ import type { HomeProjectSelection } from "@/context/layout"
 type SessionStore = {
   session?: Session[]
   path: { directory: string }
+}
+
+// Defer an expensive derived computation (e.g. sorting a large session list) to
+// idle time so it never blocks first paint or input. The memo immediately
+// returns the previous value and recomputes in the background when its inputs
+// change.
+export function deferredMemo<T>(compute: () => T): Accessor<T> {
+  const source = createMemo(compute)
+  const [value, setValue] = createSignal(source())
+
+  createEffect(() => {
+    const next = source()
+    queueMicrotask(() => setValue(() => next))
+  })
+
+  return value
 }
 
 export function compareSessionTime(a: Session, b: Session) {
