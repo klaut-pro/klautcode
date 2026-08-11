@@ -1,16 +1,46 @@
 import { type ComponentProps } from "solid-js"
 
+const paths = (
+  <>
+    <path d="M10.7 33.1C9.5 37.4 5.8 40.3 1.6 41.3L0 41.9V49.6L1.7 49.8C6.4 50.3 10.7 53.9 11.2 58.8C11.3 62.2 10.5 76.7 10.8 78C11.8 84.2 16.5 90.8 26.9 91.1H31.8L31.3 91V82.8L30.9 81.8H27.4C24.8 81.8 21.1 80.9 20.6 76.1V58.8C20.6 53.6 17.3 48.4 11.8 45.4C16.3 43.1 20.4 38.4 20.5 31.5V15.1C20.5 10.7 23.9 9.3 26.6 9.2H31L31.3 9V0L27.3 0.1C23.4 0.4 19.4 1.6 16 4.2C13.3 6.5 10.8 10 10.7 14.2V30.1V31.6V33.1Z" fill="url(#paint0_linear_1_14)" />
+    <path d="M86.3 9.4C89.3 9.4 92.6 11.1 92.6 15V31.2C92.7 38.1 96.7 43 101.6 45.5C97.2 47.8 92.6 53.2 92.7 59.3V75.5C92.6 79.5 90.1 81.8 86.2 81.8L82.4 81.9L82 82.2V91.1L82.2 91.2H86.4C96 91.1 102.6 85.5 102.8 77.1V60.6C102.7 55.5 106.3 50.4 113.1 49.7L113.5 49.6V41.4L111.9 41.2C107 40.5 102.9 36.3 102.8 30.6V14.2C102.8 7.4 97.2 0.2 87.6 0H82.1L82 0.2V8.9L82.3 9.2L86.3 9.4Z" fill="url(#paint1_linear_1_14)" />
+    <path d="M32.3 13V78.7H43.5V51.1L47.7 45.3L43.5 39.8V13H32.3Z" fill="url(#paint2_linear_1_14)" />
+    <path d="M74.4 13L47.9 45.2L75.8 78.8H89.9V78.7H90L61.3 45.2L88.9 13" fill="url(#paint3_linear_1_14)" />
+  </>
+)
+
+const defs = (
+  <>
+    <linearGradient id="paint0_linear_1_14" x1="4.891" y1="64.94" x2="27.98" y2="20.86" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#045EFF" />
+      <stop offset="1" stop-color="#B02DFF" />
+    </linearGradient>
+    <linearGradient id="paint1_linear_1_14" x1="79.1" y1="64.96" x2="104.7" y2="21.08" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5E21FE" />
+      <stop offset="0.9949" stop-color="#EB2AFF" />
+    </linearGradient>
+    <linearGradient id="paint2_linear_1_14" x1="40" y1="13" x2="40" y2="78.7" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB2AFF" />
+      <stop offset="1" stop-color="#045EFF" />
+    </linearGradient>
+    <linearGradient id="paint3_linear_1_14" x1="68.95" y1="13" x2="68.95" y2="78.8" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EB2AFF" />
+      <stop offset="1" stop-color="#045EFF" />
+    </linearGradient>
+  </>
+)
+
 export const Mark = (props: { class?: string }) => {
   return (
     <svg
       data-component="logo-mark"
       classList={{ [props.class ?? ""]: !!props.class }}
-      viewBox="0 0 16 20"
+      viewBox="0 0 114 92"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path data-slot="logo-logo-mark-shadow" d="M12 16H4V8H12V16Z" fill="var(--icon-weak-base)" />
-      <path data-slot="logo-logo-mark-o" d="M12 4H4V16H12V4ZM16 20H0V0H16V20Z" fill="var(--icon-strong-base)" />
+      {paths}
+      <defs>{defs}</defs>
     </svg>
   )
 }
@@ -21,12 +51,12 @@ export const Splash = (props: Pick<ComponentProps<"svg">, "ref" | "class">) => {
       ref={props.ref}
       data-component="logo-splash"
       classList={{ [props.class ?? ""]: !!props.class }}
-      viewBox="0 0 80 100"
+      viewBox="0 0 114 92"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M60 80H20V40H60V80Z" fill="var(--icon-base)" />
-      <path d="M60 20H20V80H60V20ZM80 100H0V0H80V100Z" fill="var(--icon-strong-base)" />
+      {paths}
+      <defs>{defs}</defs>
     </svg>
   )
 }
@@ -34,29 +64,14 @@ export const Splash = (props: Pick<ComponentProps<"svg">, "ref" | "class">) => {
 export const Logo = (props: { class?: string }) => {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 234 42"
-      fill="none"
+      data-component="logo"
       classList={{ [props.class ?? ""]: !!props.class }}
+      viewBox="0 0 114 92"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      <g>
-        <path d="M18 30H6V18H18V30Z" fill="var(--icon-weak-base)" />
-        <path d="M18 12H6V30H18V12ZM24 36H0V6H24V36Z" fill="var(--icon-base)" />
-        <path d="M48 30H36V18H48V30Z" fill="var(--icon-weak-base)" />
-        <path d="M36 30H48V12H36V30ZM54 36H36V42H30V6H54V36Z" fill="var(--icon-base)" />
-        <path d="M84 24V30H66V24H84Z" fill="var(--icon-weak-base)" />
-        <path d="M84 24H66V30H84V36H60V6H84V24ZM66 18H78V12H66V18Z" fill="var(--icon-base)" />
-        <path d="M108 36H96V18H108V36Z" fill="var(--icon-weak-base)" />
-        <path d="M108 12H96V36H90V6H108V12ZM114 36H108V12H114V36Z" fill="var(--icon-base)" />
-        <path d="M144 30H126V18H144V30Z" fill="var(--icon-weak-base)" />
-        <path d="M144 12H126V30H144V36H120V6H144V12Z" fill="var(--icon-strong-base)" />
-        <path d="M168 30H156V18H168V30Z" fill="var(--icon-weak-base)" />
-        <path d="M168 12H156V30H168V12ZM174 36H150V6H174V36Z" fill="var(--icon-strong-base)" />
-        <path d="M198 30H186V18H198V30Z" fill="var(--icon-weak-base)" />
-        <path d="M198 12H186V30H198V12ZM204 36H180V6H198V0H204V36Z" fill="var(--icon-strong-base)" />
-        <path d="M234 24V30H216V24H234Z" fill="var(--icon-weak-base)" />
-        <path d="M216 12V18H228V12H216ZM234 24H216V30H234V36H210V6H234V24Z" fill="var(--icon-strong-base)" />
-      </g>
+      {paths}
+      <defs>{defs}</defs>
     </svg>
   )
 }
