@@ -1,0 +1,62 @@
+name: release-prep
+run-name: "prepare release ${{ inputs.version || inputs.bump || 'patch' }}"
+
+on:
+  push:
+    branches:
+      - dev
+      - beta
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Bump major, minor, or patch"
+        required: false
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+      version:
+        description: "Override version (optional)"
+        required: false
+        type: string
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.version || inputs.bump }}
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    if: github.repository == 'klaut-pro/klautcode'
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-bun
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
+
+      - name: Install Klautcode
+        if: inputs.bump || inputs.version
+        run: bun i -g klautcode-ai
+
+      - id: version
+        run: ./script/version.ts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KLAUTCODE_BUMP: ${{ inputs.bump }}
+          KLAUTCODE_VERSION: ${{ inputs.version }}
+          KLAUTCODE_API_KEY: ${{ secrets.KLAUTCODE_API_KEY }}
+          GH_REPO: ${{ (github.ref_name == 'beta' && 'klaut-pro/klautcode-beta') || github.repository }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+      tag: ${{ steps.version.outputs.tag }}
+      repo: ${{ steps.version.outputs.repo }}

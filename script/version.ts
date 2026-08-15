@@ -7,7 +7,9 @@ const output = [`version=${Script.version}`]
 const sha = process.env.GITHUB_SHA ?? (await $`git rev-parse HEAD`.text()).trim()
 
 if (!Script.preview) {
-  await $`bun script/changelog.ts --to ${sha}`.cwd(process.cwd())
+  if (process.env.KLAUTCODE_API_KEY) {
+    await $`bun script/changelog.ts --to ${sha}`.cwd(process.cwd())
+  }
   const file = `${process.cwd()}/UPCOMING_CHANGELOG.md`
   const body = await Bun.file(file)
     .text()

@@ -1,30 +1,17 @@
 name: publish
-run-name: "${{ format('release {0}', inputs.bump) }}"
+run-name: "build & publish ${{ inputs.version || github.event.release.tag_name }}"
 
 on:
-  push:
-    branches:
-      - ci
-      - dev
-      - beta
-      - fix/npm-native-binary-install
-      - snapshot-*
   workflow_dispatch:
     inputs:
-      bump:
-        description: "Bump major, minor, or patch"
-        required: false
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
       version:
-        description: "Override version (optional)"
-        required: false
+        description: "Release version to build and publish (e.g. 1.2.3)"
+        required: true
         type: string
+  release:
+    types: [created]
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.version || inputs.bump }}
+concurrency: ${{ github.workflow }}-${{ github.event.release.tag_name || inputs.version }}
 
 permissions:
   id-token: write
@@ -42,26 +29,28 @@ jobs:
 
       - uses: ./.github/actions/setup-bun
 
-      - name: Setup git committer
-        id: committer
-        uses: ./.github/actions/setup-git-committer
-        with:
-          klautcode-app-id: ${{ vars.KLAUTCODE_APP_ID }}
-          klautcode-app-secret: ${{ secrets.KLAUTCODE_APP_SECRET }}
-
-      - name: Install Klautcode
-        if: inputs.bump || inputs.version
-        run: bun i -g klautcode-ai
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
 
       - id: version
         run: |
-          ./script/version.ts
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            RELEASE="${{ github.event.release.id }}"
+          else
+            VERSION="${{ inputs.version }}"
+            RELEASE=$(gh release view "v${VERSION}" --json databaseId --jq .databaseId --repo "${{ github.repository }}" 2>/dev/null || echo "")
+          fi
+          VERSION="${VERSION#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "release=${RELEASE}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "repo=${{ github.repository }}" >> "$GITHUB_OUTPUT"
         env:
-          GH_TOKEN: ${{ steps.committer.outputs.token }}
-          KLAUTCODE_BUMP: ${{ inputs.bump }}
-          KLAUTCODE_VERSION: ${{ inputs.version }}
-          KLAUTCODE_API_KEY: ${{ secrets.KLAUTCODE_API_KEY }}
-          GH_REPO: ${{ (github.ref_name == 'beta' && 'klaut-pro/klautcode-beta') || github.repository }}
+          GH_TOKEN: ${{ github.token }}
     outputs:
       version: ${{ steps.version.outputs.version }}
       release: ${{ steps.version.outputs.release }}
@@ -79,12 +68,11 @@ jobs:
 
       - uses: ./.github/actions/setup-bun
 
-      - name: Setup git committer
-        id: committer
-        uses: ./.github/actions/setup-git-committer
-        with:
-          klautcode-app-id: ${{ vars.KLAUTCODE_APP_ID }}
-          klautcode-app-secret: ${{ secrets.KLAUTCODE_APP_SECRET }}
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
 
       - name: Build
         id: build
@@ -95,7 +83,7 @@ jobs:
           KLAUTCODE_VERSION: ${{ needs.version.outputs.version }}
           KLAUTCODE_RELEASE: ${{ needs.version.outputs.release }}
           GH_REPO: ${{ needs.version.outputs.repo }}
-          GH_TOKEN: ${{ steps.committer.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -130,6 +118,8 @@ jobs:
       AZURE_TRUSTED_SIGNING_ACCOUNT_NAME: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
       AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE: ${{ secrets.AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE }}
       AZURE_TRUSTED_SIGNING_ENDPOINT: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+    outputs:
+      signed: ${{ steps.sign.outputs.signed }}
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
@@ -138,14 +128,14 @@ jobs:
           name: klautcode-cli-windows
           path: packages/klautcode/dist
 
-      - name: Setup git committer
-        id: committer
-        uses: ./.github/actions/setup-git-committer
-        with:
-          klautcode-app-id: ${{ vars.KLAUTCODE_APP_ID }}
-          klautcode-app-secret: ${{ secrets.KLAUTCODE_APP_SECRET }}
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
 
       - name: Azure login
+        if: env.AZURE_CLIENT_ID != ''
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
@@ -153,6 +143,7 @@ jobs:
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
       - uses: azure/artifact-signing-action@b443cf8ea4124818d2ea9f043cba29fc3ec47b16 # v1.2.0
+        if: env.AZURE_CLIENT_ID != ''
         with:
           endpoint: ${{ env.AZURE_TRUSTED_SIGNING_ENDPOINT }}
           signing-account-name: ${{ env.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
@@ -173,6 +164,7 @@ jobs:
           exclude-interactive-browser-credential: true
 
       - name: Verify Windows CLI signatures
+        if: env.AZURE_CLIENT_ID != ''
         shell: pwsh
         run: |
           $files = @(
@@ -189,6 +181,7 @@ jobs:
           }
 
       - name: Repack Windows CLI archives
+        if: env.AZURE_CLIENT_ID != ''
         working-directory: packages/klautcode/dist
         shell: pwsh
         run: |
@@ -196,11 +189,16 @@ jobs:
           Compress-Archive -Path "klautcode-windows-x64\bin\*" -DestinationPath "klautcode-windows-x64.zip" -Force
           Compress-Archive -Path "klautcode-windows-x64-baseline\bin\*" -DestinationPath "klautcode-windows-x64-baseline.zip" -Force
 
+      - name: Mark signed
+        id: sign
+        if: env.AZURE_CLIENT_ID != ''
+        run: echo "signed=true" >> "$GITHUB_OUTPUT"
+
       - name: Upload signed Windows CLI release assets
-        if: needs.version.outputs.release != ''
+        if: env.AZURE_CLIENT_ID != '' && needs.version.outputs.release != ''
         shell: pwsh
         env:
-          GH_TOKEN: ${{ steps.committer.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload "v${{ needs.version.outputs.version }}" `
             "${{ github.workspace }}\packages\klautcode\dist\klautcode-windows-arm64.zip" `
@@ -210,6 +208,7 @@ jobs:
             --repo "${{ needs.version.outputs.repo }}"
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: env.AZURE_CLIENT_ID != ''
         with:
           name: klautcode-cli-signed-windows
           path: |
@@ -229,6 +228,9 @@ jobs:
       AZURE_TRUSTED_SIGNING_ACCOUNT_NAME: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
       AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE: ${{ secrets.AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE }}
       AZURE_TRUSTED_SIGNING_ENDPOINT: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
     strategy:
       fail-fast: false
       matrix:
@@ -259,14 +261,14 @@ jobs:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - uses: apple-actions/import-codesign-certs@8f3fb608891dd2244cdab3d69cd68c0d37a7fe93 # v2.0.0
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && env.APPLE_CERTIFICATE != ''
         with:
           keychain: build
           p12-file-base64: ${{ secrets.APPLE_CERTIFICATE }}
           p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
 
       - name: Setup Apple API Key
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && env.APPLE_API_KEY_PATH != ''
         run: echo "${{ secrets.APPLE_API_KEY_PATH }}" > $RUNNER_TEMP/apple-api-key.p8
 
       - uses: ./.github/actions/setup-bun
@@ -274,7 +276,7 @@ jobs:
           install-flags: ${{ matrix.settings.bun_install_flags }}
 
       - name: Azure login
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && env.AZURE_CLIENT_ID != ''
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
@@ -302,12 +304,11 @@ jobs:
           sudo apt-get install -y --no-install-recommends -o dir::cache::archives="$HOME/apt-cache" rpm
           sudo chmod -R a+rw ~/apt-cache
 
-      - name: Setup git committer
-        id: committer
-        uses: ./.github/actions/setup-git-committer
-        with:
-          klautcode-app-id: ${{ vars.KLAUTCODE_APP_ID }}
-          klautcode-app-secret: ${{ secrets.KLAUTCODE_APP_SECRET }}
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
 
       - name: Prepare
         run: bun ./scripts/prepare.ts
@@ -339,7 +340,7 @@ jobs:
         timeout-minutes: 60
         env:
           KLAUTCODE_CHANNEL: ${{ (github.ref_name == 'beta' && 'beta') || 'prod' }}
-          GH_TOKEN: ${{ steps.committer.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           CSC_KEYCHAIN: build.keychain
           APPLE_API_KEY: ${{ runner.temp }}/apple-api-key.p8
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY }}
@@ -375,7 +376,7 @@ jobs:
           tar -czf "$OUT_NAME" -C "$(dirname "$APP_PATH")" "$(basename "$APP_PATH")"
 
       - name: Verify signed Windows Electron artifacts
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && env.AZURE_CLIENT_ID != ''
         shell: pwsh
         run: |
           $files = @()
@@ -409,23 +410,12 @@ jobs:
       - build-electron
     if: always() && !failure() && !cancelled()
     runs-on: ubuntu-24.04
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - uses: ./.github/actions/setup-bun
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -443,6 +433,7 @@ jobs:
           path: packages/klautcode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: needs.sign-cli-windows.outputs.signed == 'true'
         with:
           name: klautcode-cli-signed-windows
           path: packages/klautcode/dist
@@ -465,36 +456,16 @@ jobs:
           path: /tmp/desktop
           merge-multiple: true
 
-      - name: Setup git committer
-        id: committer
-        uses: ./.github/actions/setup-git-committer
-        with:
-          klautcode-app-id: ${{ vars.KLAUTCODE_APP_ID }}
-          klautcode-app-secret: ${{ secrets.KLAUTCODE_APP_SECRET }}
-
-      - name: Cache apt packages (AUR)
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: /var/cache/apt/archives
-          key: ${{ runner.os }}-apt-aur-${{ hashFiles('.github/workflows/publish.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-apt-aur-
-
-      - name: Setup SSH for AUR
+      - name: Configure git
         run: |
-          sudo apt-get update
-          sudo apt-get install -y pacman-package-manager
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          git config --global user.email "klautcode@sst.dev"
-          git config --global user.name "klautcode"
-          ssh-keyscan -H aur.archlinux.org >> ~/.ssh/known_hosts || true
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
 
       - name: Upload desktop release assets
         if: needs.version.outputs.release
         env:
-          GH_TOKEN: ${{ steps.committer.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           shopt -s nullglob
           files=(/tmp/desktop/*.{exe,blockmap,dmg,zip,AppImage,deb,rpm} /tmp/desktop/*.app.tar.gz)
@@ -505,13 +476,19 @@ jobs:
           gh release upload "v${{ needs.version.outputs.version }}" "${files[@]}" --clobber --repo "${{ needs.version.outputs.repo }}"
 
       - run: ./script/publish.ts
+        if: env.NODE_AUTH_TOKEN != ''
         env:
           KLAUTCODE_VERSION: ${{ needs.version.outputs.version }}
           KLAUTCODE_RELEASE: ${{ needs.version.outputs.release }}
           AUR_KEY: ${{ secrets.AUR_KEY }}
-          GITHUB_TOKEN: ${{ steps.committer.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           GH_REPO: ${{ needs.version.outputs.repo }}
           NPM_CONFIG_PROVENANCE: false
           LATEST_YML_DIR: /tmp/latest-yml
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+      - name: Finalize release
+        if: needs.version.outputs.release != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit "v${{ needs.version.outputs.version }}" --draft=false --repo "${{ needs.version.outputs.repo }}"
