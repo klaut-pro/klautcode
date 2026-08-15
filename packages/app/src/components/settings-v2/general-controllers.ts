@@ -49,6 +49,30 @@ export function createPermissionScopeController(sessionID: Accessor<string | und
   }
 }
 
+export function createMultitaskController() {
+  const serverSync = useServerSync()
+  const enabled = createMemo(() => {
+    const workers = serverSync().data.config.subagent_workers
+    return workers === undefined || workers === "auto" || (typeof workers === "number" && workers > 1)
+  })
+  return {
+    enabled,
+    set(checked: boolean) {
+      void serverSync().updateConfig({ subagent_workers: checked ? "auto" : 1 })
+    },
+  }
+}
+
+export type FollowupMode = "queue" | "steer"
+
+export function createFollowupController() {
+  const settings = useSettings()
+  return {
+    current: createMemo(() => settings.general.followup()),
+    select: (value: FollowupMode) => settings.general.setFollowup(value),
+  }
+}
+
 export function createShellSettingsController() {
   const serverSdk = useServerSDK()
   const serverSync = useServerSync()
@@ -168,6 +192,8 @@ export function createSoundSettingsController() {
 }
 
 export type PermissionScopeController = ReturnType<typeof createPermissionScopeController>
+export type FollowupController = ReturnType<typeof createFollowupController>
 export type ShellSettingsController = ReturnType<typeof createShellSettingsController>
 export type AppearanceSettingsController = ReturnType<typeof createAppearanceSettingsController>
 export type SoundSettingsController = ReturnType<typeof createSoundSettingsController>
+export type MultitaskController = ReturnType<typeof createMultitaskController>

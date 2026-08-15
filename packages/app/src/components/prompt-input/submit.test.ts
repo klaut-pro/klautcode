@@ -32,6 +32,7 @@ const sentPrompts: string[] = []
 const promptInputs: unknown[] = []
 const sentCommands: unknown[] = []
 const commands: Array<{ name: string }> = []
+const queuedDrafts: unknown[] = []
 let serverSessionSyncs = 0
 
 let params: { id?: string } = {}
@@ -301,6 +302,7 @@ beforeEach(() => {
   permissionServer = "server-a"
   createSessionGate = undefined
   serverSessionSyncs = 0
+  queuedDrafts.length = 0
   for (const key of Object.keys(storedSessions)) delete storedSessions[key]
 })
 
@@ -594,5 +596,46 @@ describe("prompt submit worktree selection", () => {
     expect(storedSessions["/repo/worktree-a"]).toHaveLength(1)
     expect(storedSessions["/repo/worktree-a"]?.[0]).toMatchObject({ id: "session-1", title: "New session 1" })
     expect(optimisticSeeded).toEqual([true])
+  })
+
+  test("queues a follow-up draft instead of sending when shouldQueue is true", async () => {
+    params = { id: "session-1" }
+    let shouldQueue = true
+
+    const submit = createPromptSubmit({
+      prompt,
+      info: () => ({ id: "session-1" }),
+      imageAttachments: () => [],
+      commentCount: () => 0,
+      autoAccept: () => false,
+      mode: () => "normal",
+      working: () => false,
+      editor: () => undefined,
+      queueScroll: () => undefined,
+      promptLength: (value) => value.reduce((sum, part) => sum + ("content" in part ? part.content.length : 0), 0),
+      addToHistory: () => undefined,
+      resetHistoryNavigation: () => undefined,
+      setMode: () => undefined,
+      setPopover: () => undefined,
+      shouldQueue: () => shouldQueue,
+      onQueue: (draft: unknown) => {
+        queuedDrafts.push(draft)
+      },
+    })
+
+    const event = { preventDefault: () => undefined } as unknown as Event
+
+    await submit.handleSubmit(event)
+
+    expect(queuedDrafts).toHaveLength(1)
+    expect(queuedDrafts[0]).toMatchObject({ sessionID: "session-1", agent: "agent" })
+    expect(sentPrompts).toEqual([])
+    expect(optimistic).toHaveLength(0)
+
+    shouldQueue = false
+    await submit.handleSubmit(event)
+
+    expect(sentPrompts).toEqual(["/repo/main"])
+    expect(queuedDrafts).toHaveLength(1)
   })
 })

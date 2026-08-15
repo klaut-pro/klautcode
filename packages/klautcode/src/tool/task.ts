@@ -14,6 +14,7 @@ import { Effect, Exit, Schema, Scope } from "effect"
 import { EffectBridge } from "@/effect/bridge"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Database } from "@klautcode/core/database/database"
+import { resolveSubagentWorkers, subagentWorkerPool } from "./task-workers"
 
 export interface TaskPromptOps {
   cancel(sessionID: SessionID): Effect.Effect<void>
@@ -213,6 +214,14 @@ export const TaskTool = Tool.define(
         return result.parts.findLast((item) => item.type === "text")?.text ?? ""
       })
 
+      // Multitask mode: subagents share a worker pool sized to the configured
+      // worker count (or CPU cores when "auto"), so parallel task calls queue
+      // instead of running unbounded.
+      const runWithWorkers = Effect.fn("TaskTool.runWithWorkers")(function* () {
+        const workers = resolveSubagentWorkers(cfg.subagent_workers)
+        return yield* subagentWorkerPool(workers).withPermit(runTask())
+      })
+
       const inject = Effect.fn("TaskTool.injectBackgroundResult")(function* (
         state: "completed" | "error",
         text: string,
@@ -253,7 +262,7 @@ export const TaskTool = Tool.define(
         )
       })
 
-      if (yield* background.extend({ id: nextSession.id, run: runTask() })) {
+      if (yield* background.extend({ id: nextSession.id, run: runWithWorkers() })) {
         return {
           title: params.description,
           metadata: {
@@ -282,7 +291,7 @@ export const TaskTool = Tool.define(
           }),
           notify(nextSession.id),
         ]),
-        run: runTask().pipe(Effect.onInterrupt(() => ops.cancel(nextSession.id))),
+        run: runWithWorkers().pipe(Effect.onInterrupt(() => ops.cancel(nextSession.id))),
       })
 
       function backgroundResult() {

@@ -129,6 +129,19 @@ export const { use: useTheme, provider: ThemeProvider } = createSimpleContext({
       if (theme) setStore("active", theme)
     })
 
+    // KV loads asynchronously, so the lock/mode stored on disk isn't visible at
+    // init. Re-apply it once KV is ready so a locked light/dark mode actually
+    // takes effect on launch instead of being silently dropped.
+    createEffect(() => {
+      if (!kv.ready) return
+      const lock = pick(kv.get("theme_mode_lock"))
+      const stored = pick(kv.get("theme_mode"))
+      if (lock && lock !== store.lock) setStore("lock", lock)
+      if (!lock && store.lock) setStore("lock", undefined)
+      const next = lock ?? stored
+      if (next && next !== store.mode) setStore("mode", next)
+    })
+
     function syncCustomThemes() {
       return themes
         .discover()

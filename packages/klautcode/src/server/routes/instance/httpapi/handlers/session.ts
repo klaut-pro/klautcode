@@ -410,6 +410,14 @@ export const sessionHandlers = HttpApiBuilder.group(InstanceHttpApi, "session", 
       return yield* session.updatePart(payload)
     })
 
+    const regenerateTitle = Effect.fn("SessionHttpApi.regenerateTitle")(function* (ctx: {
+      params: { sessionID: SessionID }
+    }) {
+      yield* requireSession(ctx.params.sessionID)
+      yield* promptSvc.regenerateTitle(ctx.params.sessionID)
+      return true
+    })
+
     return handlers
       .handle("list", list)
       .handle("status", status)
@@ -438,5 +446,6 @@ export const sessionHandlers = HttpApiBuilder.group(InstanceHttpApi, "session", 
       .handle("deleteMessage", deleteMessage)
       .handle("deletePart", deletePart)
       .handle("updatePart", updatePart)
+      .handle("regenerateTitle", regenerateTitle)
   }),
 )

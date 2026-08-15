@@ -24,13 +24,16 @@ import { createEventListener } from "@solid-primitives/event-listener"
 import { matchesModelSearch } from "./dialog-select-model-search"
 
 const isFree = (provider: string, cost: { input: number } | undefined) =>
-  provider === "klautcode" && (!cost || cost.input === 0)
+  provider === "klautcode" ||
+  provider === "opencode-go" ||
+  (provider === "opencode" && (!cost || cost.input === 0))
 
 type ModelState = ReturnType<typeof useLocal>["model"]
 type ModelItem = ReturnType<ModelState["list"]>[number]
 
 const modelKey = (model: ModelItem) => `${model.provider.id}:${model.id}`
 const manageKey = "action:manage"
+const freeModelsKey = "free"
 
 const sortModelGroups = (a: { category: string; items: ModelItem[] }, b: { category: string; items: ModelItem[] }) => {
   const aIndex = popularProviders.indexOf(a.category)
@@ -71,8 +74,12 @@ const ModelList: Component<{
       current={model.current()}
       filterKeys={["provider.name", "name", "id"]}
       sortBy={(a, b) => a.name.localeCompare(b.name)}
-      groupBy={(x) => x.provider.name}
+      groupBy={(x) => (isFree(x.provider.id, x.cost) ? language.t("dialog.model.unpaid.freeModels.title") : x.provider.name)}
       sortGroupsBy={(a, b) => {
+        const aFree = isFree(a.items[0].provider.id, a.items[0].cost)
+        const bFree = isFree(b.items[0].provider.id, b.items[0].cost)
+        if (aFree && !bFree) return -1
+        if (!aFree && bFree) return 1
         const aProvider = a.items[0].provider.id
         const bProvider = b.items[0].provider.id
         if (popularProviders.includes(aProvider) && !popularProviders.includes(bProvider)) return -1
@@ -274,11 +281,15 @@ function createModelSelectorController(input: {
       return [...filtered].sort((a, b) => a.name.localeCompare(b.name))
     },
     groups: (models: ModelItem[]) => {
+      const free = models.filter((item) => isFree(item.provider.id, item.cost))
+      const rest = models.filter((item) => !isFree(item.provider.id, item.cost))
       const byProvider = new Map<string, ModelItem[]>()
-      for (const item of models) {
+      for (const item of rest) {
         byProvider.set(item.provider.id, [...(byProvider.get(item.provider.id) ?? []), item])
       }
-      return Array.from(byProvider, ([category, items]) => ({ category, items })).sort(sortModelGroups)
+      const groups = Array.from(byProvider, ([category, items]) => ({ category, items })).sort(sortModelGroups)
+      if (free.length > 0) groups.unshift({ category: freeModelsKey, items: free })
+      return groups
     },
     current: () => {
       const value = model.current()
@@ -451,7 +462,11 @@ function ModelSelectorPopoverV2View(props: {
                   {(group) => (
                     <MenuV2.Group>
                       <MenuV2.GroupLabel class="gap-2 px-3">
-                        <span class="min-w-0 truncate">{group.items[0].provider.name}</span>
+                        <span class="min-w-0 truncate">
+                          {group.category === freeModelsKey
+                            ? language.t("dialog.model.unpaid.freeModels.title")
+                            : group.items[0].provider.name}
+                        </span>
                       </MenuV2.GroupLabel>
                       <MenuV2.RadioGroup value={props.current()}>
                         <For each={group.items}>

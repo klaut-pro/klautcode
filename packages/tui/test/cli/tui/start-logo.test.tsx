@@ -46,9 +46,8 @@ describe("DottedWordmark", () => {
 
 describe("ThinkingOrbs", () => {
   test("renders orb dots when animations enabled", async () => {
-    const frame = await renderSettledFrame(() => <ThinkingOrbs />, 60, 12)
-    expect(frame).toContain("·")
-    expect(frame).toContain("●")
+    const frame = await renderSettledFrame(() => <ThinkingOrbs />, 40, 30)
+    expect(frame).toMatch(/[⠁-⣿]/)
   })
 })
 

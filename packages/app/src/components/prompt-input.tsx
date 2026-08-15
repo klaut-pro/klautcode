@@ -50,6 +50,8 @@ import { useCommand } from "@/context/command"
 import { usePermission } from "@/context/permission"
 import { useLanguage } from "@/context/language"
 import { usePlatform } from "@/context/platform"
+import { useSettings } from "@/context/settings"
+import { Switch as SwitchV2 } from "@klautcode/ui/switch"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { createTextFragment, getCursorPosition, setCursorPosition, setRangeEdge } from "./prompt-input/editor-dom"
 import { createPromptAttachments } from "./prompt-input/attachments"
@@ -127,6 +129,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
   const permission = usePermission()
   const language = useLanguage()
   const platform = usePlatform()
+  const settings = useSettings()
   const tabs = () => props.controls.session.tabs
   let editorRef!: HTMLDivElement
   let fileInputRef: HTMLInputElement | undefined
@@ -1783,11 +1786,26 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                     </Show>
                   </Show>
                 </Show>
+                <div class="flex items-center gap-1.5 min-w-0 flex-1 h-7 justify-end">
+                  <Tooltip
+                    placement="top"
+                    gutter={4}
+                    value={settings.general.autoFreeMode() ? language.t("settings.general.row.autoFreeMode.title") : language.t("settings.general.row.autoFreeMode.description")}
+                  >
+                    <label class="flex items-center gap-1 text-xs text-text-muted">
+                      <SwitchV2
+                        checked={settings.general.autoFreeMode()}
+                        onChange={(checked) => settings.general.setAutoFreeMode(checked)}
+                      />
+                      Auto free
+                    </label>
+                  </Tooltip>
+                </div>
+              </div>
               </div>
             </div>
-          </div>
-        </DockTray>
-      </Show>
-    </div>
-  )
-}
+          </DockTray>
+        </Show>
+      </div>
+    )
+  }

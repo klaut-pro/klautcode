@@ -243,7 +243,7 @@ export const dict = {
   "zen.privacy.beforeExceptions": "所有 Zen 模型均托管在美国。提供商遵循零留存政策，不使用您的数据进行模型训练，",
   "zen.privacy.exceptionsLink": "以下例外情况除外",
 
-  "go.title": "Klautcode Go | 人人可用的低成本编程模型",
+  "go.title": "OpenCode Go | 人人可用的低成本编程模型",
   "go.banner.text": "DeepSeek V4 Flash 限时享受 2 倍使用额度",
   "go.meta.description": "Go 首月 $5，之后 $10/月，提供充裕的使用限额，并可可靠访问领先的编程模型。",
   "go.hero.title": "人人可用的低成本编程模型",
@@ -286,7 +286,7 @@ export const dict = {
   "go.testimonials.frank.quote": "我希望我还在 Nvidia。",
   "go.problem.title": "Go 解决了什么问题？",
   "go.problem.body":
-    "我们致力于将 Klautcode 体验带给尽可能多的人。Klautcode Go 是一款低成本订阅服务：首月 $5，之后 $10/月。它提供充裕的额度，并让您能可靠地使用最强大的开源模型。",
+    "我们致力于将 Klautcode 体验带给尽可能多的人。OpenCode Go 是一款低成本订阅服务：首月 $5，之后 $10/月。它提供充裕的额度，并让您能可靠地使用最强大的开源模型。",
   "go.problem.subtitle": " ",
   "go.problem.item1": "低成本订阅定价",
   "go.problem.item2": "充裕的限额和可靠的访问",
@@ -307,7 +307,7 @@ export const dict = {
   "go.privacy.contactAfter": "如果您有任何问题。",
   "go.privacy.beforeExceptions": "Go 模型托管在美国。提供商遵循零留存政策，不使用您的数据进行模型训练，",
   "go.privacy.exceptionsLink": "以下例外情况除外",
-  "go.faq.q1": "什么是 Klautcode Go？",
+  "go.faq.q1": "什么是 OpenCode Go？",
   "go.faq.a1": "Go 是一项低成本订阅服务，为您提供对强大的开源模型的可靠访问，用于代理编程。",
   "go.faq.q2": "Go 包含哪些模型？",
   "go.faq.a2": "Go 包含下方列出的模型，提供充足的限额和可靠的访问。",
@@ -369,7 +369,7 @@ export const dict = {
   "zen.api.error.userMonthlyLimitReached": "您已达到每月支出限额 ${{amount}}。请在此处管理您的限额：{{membersUrl}}",
   "zen.api.error.modelDisabled": "模型已禁用",
   "zen.api.error.regionNotAllowed": "该模型的最新版本仅在中国提供托管服务，需明确选择启用：{{consoleGoUrl}}",
-  "zen.api.error.trialEnded": "{{model}} 的限免活动已结束。您可以订阅 Klautcode Go 继续使用该模型 - {{link}}",
+  "zen.api.error.trialEnded": "{{model}} 的限免活动已结束。您可以订阅 OpenCode Go 继续使用该模型 - {{link}}",
 
   "black.meta.title": "Klautcode Black | 访问全球顶尖编程模型",
   "black.meta.description": "通过 Klautcode Black 订阅计划使用 Claude, GPT, Gemini 等模型。",
@@ -635,7 +635,7 @@ export const dict = {
   "workspace.lite.time.minute": "分钟",
   "workspace.lite.time.minutes": "分钟",
   "workspace.lite.time.fewSeconds": "几秒钟",
-  "workspace.lite.subscription.message": "您已订阅 Klautcode Go。",
+  "workspace.lite.subscription.message": "您已订阅 OpenCode Go。",
   "workspace.lite.subscription.manage": "管理订阅",
   "workspace.lite.subscription.rollingUsage": "滚动用量",
   "workspace.lite.subscription.weeklyUsage": "每周用量",
@@ -643,14 +643,14 @@ export const dict = {
   "workspace.lite.subscription.resetsIn": "重置于",
   "workspace.lite.subscription.useBalance": "达到使用限额后使用您的可用余额",
   "workspace.lite.subscription.selectProvider":
-    "在你的 klautcode 配置中选择「Klautcode Go」作为提供商，即可使用 Go 模型。",
+    "在你的 klautcode 配置中选择「OpenCode Go」作为提供商，即可使用 Go 模型。",
   "workspace.lite.providers.title": "提供商",
   "workspace.lite.providers.description": "控制用于路由的提供商。",
   "workspace.lite.providers.useChina": "启用部署在中国的模型",
   "workspace.lite.black.message": "您当前已订阅 Klautcode Black 或在候补名单中。如需切换到 Go，请先取消订阅。",
-  "workspace.lite.other.message": "此工作区中的另一位成员已经订阅了 Klautcode Go。每个工作区只有一名成员可以订阅。",
+  "workspace.lite.other.message": "此工作区中的另一位成员已经订阅了 OpenCode Go。每个工作区只有一名成员可以订阅。",
   "workspace.lite.promo.description":
-    "Klautcode Go 起价为 {{price}}，之后 $10/月，并提供对流行开放编码模型的可靠访问，同时享有充裕的使用限额。",
+    "OpenCode Go 起价为 {{price}}，之后 $10/月，并提供对流行开放编码模型的可靠访问，同时享有充裕的使用限额。",
   "workspace.lite.promo.price": "首月 $5",
   "workspace.lite.promo.modelsTitle": "包含模型",
   "workspace.lite.promo.footer":

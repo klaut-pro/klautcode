@@ -18,7 +18,7 @@ import { useClipboard } from "../context/clipboard"
 
 const PROVIDER_PRIORITY: Record<string, number> = {
   klautcode: 0,
-  "klautcode-go": 1,
+  "opencode-go": 1,
   openai: 2,
   "github-copilot": 3,
   anthropic: 4,
@@ -62,7 +62,7 @@ export function providerOptions(list: { id: string; name: string }[]): ProviderO
           klautcode: "(Recommended)",
           anthropic: "(API key)",
           openai: "(ChatGPT Plus/Pro or API key)",
-          "klautcode-go": "Low cost subscription for everyone",
+          "opencode-go": "Low cost subscription for everyone",
         }[provider.id],
         category: provider.id in PROVIDER_PRIORITY ? "Popular" : "Providers",
       })),
@@ -379,14 +379,14 @@ function ApiMethod(props: ApiMethodProps) {
               </text>
             </box>
           ),
-          "klautcode-go": (
+          "opencode-go": (
             <box gap={1}>
               <text fg={theme.textMuted}>
-                Klautcode Go is a $10 per month subscription that provides reliable access to popular open coding models
+                OpenCode Go is a $10 per month subscription that provides reliable access to popular open coding models
                 with generous usage limits.
               </text>
               <text fg={theme.text}>
-                Go to <span style={{ fg: theme.primary }}>https://code.klaut.pro/go</span> and enable Klautcode Go
+                Go to <span style={{ fg: theme.primary }}>https://code.klaut.pro/go</span> and enable OpenCode Go
               </text>
             </box>
           ),

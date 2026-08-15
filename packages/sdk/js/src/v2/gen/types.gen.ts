@@ -1933,6 +1933,10 @@ export type Config = {
   small_model?: string
   default_agent?: string
   subagent_depth?: number
+  /**
+   * Maximum number of subagents that may run in parallel (multitask mode). 'auto' (default) sizes the worker pool to the machine's CPU core count.
+   */
+  subagent_workers?: number | "auto"
   username?: string
   mode?: {
     build?: AgentConfig
@@ -10475,6 +10479,40 @@ export type PartUpdateResponses = {
 }
 
 export type PartUpdateResponse = PartUpdateResponses[keyof PartUpdateResponses]
+
+export type SessionRegenerateTitleData = {
+  body?: never
+  path: {
+    sessionID: string
+  }
+  query?: {
+    directory?: string
+    workspace?: string
+  }
+  url: "/session/{sessionID}/title"
+}
+
+export type SessionRegenerateTitleErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * NotFoundError
+   */
+  404: NotFoundError
+}
+
+export type SessionRegenerateTitleError = SessionRegenerateTitleErrors[keyof SessionRegenerateTitleErrors]
+
+export type SessionRegenerateTitleResponses = {
+  /**
+   * Title regenerated
+   */
+  200: boolean
+}
+
+export type SessionRegenerateTitleResponse = SessionRegenerateTitleResponses[keyof SessionRegenerateTitleResponses]
 
 export type SyncStartData = {
   body?: never

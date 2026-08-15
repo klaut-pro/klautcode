@@ -4,7 +4,7 @@ import { expectAppVisible } from "../utils/waits"
 
 const directory = "C:/Klautcode/NewProject"
 
-test("creates a session in a new project, connects Klautcode Go, and selects its model", async ({ page }) => {
+test("creates a session in a new project, connects OpenCode Go, and selects its model", async ({ page }) => {
   let connectedGo = false
   let pendingGo = false
   const connections: Array<{ integrationID: string; body: unknown }> = []
@@ -34,8 +34,8 @@ test("creates a session in a new project, connects Klautcode Go, and selects its
           },
         },
         {
-          id: "klautcode-go",
-          name: "Klautcode Go",
+          id: "opencode-go",
+          name: "OpenCode Go",
           models: {
             "go-model-1": {
               id: "go-model-1",
@@ -46,13 +46,13 @@ test("creates a session in a new project, connects Klautcode Go, and selects its
           },
         },
       ],
-      connected: connectedGo ? ["klautcode", "klautcode-go"] : ["klautcode"],
+      connected: connectedGo ? ["klautcode", "opencode-go"] : ["klautcode"],
       default: { providerID: "klautcode", modelID: "free-model" },
     }),
-    integrationMethods: { "klautcode-go": [{ type: "api", label: "API key" }] },
+    integrationMethods: { "opencode-go": [{ type: "api", label: "API key" }] },
     onConnectKey: (input) => {
       connections.push(input)
-      if (input.integrationID === "klautcode-go") pendingGo = true
+      if (input.integrationID === "opencode-go") pendingGo = true
     },
     onInstanceDispose: () => {
       if (pendingGo) connectedGo = true
@@ -81,15 +81,15 @@ test("creates a session in a new project, connects Klautcode Go, and selects its
   await modelControl.click()
   await expect(page.locator('[data-section="free-models"]')).toContainText("Free models provided by Klautcode")
 
-  await page.locator('[data-provider-id="klautcode-go"]').click()
+  await page.locator('[data-provider-id="opencode-go"]').click()
   await page.locator('[data-input="provider-api-key"]').fill("mock-go-api-key")
   await page.locator('[data-action="provider-connect-submit"]').click()
   await expect(page.locator('[data-component="dialog-v2"]')).toHaveCount(0)
-  expect(connections).toEqual([{ integrationID: "klautcode-go", body: { type: "api", key: "mock-go-api-key" } }])
+  expect(connections).toEqual([{ integrationID: "opencode-go", body: { type: "api", key: "mock-go-api-key" } }])
 
   await expect(modelControl).toHaveAttribute("data-control-type", "popover")
   await modelControl.click()
-  const goModel = page.locator('[data-option-key="klautcode-go:go-model-1"]')
+  const goModel = page.locator('[data-option-key="opencode-go:go-model-1"]')
   await expect(goModel).toBeVisible()
   await goModel.click()
 

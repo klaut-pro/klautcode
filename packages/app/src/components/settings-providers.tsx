@@ -18,7 +18,7 @@ type ProviderItem = ReturnType<ReturnType<typeof useProviders>["connected"]>[num
 
 const PROVIDER_NOTES = [
   { match: (id: string) => id === "klautcode", key: "dialog.provider.klautcode.note" },
-  { match: (id: string) => id === "klautcode-go", key: "dialog.provider.klautcodeGo.tagline" },
+  { match: (id: string) => id === "opencode-go", key: "dialog.provider.opencodeGo.tagline" },
   { match: (id: string) => id === "anthropic", key: "dialog.provider.anthropic.note" },
   { match: (id: string) => id.startsWith("github-copilot"), key: "dialog.provider.copilot.note" },
   { match: (id: string) => id === "openai", key: "dialog.provider.openai.note" },
@@ -206,7 +206,7 @@ const SettingsProvidersContent: Component<{ onBack?: () => void }> = (props) => 
                       <Show when={item.id === "klautcode"}>
                         <Tag>{language.t("dialog.provider.tag.recommended")}</Tag>
                       </Show>
-                      <Show when={item.id === "klautcode-go"}>
+                      <Show when={item.id === "opencode-go"}>
                         <Tag>{language.t("dialog.provider.tag.recommended")}</Tag>
                       </Show>
                     </div>

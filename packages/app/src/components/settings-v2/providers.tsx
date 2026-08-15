@@ -18,13 +18,14 @@ type ProviderItem = ReturnType<ReturnType<typeof useProviders>["connected"]>[num
 
 const PROVIDER_NOTES = [
   { match: (id: string) => id === "klautcode", key: "dialog.provider.klautcode.note" },
-  { match: (id: string) => id === "klautcode-go", key: "dialog.provider.klautcodeGo.tagline" },
+  { match: (id: string) => id === "opencode-go" || id === "opencode", key: "dialog.provider.opencodeGo.tagline" },
   { match: (id: string) => id === "anthropic", key: "dialog.provider.anthropic.note" },
   { match: (id: string) => id.startsWith("github-copilot"), key: "dialog.provider.copilot.note" },
   { match: (id: string) => id === "openai", key: "dialog.provider.openai.note" },
   { match: (id: string) => id === "google", key: "dialog.provider.google.note" },
   { match: (id: string) => id === "openrouter", key: "dialog.provider.openrouter.note" },
   { match: (id: string) => id === "vercel", key: "dialog.provider.vercel.note" },
+  { match: (id: string) => id === "hetzner", key: "dialog.provider.hetzner.note" },
 ] as const
 
 const PROVIDER_ICON_SIZE = 16
@@ -208,7 +209,7 @@ export const SettingsProvidersV2: Component<{
                     <div class="settings-v2-provider-copy">
                       <div class="settings-v2-provider-main">
                         <span class="settings-v2-provider-name">{item.name}</span>
-                        <Show when={item.id === "klautcode" || item.id === "klautcode-go"}>
+                        <Show when={item.id === "klautcode" || item.id === "opencode-go" || item.id === "opencode"}>
                           <Tag>{language.t("dialog.provider.tag.recommended")}</Tag>
                         </Show>
                       </div>

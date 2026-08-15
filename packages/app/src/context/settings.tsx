@@ -39,6 +39,8 @@ export interface Settings {
     agentVisibilityInitialized?: boolean
     newInterfaceNoticeDismissed?: boolean
     shouldDisplayTabsToast?: boolean
+    freeModels: boolean
+    autoFreeMode: boolean
   }
   appearance: {
     fontSize: number
@@ -184,7 +186,7 @@ const defaultSettings: Settings = {
   general: {
     autoSave: true,
     releaseNotes: true,
-    followup: "steer",
+    followup: "queue",
     showFileTree: false,
     showNavigation: false,
     showSearch: false,
@@ -195,6 +197,8 @@ const defaultSettings: Settings = {
     editToolPartsExpanded: false,
     showCustomAgents: false,
     mobileTitlebarPosition: "top",
+    freeModels: true,
+    autoFreeMode: true,
   },
   appearance: {
     fontSize: 14,
@@ -350,11 +354,6 @@ export const { use: useSettings, provider: SettingsProvider } = createSimpleCont
       root.style.setProperty("--font-family-sans", sansFontFamily(store.appearance?.sans))
     })
 
-    createEffect(() => {
-      if (store.general?.followup !== "queue") return
-      setStore("general", "followup", "steer")
-    })
-
     return {
       ready,
       get current() {
@@ -369,12 +368,9 @@ export const { use: useSettings, provider: SettingsProvider } = createSimpleCont
         setReleaseNotes(value: boolean) {
           setStore("general", "releaseNotes", value)
         },
-        followup: withFallback(
-          () => (store.general?.followup === "queue" ? "steer" : store.general?.followup),
-          defaultSettings.general.followup,
-        ),
+        followup: withFallback(() => store.general?.followup, defaultSettings.general.followup),
         setFollowup(value: "queue" | "steer") {
-          setStore("general", "followup", value === "queue" ? "steer" : value)
+          setStore("general", "followup", value)
         },
         showFileTree,
         setShowFileTree(value: boolean) {
@@ -427,6 +423,14 @@ export const { use: useSettings, provider: SettingsProvider } = createSimpleCont
         ),
         setMobileTitlebarPosition(value: "top" | "bottom") {
           setStore("general", "mobileTitlebarPosition", value)
+        },
+        freeModels: withFallback(() => store.general?.freeModels, defaultSettings.general.freeModels),
+        setFreeModels(value: boolean) {
+          setStore("general", "freeModels", value)
+        },
+        autoFreeMode: withFallback(() => store.general?.autoFreeMode, defaultSettings.general.autoFreeMode),
+        setAutoFreeMode(value: boolean) {
+          setStore("general", "autoFreeMode", value)
         },
         newLayoutDesigns,
         setNewLayoutDesigns(value: boolean) {

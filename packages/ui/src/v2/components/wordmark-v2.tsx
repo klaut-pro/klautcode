@@ -1,4 +1,43 @@
-import { createUniqueId, type ComponentProps } from "solid-js"
+import { For, createUniqueId, type ComponentProps } from "solid-js"
+
+const LETTERS: Array<{ x: number; d: string }> = [
+  {
+    x: 0,
+    d: "M0 18H18V110H0ZM30.73 76.73L76.73 30.73L51.27 5.27L5.27 51.27ZM5.27 76.73L51.27 122.73L76.73 97.27L30.73 51.27Z",
+  },
+  {
+    x: 80,
+    d: "M0 18H18V110H0ZM0 92H50V110H0Z",
+  },
+  {
+    x: 160,
+    d: "M27.51 114.19L49.51 22.19L14.49 13.81L-7.51 105.81ZM71.51 105.81L49.51 13.81L14.49 22.19L36.49 114.19ZM14 54H50V72H14Z",
+  },
+  {
+    x: 240,
+    d: "M0 18H18V90H0ZM46 18H64V90H46ZM0 92H64V110H0Z",
+  },
+  {
+    x: 320,
+    d: "M0 18H64V36H0ZM23 18H41V110H23Z",
+  },
+  {
+    x: 400,
+    d: "M0 18H64V36H0ZM0 92H64V110H0ZM0 18H18V110H0Z",
+  },
+  {
+    x: 480,
+    d: "M64 18H0V110H64V18ZM18 36H46V92H18Z",
+  },
+  {
+    x: 560,
+    d: "M64 18H0V110H64V18ZM20 36H48V92H20Z",
+  },
+  {
+    x: 640,
+    d: "M0 18H18V110H0ZM0 18H64V36H0ZM0 92H64V110H0ZM0 54H50V72H0Z",
+  },
+]
 
 export function WordmarkV2(props: Pick<ComponentProps<"svg">, "class">) {
   const mask = createUniqueId()
@@ -14,46 +53,17 @@ export function WordmarkV2(props: Pick<ComponentProps<"svg">, "class">) {
       <g opacity="0.6">
         <g mask={`url(#${mask})`}>
           <g opacity="0.16">
-            <path
-              opacity="0.7"
-              d="M55.3846 36.4286H18.4615V91.7143H55.3846V36.4286ZM73.8462 110.143H0V18H73.8462V110.143Z"
-              fill="currentColor"
-            />
-            <path
-              opacity="0.7"
-              d="M110.462 91.7143H147.385V36.4286H110.462V91.7143ZM165.846 110.143H110.462V128.571H92V18H165.846V110.143Z"
-              fill="currentColor"
-            />
-            <path
-              opacity="0.7"
-              d="M258.846 73.2857H203.462V91.7143H258.846V110.143H185V18H258.846V73.2857ZM203.462 54.8571H240.385V36.4286H203.462V54.8571Z"
-              fill="currentColor"
-            />
-            <path
-              opacity="0.7"
-              d="M332.385 36.4286H295.462V110.143H277V18H332.385V36.4286ZM350.846 110.143H332.385V36.4286H350.846V110.143Z"
-              fill="currentColor"
-            />
-            <path
-              opacity="0.7"
-              d="M442.846 36.4286H387.462V91.7143H442.846V110.143H369V18H442.846V36.4286Z"
-              fill="currentColor"
-            />
-            <path
-              opacity="0.7"
-              d="M517.385 36.4286H480.462V91.7143H517.385V36.4286ZM535.846 110.143H462V18H535.846V110.143Z"
-              fill="currentColor"
-            />
-            <path
-              opacity="0.7"
-              d="M609.385 36.8571H572.462V92.1429H609.385V36.8571ZM627.846 110.571H554V18.4286H609.385V0H627.846V110.571Z"
-              fill="currentColor"
-            />
-            <path
-              opacity="0.7"
-              d="M664.462 36.4286V54.8571H701.385V36.4286H664.462ZM719.846 73.2857H664.462V91.7143H719.846V110.143H646V18H719.846V73.2857Z"
-              fill="currentColor"
-            />
+            <For each={LETTERS}>
+              {(letter) => (
+                <path
+                  opacity="0.7"
+                  transform={`translate(${letter.x} 0)`}
+                  d={letter.d}
+                  fill="currentColor"
+                  fill-rule="evenodd"
+                />
+              )}
+            </For>
           </g>
         </g>
       </g>

@@ -33,6 +33,7 @@ import {
   type JSX,
   lazy,
   onCleanup,
+  onMount,
   type ParentProps,
   Show,
 } from "solid-js"
@@ -56,6 +57,8 @@ import { ServerConnection, ServerProvider, serverName, useServer } from "@/conte
 import { SettingsProvider, useSettings } from "@/context/settings"
 import { TabsProvider, useTabs, type DraftTab } from "@/context/tabs"
 import { SDKProvider, useSDK } from "@/context/sdk"
+import { useDialog } from "@klautcode/ui/context/dialog"
+import { OpencodeImportDialog } from "@/components/settings-v2/opencode-import"
 import { WslServersProvider } from "@/wsl/context"
 import DirectoryLayout, { DirectoryDataProvider } from "@/pages/directory-layout"
 import LegacyLayout from "@/pages/layout"
@@ -316,6 +319,7 @@ function SharedProviders(props: ParentProps) {
       <BodyDesignClass />
       <CommandProvider>
         <DesktopCommands />
+        <DesktopOpencodeImportPrompt />
         <HighlightsProvider>{props.children}</HighlightsProvider>
       </CommandProvider>
     </>
@@ -340,6 +344,36 @@ function DesktopCommands() {
       })
     }
     return commands
+  })
+
+  return null
+}
+
+// Desktop only: on the first launch (after first-launch onboarding) present an
+// import prompt when an existing opencode instance is detected. Dismissing or
+// finishing the dialog marks the prompt as seen so it does not repeat.
+function DesktopOpencodeImportPrompt() {
+  const platform = usePlatform()
+  const dialog = useDialog()
+
+  onMount(() => {
+    if (platform.platform !== "desktop" || !platform.opencodeImport || !platform.storage) return
+    let shown = false
+    void (async () => {
+      const prompted = platform.storage!("opencode-import.dat")
+      const settings = platform.storage!("klautcode.settings")
+      try {
+        if (await prompted.getItem("prompted")) return
+        if ((await settings.getItem("firstLaunchOnboardingComplete")) !== "true") return
+        const scan = await platform.opencodeImport!.scan()
+        if (scan.projects.length > 0) {
+          shown = true
+          const markSeen = () => void prompted.setItem("prompted", "1")
+          dialog.show(() => <OpencodeImportDialog directory={scan.directory} onClose={markSeen} />, markSeen)
+        }
+      } catch {}
+      if (!shown) await prompted.setItem("prompted", "1")
+    })()
   })
 
   return null

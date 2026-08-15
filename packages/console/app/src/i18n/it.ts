@@ -253,7 +253,7 @@ export const dict = {
     "Tutti i modelli Zen sono ospitati negli Stati Uniti. I provider seguono una policy di zero-retention e non usano i tuoi dati per l'addestramento dei modelli, con le",
   "zen.privacy.exceptionsLink": "seguenti eccezioni",
 
-  "go.title": "Klautcode Go | Modelli di coding a basso costo per tutti",
+  "go.title": "OpenCode Go | Modelli di coding a basso costo per tutti",
   "go.banner.text": "DeepSeek V4 Flash offre limiti di utilizzo 2x superiori per un periodo limitato",
   "go.meta.description":
     "Go inizia a $5 per il primo mese, poi $10/mese, con limiti di utilizzo generosi e un accesso affidabile ai principali modelli di coding.",
@@ -298,7 +298,7 @@ export const dict = {
   "go.testimonials.frank.quote": "Vorrei essere ancora a Nvidia.",
   "go.problem.title": "Quale problema risolve Go?",
   "go.problem.body":
-    "Ci concentriamo nel portare l'esperienza Klautcode a quante più persone possibile. Klautcode Go è un abbonamento a basso costo: $5 il primo mese, poi $10/mese. Offre limiti generosi e accesso affidabile ai modelli open source più capaci.",
+    "Ci concentriamo nel portare l'esperienza Klautcode a quante più persone possibile. OpenCode Go è un abbonamento a basso costo: $5 il primo mese, poi $10/mese. Offre limiti generosi e accesso affidabile ai modelli open source più capaci.",
   "go.problem.subtitle": " ",
   "go.problem.item1": "Prezzo di abbonamento a basso costo",
   "go.problem.item2": "Limiti generosi e accesso affidabile",
@@ -321,7 +321,7 @@ export const dict = {
   "go.privacy.beforeExceptions":
     "I modelli Go sono ospitati negli Stati Uniti. I provider seguono una policy di zero-retention e non usano i tuoi dati per l'addestramento dei modelli, con le",
   "go.privacy.exceptionsLink": "seguenti eccezioni",
-  "go.faq.q1": "Che cos'è Klautcode Go?",
+  "go.faq.q1": "Che cos'è OpenCode Go?",
   "go.faq.a1":
     "Go è un abbonamento a basso costo che ti dà un accesso affidabile a modelli open source capaci per il coding agentico.",
   "go.faq.q2": "Quali modelli include Go?",
@@ -392,7 +392,7 @@ export const dict = {
   "zen.api.error.regionNotAllowed":
     "La versione più recente di questo modello è disponibile solo con hosting in Cina e richiede un consenso esplicito: {{consoleGoUrl}}",
   "zen.api.error.trialEnded":
-    "La promozione gratuita di {{model}} è terminata. Puoi continuare a usare il modello abbonandoti a Klautcode Go - {{link}}",
+    "La promozione gratuita di {{model}} è terminata. Puoi continuare a usare il modello abbonandoti a OpenCode Go - {{link}}",
 
   "black.meta.title": "Klautcode Black | Accedi ai migliori modelli di coding al mondo",
   "black.meta.description":
@@ -663,7 +663,7 @@ export const dict = {
   "workspace.lite.time.minute": "minuto",
   "workspace.lite.time.minutes": "minuti",
   "workspace.lite.time.fewSeconds": "pochi secondi",
-  "workspace.lite.subscription.message": "Sei abbonato a Klautcode Go.",
+  "workspace.lite.subscription.message": "Sei abbonato a OpenCode Go.",
   "workspace.lite.subscription.manage": "Gestisci Abbonamento",
   "workspace.lite.subscription.rollingUsage": "Utilizzo Continuativo",
   "workspace.lite.subscription.weeklyUsage": "Utilizzo Settimanale",
@@ -671,16 +671,16 @@ export const dict = {
   "workspace.lite.subscription.resetsIn": "Si resetta tra",
   "workspace.lite.subscription.useBalance": "Usa il tuo saldo disponibile dopo aver raggiunto i limiti di utilizzo",
   "workspace.lite.subscription.selectProvider":
-    'Seleziona "Klautcode Go" come provider nella tua configurazione klautcode per utilizzare i modelli Go.',
+    'Seleziona "OpenCode Go" come provider nella tua configurazione klautcode per utilizzare i modelli Go.',
   "workspace.lite.providers.title": "Provider",
   "workspace.lite.providers.description": "Controlla quali provider vengono usati per il routing.",
   "workspace.lite.providers.useChina": "Abilita modelli ospitati in Cina",
   "workspace.lite.black.message":
     "Attualmente sei abbonato a Klautcode Black o sei in lista d'attesa. Annulla l'iscrizione prima se desideri passare a Go.",
   "workspace.lite.other.message":
-    "Un altro membro in questo workspace è già abbonato a Klautcode Go. Solo un membro per workspace può abbonarsi.",
+    "Un altro membro in questo workspace è già abbonato a OpenCode Go. Solo un membro per workspace può abbonarsi.",
   "workspace.lite.promo.description":
-    "Klautcode Go parte da {{price}}, poi $10/mese, e offre un accesso affidabile a popolari modelli di coding aperti con generosi limiti di utilizzo.",
+    "OpenCode Go parte da {{price}}, poi $10/mese, e offre un accesso affidabile a popolari modelli di coding aperti con generosi limiti di utilizzo.",
   "workspace.lite.promo.price": "$5 il primo mese",
   "workspace.lite.promo.modelsTitle": "Cosa è incluso",
   "workspace.lite.promo.footer":

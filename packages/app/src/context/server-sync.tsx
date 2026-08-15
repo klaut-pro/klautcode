@@ -684,6 +684,12 @@ export function createServerSyncContextInner(serverSDK: ServerSDK) {
     disableMcp: children.disableMcp,
     queryOptions: queryOptionsApi,
     refreshProviders,
+    reloadChats: async () => {
+      await Promise.all([
+        queryClient.refetchQueries({ predicate: (query) => query.queryKey[0] === "home" && query.queryKey[1] === "session-index" }),
+        queryClient.refetchQueries({ queryKey: [serverSDK.scope, "activeSessions"] as const, type: "active" }),
+      ])
+    },
     // bootstrap,
     updateConfig: updateConfigMutation.mutateAsync,
     project: projectApi,

@@ -254,7 +254,7 @@ export const dict = {
     "Усі моделі Zen розміщені в США. Провайдери дотримуються політики нульового зберігання та не використовують ваші дані для навчання моделей, за",
   "zen.privacy.exceptionsLink": "такими винятками",
 
-  "go.title": "Klautcode Go | Недорогі моделі кодування для всіх",
+  "go.title": "OpenCode Go | Недорогі моделі кодування для всіх",
   "go.banner.text": "DeepSeek V4 Flash отримує 2x ліміти використання протягом обмеженого часу",
   "go.meta.description":
     "Go починається від $5 за перший місяць, потім $10/місяць, зі щедрими лімітами використання та надійним доступом до провідних моделей для кодування.",
@@ -299,7 +299,7 @@ export const dict = {
   "go.testimonials.frank.quote": "Хотів би я досі бути в Nvidia.",
   "go.problem.title": "Яку проблему вирішує Go?",
   "go.problem.body":
-    "Ми зосереджені на тому, щоб зробити досвід Klautcode доступним для якомога більшої кількості людей. Klautcode Go — це недорога підписка: $5 за перший місяць, потім $10/місяць. Вона надає щедрі ліміти та надійний доступ до найкращих моделей з відкритим кодом.",
+    "Ми зосереджені на тому, щоб зробити досвід Klautcode доступним для якомога більшої кількості людей. OpenCode Go — це недорога підписка: $5 за перший місяць, потім $10/місяць. Вона надає щедрі ліміти та надійний доступ до найкращих моделей з відкритим кодом.",
   "go.problem.subtitle": " ",
   "go.problem.item1": "Недорога підписка",
   "go.problem.item2": "Щедрі ліміти та надійний доступ",
@@ -323,7 +323,7 @@ export const dict = {
   "go.privacy.beforeExceptions":
     "Моделі Go розміщені в США. Провайдери дотримуються політики нульового зберігання та не використовують ваші дані для навчання моделей, за",
   "go.privacy.exceptionsLink": "такими винятками",
-  "go.faq.q1": "Що таке Klautcode Go?",
+  "go.faq.q1": "Що таке OpenCode Go?",
   "go.faq.a1":
     "Go — це недорога підписка, яка надає надійний доступ до найкращих моделей з відкритим кодом для агентного кодування.",
   "go.faq.q2": "Які моделі включає Go?",
@@ -393,7 +393,7 @@ export const dict = {
   "zen.api.error.regionNotAllowed":
     "Остання версія цієї моделі доступна лише на серверах у Китаї, і для її використання потрібно надати явну згоду: {{consoleGoUrl}}",
   "zen.api.error.trialEnded":
-    "Безкоштовна акція для {{model}} закінчилася. Ви можете продовжити використання, підписавшись на Klautcode Go — {{link}}",
+    "Безкоштовна акція для {{model}} закінчилася. Ви можете продовжити використання, підписавшись на OpenCode Go — {{link}}",
 
   "black.meta.title": "Klautcode Black | Доступ до найкращих моделей кодування",
   "black.meta.description": "Отримайте доступ до Claude, GPT, Gemini та інших із планами підписки Klautcode Black.",
@@ -662,21 +662,21 @@ export const dict = {
   "workspace.lite.time.minute": "хвилина",
   "workspace.lite.time.minutes": "хвилин(и)",
   "workspace.lite.time.fewSeconds": "кілька секунд",
-  "workspace.lite.subscription.message": "Ви підписані на Klautcode Go.",
+  "workspace.lite.subscription.message": "Ви підписані на OpenCode Go.",
   "workspace.lite.subscription.manage": "Керувати підпискою",
   "workspace.lite.subscription.rollingUsage": "Ковзне використання",
   "workspace.lite.subscription.weeklyUsage": "Тижневе використання",
   "workspace.lite.subscription.monthlyUsage": "Місячне використання",
   "workspace.lite.subscription.resetsIn": "Скидається через",
   "workspace.lite.subscription.useBalance": "Використовуйте доступний баланс після досягнення лімітів",
-  "workspace.lite.subscription.selectProvider": 'Виберіть "Klautcode Go" як провайдера в конфігурації klautcode.',
+  "workspace.lite.subscription.selectProvider": 'Виберіть "OpenCode Go" як провайдера в конфігурації klautcode.',
   "workspace.lite.providers.title": "Провайдери",
   "workspace.lite.providers.description": "Керуйте провайдерами, які використовуються для маршрутизації.",
   "workspace.lite.providers.useChina": "Увімкнути моделі, розміщені в Китаї",
   "workspace.lite.black.message":
     "Ви вже підписані на Klautcode Black або в списку очікування. Спочатку скасуйте підписку, якщо хочете перейти на Go.",
-  "workspace.lite.other.message": "Інший учасник цього робочого простору вже підписаний на Klautcode Go.",
-  "workspace.lite.promo.description": "Klautcode Go починається від {{price}}, потім $10/місяць, із щедрими лімітами.",
+  "workspace.lite.other.message": "Інший учасник цього робочого простору вже підписаний на OpenCode Go.",
+  "workspace.lite.promo.description": "OpenCode Go починається від {{price}}, потім $10/місяць, із щедрими лімітами.",
   "workspace.lite.promo.price": "$5 за перший місяць",
   "workspace.lite.promo.modelsTitle": "Що включено",
   "workspace.lite.promo.footer":

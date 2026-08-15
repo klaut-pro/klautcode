@@ -22,4 +22,6 @@ export class Info extends Schema.Class<Info>("ConfigV2.Agent")({
   steps: PositiveInt.pipe(Schema.optional),
   disabled: Schema.Boolean.pipe(Schema.optional),
   permissions: Permission.Ruleset.pipe(Schema.optional),
+  freeModels: Schema.Boolean.pipe(Schema.optional),
+  autoFreeMode: Schema.Boolean.pipe(Schema.optional),
 }) {}

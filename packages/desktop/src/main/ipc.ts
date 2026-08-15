@@ -24,6 +24,7 @@ import type { UpdaterController } from "./updater-controller"
 import { createUpdaterSubscriptions } from "./updater-subscriptions"
 import { createDesktopDraftStore } from "./draft-store"
 import { nativeT } from "./native-translations"
+import { runOpencodeImport, scanOpencodeImport } from "./opencode-import"
 
 const pickerFilters = (ext?: string[]) => {
   if (!ext || ext.length === 0) return undefined
@@ -111,6 +112,10 @@ export function registerIpcHandlers(deps: Deps) {
     if (!bundle) throw new Error("Invalid native translation bundle")
     deps.setNativeTranslations(bundle)
   })
+  ipcMain.handle("opencode-import-scan", (_event: IpcMainInvokeEvent, directory?: string) => scanOpencodeImport(directory))
+  ipcMain.handle("opencode-import-run", (_event: IpcMainInvokeEvent, directory: string, projectIds: string[]) =>
+    runOpencodeImport(directory, projectIds),
+  )
   ipcMain.handle("store-get", (_event: IpcMainInvokeEvent, name: string, key: string) => {
     try {
       const store = getStore(name)

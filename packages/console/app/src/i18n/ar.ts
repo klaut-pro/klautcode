@@ -251,7 +251,7 @@ export const dict = {
     "تتم استضافة جميع نماذج Zen في الولايات المتحدة. يتبع المزودون سياسة عدم الاحتفاظ بالبيانات ولا يستخدمون بياناتك لتدريب النماذج، مع",
   "zen.privacy.exceptionsLink": "الاستثناءات التالية",
 
-  "go.title": "Klautcode Go | نماذج برمجة منخفضة التكلفة للجميع",
+  "go.title": "OpenCode Go | نماذج برمجة منخفضة التكلفة للجميع",
   "go.banner.text": "يحصل DeepSeek V4 Flash على حدود استخدام مضاعفة لفترة محدودة",
   "go.meta.description":
     "يبدأ Go بسعر $5 للشهر الأول، ثم $10/شهر، مع حدود استخدام سخية ووصول موثوق إلى نماذج البرمجة الرائدة.",
@@ -296,7 +296,7 @@ export const dict = {
   "go.testimonials.frank.quote": "أتمنى لو كنت لا أزال في Nvidia.",
   "go.problem.title": "ما المشكلة التي يحلها Go؟",
   "go.problem.body":
-    "نحن نركز على تقديم تجربة Klautcode لأكبر عدد ممكن من الناس. Klautcode Go هو اشتراك منخفض التكلفة: $5 للشهر الأول، ثم $10/شهر. يوفر حدودا سخية ووصولا موثوقا إلى نماذج المصدر المفتوح الأكثر قدرة.",
+    "نحن نركز على تقديم تجربة Klautcode لأكبر عدد ممكن من الناس. OpenCode Go هو اشتراك منخفض التكلفة: $5 للشهر الأول، ثم $10/شهر. يوفر حدودا سخية ووصولا موثوقا إلى نماذج المصدر المفتوح الأكثر قدرة.",
   "go.problem.subtitle": " ",
   "go.problem.item1": "أسعار اشتراك منخفضة التكلفة",
   "go.problem.item2": "حدود سخية ووصول موثوق",
@@ -319,7 +319,7 @@ export const dict = {
   "go.privacy.beforeExceptions":
     "تتم استضافة نماذج Go في الولايات المتحدة. يتبع المزودون سياسة عدم الاحتفاظ بالبيانات ولا يستخدمون بياناتك لتدريب النماذج، مع",
   "go.privacy.exceptionsLink": "الاستثناءات التالية",
-  "go.faq.q1": "ما هو Klautcode Go؟",
+  "go.faq.q1": "ما هو OpenCode Go؟",
   "go.faq.a1": "Go هو اشتراك منخفض التكلفة يمنحك وصولًا موثوقًا إلى نماذج مفتوحة المصدر قادرة على البرمجة الوكيلة.",
   "go.faq.q2": "ما النماذج التي يتضمنها Go؟",
   "go.faq.a2": "يتضمن Go النماذج المدرجة أدناه، مع حدود سخية وإتاحة موثوقة.",
@@ -387,7 +387,7 @@ export const dict = {
   "zen.api.error.regionNotAllowed":
     "لا يتوفر أحدث إصدار من هذا النموذج إلا مستضافًا في الصين، ويتطلب تفعيلًا صريحًا: {{consoleGoUrl}}",
   "zen.api.error.trialEnded":
-    "انتهى العرض المجاني لـ {{model}}. يمكنك مواصلة استخدام النموذج بالاشتراك في Klautcode Go - {{link}}",
+    "انتهى العرض المجاني لـ {{model}}. يمكنك مواصلة استخدام النموذج بالاشتراك في OpenCode Go - {{link}}",
 
   "black.meta.title": "Klautcode Black | الوصول إلى أفضل نماذج البرمجة في العالم",
   "black.meta.description": "احصل على وصول إلى Claude، GPT، Gemini والمزيد مع خطط اشتراك Klautcode Black.",
@@ -654,7 +654,7 @@ export const dict = {
   "workspace.lite.time.minute": "دقيقة",
   "workspace.lite.time.minutes": "دقائق",
   "workspace.lite.time.fewSeconds": "بضع ثوان",
-  "workspace.lite.subscription.message": "أنت مشترك في Klautcode Go.",
+  "workspace.lite.subscription.message": "أنت مشترك في OpenCode Go.",
   "workspace.lite.subscription.manage": "إدارة الاشتراك",
   "workspace.lite.subscription.rollingUsage": "الاستخدام المتجدد",
   "workspace.lite.subscription.weeklyUsage": "الاستخدام الأسبوعي",
@@ -662,16 +662,16 @@ export const dict = {
   "workspace.lite.subscription.resetsIn": "إعادة تعيين في",
   "workspace.lite.subscription.useBalance": "استخدم رصيدك المتوفر بعد الوصول إلى حدود الاستخدام",
   "workspace.lite.subscription.selectProvider":
-    'اختر "Klautcode Go" كمزود في إعدادات klautcode الخاصة بك لاستخدام نماذج Go.',
+    'اختر "OpenCode Go" كمزود في إعدادات klautcode الخاصة بك لاستخدام نماذج Go.',
   "workspace.lite.providers.title": "المزودون",
   "workspace.lite.providers.description": "تحكم في المزودين المستخدمين للتوجيه.",
   "workspace.lite.providers.useChina": "تفعيل النماذج المستضافة في الصين",
   "workspace.lite.black.message":
     "أنت مشترك حاليًا في Klautcode Black أو في قائمة الانتظار. يرجى إلغاء الاشتراك أولاً إذا كنت ترغب في التبديل إلى Go.",
   "workspace.lite.other.message":
-    "عضو آخر في مساحة العمل هذه مشترك بالفعل في Klautcode Go. يمكن لعضو واحد فقط لكل مساحة عمل الاشتراك.",
+    "عضو آخر في مساحة العمل هذه مشترك بالفعل في OpenCode Go. يمكن لعضو واحد فقط لكل مساحة عمل الاشتراك.",
   "workspace.lite.promo.description":
-    "يبدأ Klautcode Go بسعر {{price}}، ثم $10/شهر، ويوفر وصولا موثوقا لنماذج البرمجة المفتوحة الشهيرة مع حدود استخدام سخية.",
+    "يبدأ OpenCode Go بسعر {{price}}، ثم $10/شهر، ويوفر وصولا موثوقا لنماذج البرمجة المفتوحة الشهيرة مع حدود استخدام سخية.",
   "workspace.lite.promo.price": "$5 للشهر الأول",
   "workspace.lite.promo.modelsTitle": "ما يتضمنه",
   "workspace.lite.promo.footer":

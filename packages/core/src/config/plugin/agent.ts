@@ -71,10 +71,15 @@ export const Plugin = define({
           documents.flatMap((document) => document.info.permissions ?? []),
           global.home,
         )
+        const configuredPermission = permissionConfigToRules(
+          documents.flatMap((document) =>
+            document.info.permission !== undefined ? [document.info.permission] : [],
+          ),
+        )
         const configuredDefault = Config.latest(documents, "default_agent")
         if (configuredDefault !== undefined) draft.default(AgentV2.ID.make(configuredDefault))
         for (const current of draft.list()) {
-          draft.update(current.id, (agent) => agent.permissions.push(...permissions))
+          draft.update(current.id, (agent) => agent.permissions.push(...permissions, ...configuredPermission))
         }
 
         for (const document of documents) {
@@ -115,6 +120,26 @@ export const Plugin = define({
     )
   }),
 })
+
+function permissionConfigToRules(configs: NonNullable<Config.Info["permission"]>[]): PermissionV2.Ruleset {
+  const rules: PermissionV2.Rule[] = []
+  for (const config of configs) {
+    if (typeof config === "string") {
+      rules.push({ action: "*", resource: "*", effect: config })
+      continue
+    }
+    for (const [permission, value] of Object.entries(config)) {
+      if (typeof value === "string") {
+        rules.push({ action: permission, resource: "*", effect: value })
+        continue
+      }
+      for (const [resource, effect] of Object.entries(value)) {
+        rules.push({ action: permission, resource, effect })
+      }
+    }
+  }
+  return rules
+}
 
 function expandPermissions(rules: PermissionV2.Ruleset, home: string): PermissionV2.Ruleset {
   // Expand only resources tools resolve as filesystem paths. Bash resources are raw shell text:

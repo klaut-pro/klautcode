@@ -133,6 +133,8 @@ const api: ElectronAPI = {
   setForceFocus: (enabled) => ipcRenderer.invoke("set-force-focus", enabled),
   recordFatalRendererError: (error) => ipcRenderer.invoke("record-fatal-renderer-error", error),
   setNativeTranslations: (bundle) => ipcRenderer.invoke("set-native-translations", bundle),
+  opencodeScan: (directory) => ipcRenderer.invoke("opencode-import-scan", directory),
+  opencodeImport: (directory, projectIds) => ipcRenderer.invoke("opencode-import-run", directory, projectIds),
 }
 
 contextBridge.exposeInMainWorld("api", api)

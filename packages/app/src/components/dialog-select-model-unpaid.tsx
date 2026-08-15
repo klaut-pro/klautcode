@@ -116,10 +116,10 @@ export const DialogSelectModelUnpaid: Component<{ model?: ModelState }> = (props
                     <Show when={i.id === "klautcode"}>
                       <Tag>{language.t("dialog.provider.tag.recommended")}</Tag>
                     </Show>
-                    <Show when={i.id === "klautcode-go"}>
+                    <Show when={i.id === "opencode-go" || i.id === "opencode"}>
                       <>
                         <div class="text-14-regular text-text-weak">
-                          {language.t("dialog.provider.klautcodeGo.tagline")}
+                          {language.t("dialog.provider.opencodeGo.tagline")}
                         </div>
                         <Tag>{language.t("dialog.provider.tag.recommended")}</Tag>
                       </>
