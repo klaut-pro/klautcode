@@ -5,6 +5,7 @@ import path from "path"
 import { type ParseError, parse } from "jsonc-parser"
 import { Context, Effect, Layer, Option, Schema } from "effect"
 import { Permission } from "@klautcode/schema/permission"
+import { ConfigPermissionV1 } from "./v1/config/permission"
 import { FSUtil } from "./fs-util"
 import { Global } from "./global"
 import { Location } from "./location"
@@ -59,6 +60,9 @@ export class Info extends Schema.Class<Info>("Config.Info")({
   }),
   permissions: Permission.Ruleset.pipe(Schema.optional).annotate({
     description: "Ordered tool permission rules applied to agent tool use",
+  }),
+  permission: ConfigPermissionV1.Info.pipe(Schema.optional).annotate({
+    description: "Per-tool permission actions applied to agent tool use",
   }),
   agents: Schema.Record(Schema.String, ConfigAgent.Info).pipe(Schema.optional).annotate({
     description: "Named built-in agent overrides and custom agent definitions",

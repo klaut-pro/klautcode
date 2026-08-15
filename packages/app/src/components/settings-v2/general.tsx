@@ -1,4 +1,4 @@
-import { Component, Show, createMemo, createResource } from "solid-js"
+import { Component, Show, createMemo, createResource, createSignal } from "solid-js"
 import { createMediaQuery } from "@solid-primitives/media"
 import { ButtonV2 } from "@klautcode/ui/v2/button-v2"
 import { SelectV2 } from "@klautcode/ui/v2/select-v2"
@@ -9,18 +9,23 @@ import { useLanguage } from "@/context/language"
 import { usePlatform } from "@/context/platform"
 import { useUpdaterAction } from "../updater-action"
 import { useSettings } from "@/context/settings"
+import { useServerSync } from "@/context/server-sync"
 import { ExternalLink } from "../external-link"
 import { SettingsListV2 } from "./parts/list"
 import { SettingsRowV2 } from "./parts/row"
 import { LayoutRetirementNotice, LayoutTransitionToggle } from "./interface-transition"
 import {
   createAppearanceSettingsController,
+  createFollowupController,
+  createMultitaskController,
   createPermissionScopeController,
   createShellOptions,
   createShellSettingsController,
   createSoundSettingsController,
   soundOptions,
   type AppearanceSettingsController,
+  type FollowupController,
+  type MultitaskController,
   type PermissionScopeController,
   type ShellSettingsController,
   type SoundSettingsController,
@@ -83,6 +88,47 @@ const PermissionScopeSetting: Component<{ controller: PermissionScopeController 
           onChange={props.controller.set}
         />
       </div>
+    </SettingsRowV2>
+  )
+}
+
+const MultitaskSetting: Component<{ controller: MultitaskController }> = (props) => {
+  const language = useLanguage()
+  return (
+    <SettingsRowV2
+      title={language.t("settings.general.row.multitask.title")}
+      description={language.t("settings.general.row.multitask.description")}
+    >
+      <div data-action="settings-multitask-mode">
+        <Switch checked={props.controller.enabled()} onChange={props.controller.set} />
+      </div>
+    </SettingsRowV2>
+  )
+}
+
+const followupOptions: ("queue" | "steer")[] = ["queue", "steer"]
+const followupLabels: Record<"queue" | "steer", Parameters<ReturnType<typeof useLanguage>["t"]>[0]> = {
+  queue: "settings.general.row.followup.option.queue",
+  steer: "settings.general.row.followup.option.steer",
+}
+
+const FollowupSetting: Component<{ controller: FollowupController }> = (props) => {
+  const language = useLanguage()
+  return (
+    <SettingsRowV2
+      title={language.t("settings.general.row.followup.title")}
+      description={language.t("settings.general.row.followup.description")}
+    >
+      <SelectV2
+        appearance="inline"
+        data-action="settings-followup"
+        options={followupOptions}
+        current={props.controller.current()}
+        placement="bottom-end"
+        gutter={6}
+        label={(option) => language.t(followupLabels[option])}
+        onSelect={(option) => option && props.controller.select(option)}
+      />
     </SettingsRowV2>
   )
 }
@@ -278,9 +324,12 @@ export const SettingsGeneralV2: Component<{
   const platform = usePlatform()
   const dialog = useDialog()
   const settings = useSettings()
+  const serverSync = useServerSync()
   const mobile = createMediaQuery("(max-width: 767px)")
   const updater = useUpdaterAction()
   const permissionScope = createPermissionScopeController(() => props.sessionID)
+  const followup = createFollowupController()
+  const multitask = createMultitaskController()
   const shell = createShellSettingsController()
   const appearance = createAppearanceSettingsController()
   const sounds = createSoundSettingsController()
@@ -297,6 +346,17 @@ export const SettingsGeneralV2: Component<{
     const update = platform.setPinchZoomEnabled?.(checked)
     if (!update) return
     void update.catch(() => setPinchZoom(!checked))
+  }
+
+  const [reloading, setReloading] = createSignal(false)
+  const reloadChats = async () => {
+    if (reloading()) return
+    setReloading(true)
+    try {
+      await serverSync().reloadChats()
+    } finally {
+      setReloading(false)
+    }
   }
 
   const InterfaceSection = () => (
@@ -331,6 +391,10 @@ export const SettingsGeneralV2: Component<{
 
         <PermissionScopeSetting controller={permissionScope} />
 
+        <FollowupSetting controller={followup} />
+
+        <MultitaskSetting controller={multitask} />
+
         <ShellSetting controller={shell} />
 
         <SettingsRowV2
@@ -342,6 +406,34 @@ export const SettingsGeneralV2: Component<{
               checked={settings.general.showReasoningSummaries()}
               onChange={(checked) => settings.general.setShowReasoningSummaries(checked)}
             />
+          </div>
+        </SettingsRowV2>
+
+        <SettingsRowV2
+          title={language.t("settings.general.row.autoFreeMode.title")}
+          description={language.t("settings.general.row.autoFreeMode.description")}
+        >
+          <div data-action="settings-feed-auto-free-mode">
+            <Switch
+              checked={settings.general.autoFreeMode()}
+              onChange={(checked) => settings.general.setAutoFreeMode(checked)}
+            />
+          </div>
+        </SettingsRowV2>
+
+        <SettingsRowV2
+          title={language.t("settings.general.row.reloadChats.title")}
+          description={language.t("settings.general.row.reloadChats.description")}
+        >
+          <div data-action="settings-reload-chats">
+            <ButtonV2
+              size="small"
+              variant="neutral"
+              disabled={reloading()}
+              onClick={() => void reloadChats()}
+            >
+              {language.t(reloading() ? "settings.general.row.reloadChats.reloading" : "settings.general.row.reloadChats.action")}
+            </ButtonV2>
           </div>
         </SettingsRowV2>
 

@@ -2,6 +2,7 @@ import { createMemo, For, Show } from "solid-js"
 import { useNavigate, useParams } from "@solidjs/router"
 import { useLanguage } from "@/context/language"
 import { useSync } from "@/context/sync"
+import { useSDK } from "@/context/sdk"
 import { Icon } from "@klautcode/ui/icon"
 import { useLayout } from "@/context/layout"
 import { base64Encode } from "@klautcode/core/util/encode"
@@ -52,6 +53,7 @@ export function SessionSubagentDock() {
   const language = useLanguage()
   const navigate = useNavigate()
   const layout = useLayout()
+  const sdk = useSDK()
   const params = useParams()
   const sessionID = () => params.id
 
@@ -73,6 +75,12 @@ export function SessionSubagentDock() {
     navigate(`/${base64Encode(directory)}/session/${sessionId}`)
   }
 
+  const stopSubagent = async (sessionId: string) => {
+    await sdk()
+      .api.session.interrupt({ sessionID: sessionId })
+      .catch(() => {})
+  }
+
   return (
     <Show when={active().length > 0}>
       <div data-component="session-subagent-dock" class="w-full px-3 pb-2 flex flex-col gap-1">
@@ -83,7 +91,7 @@ export function SessionSubagentDock() {
         <div class="flex flex-wrap gap-1.5">
           <For each={active()}>
             {(subagent) => (
-              <button
+              <div
                 class="group flex items-center gap-1.5 rounded-md border border-border-weak-base bg-background-base/50 px-2 py-1 text-13-regular text-text-strong transition-colors hover:bg-surface-raised-base-hover"
                 onClick={() => openSubagent(subagent.sessionId)}
               >
@@ -95,8 +103,19 @@ export function SessionSubagentDock() {
                   }}
                 />
                 <span class="truncate max-w-52">{subagent.description || getFilename(subagent.sessionId)}</span>
-                <Icon name="arrow-right" size="small" class="opacity-0 group-hover:opacity-100 shrink-0" />
-              </button>
+                <button
+                  type="button"
+                  data-action="session-subagent-stop"
+                  aria-label={language.t("session.subagents.stop")}
+                  class="ml-0.5 flex size-5 shrink-0 items-center justify-center rounded-sm text-text-weak opacity-0 transition-opacity hover:bg-surface-raised-base-hover hover:text-text-base group-hover:opacity-100 focus-visible:opacity-100"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    void stopSubagent(subagent.sessionId)
+                  }}
+                >
+                  <Icon name="close" size="small" />
+                </button>
+              </div>
             )}
           </For>
         </div>

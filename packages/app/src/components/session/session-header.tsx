@@ -479,6 +479,29 @@ export function SessionHeader() {
                       </TooltipKeybind>
 
                       <TooltipKeybind
+                        title={language.t("command.projectSidebar.toggle")}
+                        keybind={command.keybind("projectSidebar.toggle")}
+                      >
+                        <Button
+                          variant="ghost"
+                          class="titlebar-icon w-8 h-6 p-0 box-border"
+                          onClick={() => layout.projectSidebar.toggle()}
+                          aria-label={language.t("command.projectSidebar.toggle")}
+                          aria-expanded={layout.projectSidebar.opened()}
+                          aria-controls="project-chats-sidebar"
+                        >
+                          <Icon
+                            size="small"
+                            name="sidebar"
+                            classList={{
+                              "text-icon-strong": layout.projectSidebar.opened(),
+                              "text-icon-weak": !layout.projectSidebar.opened(),
+                            }}
+                          />
+                        </Button>
+                      </TooltipKeybind>
+
+                      <TooltipKeybind
                         title={language.t("command.fileTree.toggle")}
                         keybind={command.keybind("fileTree.toggle")}
                       >

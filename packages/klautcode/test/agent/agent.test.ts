@@ -164,7 +164,7 @@ it.instance("general agent denies todo tools", () =>
   Effect.gen(function* () {
     const general = yield* load((svc) => svc.get("general"))
     expect(general).toBeDefined()
-    expect(general?.mode).toBe("subagent")
+    expect(general?.mode).toBe("all")
     expect(general?.hidden).toBeUndefined()
     expect(evalPerm(general, "todowrite")).toBe("deny")
   }),
@@ -749,6 +749,7 @@ it.instance(
       agent: {
         build: { disable: true },
         plan: { disable: true },
+        general: { disable: true },
       },
     },
   },

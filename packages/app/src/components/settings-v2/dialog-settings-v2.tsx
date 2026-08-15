@@ -1,4 +1,4 @@
-import { Component, createMemo, createSignal, startTransition } from "solid-js"
+import { Component, Show, createMemo, createSignal, startTransition } from "solid-js"
 import { Dialog } from "@klautcode/ui/v2/dialog-v2"
 import { TabsV2 } from "@klautcode/ui/v2/tabs-v2"
 import { Icon } from "@klautcode/ui/icon"
@@ -6,10 +6,12 @@ import { useLanguage } from "@/context/language"
 import { usePlatform } from "@/context/platform"
 import { SettingsGeneralV2 } from "./general"
 import { SettingsKeybinds } from "../settings-keybinds"
+import { SettingsPermissionsV2 } from "./permissions"
 import { SettingsProvidersV2 } from "./providers"
 import { SettingsModelsV2 } from "./models"
 import "./settings-v2.css"
 import { SettingsServersV2 } from "./servers"
+import { SettingsOpencodeImportV2 } from "./opencode-import"
 import { useDialog } from "@klautcode/ui/context/dialog"
 import { useLayout } from "@/context/layout"
 import { useTabs } from "@/context/tabs"
@@ -65,6 +67,16 @@ export const DialogSettings: Component<{
                       <Icon name="keyboard" />
                       {language.t("settings.tab.shortcuts")}
                     </TabsV2.Trigger>
+                    <TabsV2.Trigger value="permissions">
+                      <Icon name="shield" />
+                      {language.t("settings.tab.permissions")}
+                    </TabsV2.Trigger>
+                    <Show when={platform.opencodeImport}>
+                      <TabsV2.Trigger value="import">
+                        <Icon name="download" />
+                        {language.t("settings.tab.import")}
+                      </TabsV2.Trigger>
+                    </Show>
                   </div>
                 </div>
 
@@ -99,6 +111,14 @@ export const DialogSettings: Component<{
         <TabsV2.Content value="shortcuts" class="settings-v2-panel">
           <SettingsKeybinds v2 />
         </TabsV2.Content>
+        <TabsV2.Content value="permissions" class="settings-v2-panel">
+          <SettingsPermissionsV2 />
+        </TabsV2.Content>
+        <Show when={platform.opencodeImport}>
+          <TabsV2.Content value="import" class="settings-v2-panel">
+            <SettingsOpencodeImportV2 />
+          </TabsV2.Content>
+        </Show>
         <TabsV2.Content value="servers" class="settings-v2-panel">
           <SettingsServersV2 />
         </TabsV2.Content>

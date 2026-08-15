@@ -82,6 +82,7 @@ import {
   sessionPanelWidthMax,
 } from "@/pages/session/session-panel-width"
 import { SessionSidePanel } from "@/pages/session/session-side-panel"
+import { ProjectChatsSidebar } from "@/components/project-chats-sidebar"
 import { sessionPanelLayout } from "@/pages/session/session-panel-layout"
 import { SessionReviewEmptyChangesV2 } from "@klautcode/session-ui/v2/session-review-empty-changes-v2"
 import { SessionReviewEmptyNoGitV2 } from "@klautcode/session-ui/v2/session-review-empty-no-git-v2"
@@ -147,7 +148,12 @@ async function runPromptRollbackMutation<T, R>(input: {
 export function SessionPage() {
   return (
     <SessionProviders>
-      <Page />
+      <div class="flex size-full">
+        <ProjectChatsSidebar />
+        <div class="flex-1 min-w-0">
+          <Page />
+        </div>
+      </div>
     </SessionProviders>
   )
 }

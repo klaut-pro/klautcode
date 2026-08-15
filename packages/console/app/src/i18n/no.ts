@@ -253,7 +253,7 @@ export const dict = {
     "Alle Zen-modeller hostes i USA. Leverandører følger en policy om null oppbevaring og bruker ikke dataene dine til modelltrening, med",
   "zen.privacy.exceptionsLink": "følgende unntak",
 
-  "go.title": "Klautcode Go | Rimelige kodemodeller for alle",
+  "go.title": "OpenCode Go | Rimelige kodemodeller for alle",
   "go.banner.text": "DeepSeek V4 Flash får 2x bruksgrense i en begrenset periode",
   "go.meta.description":
     "Go starter på $5 for den første måneden, deretter $10/måned, med sjenerøse bruksgrenser og pålitelig tilgang til ledende kodemodeller.",
@@ -298,7 +298,7 @@ export const dict = {
   "go.testimonials.frank.quote": "Jeg skulle ønske jeg fortsatt var hos Nvidia.",
   "go.problem.title": "Hvilket problem løser Go?",
   "go.problem.body":
-    "Vi fokuserer på å bringe Klautcode-opplevelsen til så mange som mulig. Klautcode Go er et rimelig abonnement: $5 for den første måneden, deretter $10/måned. Det gir sjenerøse grenser og pålitelig tilgang til de mest kapable åpen kildekode-modellene.",
+    "Vi fokuserer på å bringe Klautcode-opplevelsen til så mange som mulig. OpenCode Go er et rimelig abonnement: $5 for den første måneden, deretter $10/måned. Det gir sjenerøse grenser og pålitelig tilgang til de mest kapable åpen kildekode-modellene.",
   "go.problem.subtitle": " ",
   "go.problem.item1": "Rimelig abonnementspris",
   "go.problem.item2": "Rause grenser og pålitelig tilgang",
@@ -322,7 +322,7 @@ export const dict = {
   "go.privacy.beforeExceptions":
     "Go-modeller hostes i USA. Leverandører følger en policy om null oppbevaring og bruker ikke dataene dine til modelltrening, med",
   "go.privacy.exceptionsLink": "følgende unntak",
-  "go.faq.q1": "Hva er Klautcode Go?",
+  "go.faq.q1": "Hva er OpenCode Go?",
   "go.faq.a1":
     "Go er et rimelig abonnement som gir deg pålitelig tilgang til kapable åpen kildekode-modeller for agent-koding.",
   "go.faq.q2": "Hvilke modeller inkluderer Go?",
@@ -394,7 +394,7 @@ export const dict = {
   "zen.api.error.regionNotAllowed":
     "Den nyeste versjonen av denne modellen er bare tilgjengelig som en tjeneste driftet i Kina og krever at du uttrykkelig samtykker: {{consoleGoUrl}}",
   "zen.api.error.trialEnded":
-    "Den gratis kampanjen for {{model}} er avsluttet. Du kan fortsette å bruke modellen ved å abonnere på Klautcode Go - {{link}}",
+    "Den gratis kampanjen for {{model}} er avsluttet. Du kan fortsette å bruke modellen ved å abonnere på OpenCode Go - {{link}}",
 
   "black.meta.title": "Klautcode Black | Få tilgang til verdens beste kodemodeller",
   "black.meta.description": "Få tilgang til Claude, GPT, Gemini og mer med Klautcode Black-abonnementer.",
@@ -663,7 +663,7 @@ export const dict = {
   "workspace.lite.time.minute": "minutt",
   "workspace.lite.time.minutes": "minutter",
   "workspace.lite.time.fewSeconds": "noen få sekunder",
-  "workspace.lite.subscription.message": "Du abonnerer på Klautcode Go.",
+  "workspace.lite.subscription.message": "Du abonnerer på OpenCode Go.",
   "workspace.lite.subscription.manage": "Administrer abonnement",
   "workspace.lite.subscription.rollingUsage": "Løpende bruk",
   "workspace.lite.subscription.weeklyUsage": "Ukentlig bruk",
@@ -671,16 +671,16 @@ export const dict = {
   "workspace.lite.subscription.resetsIn": "Nullstilles om",
   "workspace.lite.subscription.useBalance": "Bruk din tilgjengelige saldo etter å ha nådd bruksgrensene",
   "workspace.lite.subscription.selectProvider":
-    'Velg "Klautcode Go" som leverandør i klautcode-konfigurasjonen din for å bruke Go-modeller.',
+    'Velg "OpenCode Go" som leverandør i klautcode-konfigurasjonen din for å bruke Go-modeller.',
   "workspace.lite.providers.title": "Leverandører",
   "workspace.lite.providers.description": "Kontroller hvilke leverandører som brukes til ruting.",
   "workspace.lite.providers.useChina": "Aktiver modeller hostet i Kina",
   "workspace.lite.black.message":
     "Du abonnerer for øyeblikket på Klautcode Black eller står på venteliste. Vennligst avslutt abonnementet først hvis du vil bytte til Go.",
   "workspace.lite.other.message":
-    "Et annet medlem i dette arbeidsområdet abonnerer allerede på Klautcode Go. Kun ett medlem per arbeidsområde kan abonnere.",
+    "Et annet medlem i dette arbeidsområdet abonnerer allerede på OpenCode Go. Kun ett medlem per arbeidsområde kan abonnere.",
   "workspace.lite.promo.description":
-    "Klautcode Go starter på {{price}}, deretter $10/måned, og gir pålitelig tilgang til populære åpne kodingsmodeller med sjenerøse bruksgrenser.",
+    "OpenCode Go starter på {{price}}, deretter $10/måned, og gir pålitelig tilgang til populære åpne kodingsmodeller med sjenerøse bruksgrenser.",
   "workspace.lite.promo.price": "$5 for den første måneden",
   "workspace.lite.promo.modelsTitle": "Hva som er inkludert",
   "workspace.lite.promo.footer":

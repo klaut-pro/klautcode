@@ -135,6 +135,44 @@ describe("ConfigAgentPlugin.Plugin", () => {
     }),
   )
 
+  it.effect("applies the permission object config as agent rules", () =>
+    Effect.gen(function* () {
+      const agents = yield* AgentV2.Service
+      const build = AgentV2.ID.make("build")
+      yield* agents.transform((editor) => editor.update(build, () => {}))
+      const config = Config.Service.of({
+        entries: () =>
+          Effect.succeed([
+            new Config.Document({
+              type: "document",
+              info: decode({
+                permission: {
+                  external_directory: "allow",
+                  read: "allow",
+                  bash: {
+                    "git *": "deny",
+                  },
+                },
+              }),
+            }),
+          ]),
+      })
+
+      yield* ConfigAgentPlugin.Plugin.effect(host({ agent: agentHost(agents) })).pipe(
+        Effect.provideService(Config.Service, config),
+      )
+
+      const buildAgent = yield* agents.get(build)
+      if (!buildAgent) throw new Error("expected configured build agent")
+      expect(
+        PermissionV2.evaluate("external_directory", "/Users/x/secret/file", buildAgent.permissions).effect,
+      ).toBe("allow")
+      expect(PermissionV2.evaluate("read", "README.md", buildAgent.permissions).effect).toBe("allow")
+      expect(PermissionV2.evaluate("bash", "git status", buildAgent.permissions).effect).toBe("deny")
+      expect(PermissionV2.evaluate("bash", "bun test", buildAgent.permissions).effect).toBe("ask")
+    }),
+  )
+
   it.effect("maps configured agent fields and preserves an unspecified model variant", () =>
     Effect.gen(function* () {
       const agents = yield* AgentV2.Service

@@ -1176,6 +1176,19 @@ export class Service extends Context.Service<Service, Interface>()("@klautcode/P
 
 export const use = serviceUse(Service)
 
+function fetchZenModels(baseURL: string, key: string): Effect.Effect<Set<string>, unknown> {
+  return Effect.gen(function* () {
+    const response = yield* Effect.promise(() =>
+      fetch(`${baseURL}/models`, {
+        headers: { Authorization: `Bearer ${key}` },
+      }),
+    )
+    if (!response.ok) return new Set<string>()
+    const body = (yield* Effect.promise(() => response.json())) as { data?: Array<{ id?: string }> }
+    return new Set((body.data ?? []).map((model) => model.id ?? "").filter(Boolean))
+  })
+}
+
 function cost(c: ModelsDev.Model["cost"]): Model["cost"] {
   const result: Model["cost"] = {
     input: c?.input ?? 0,
@@ -1542,6 +1555,34 @@ const layer = Layer.effect(
               source: "api",
               key: provider.key,
             })
+          }
+        }
+        // opencode and opencode-go share the same zen account/API key; if only one
+        // is stored, apply it to the sibling provider too.
+        const openCode = yield* auth.get("opencode").pipe(Effect.orDie)
+        const openCodeGo = yield* auth.get("opencode-go").pipe(Effect.orDie)
+        const openCodeKey = openCode?.type === "api" ? openCode.key : openCodeGo?.type === "api" ? openCodeGo.key : undefined
+        if (openCodeKey) {
+          for (const providerID of [ProviderV2.ID.make("opencode"), ProviderV2.ID.make("opencode-go")]) {
+            if (disabled.has(providerID)) continue
+            const existing = providers[providerID]
+            if (existing && existing.key) continue
+            mergeProvider(providerID, { source: "api", key: openCodeKey })
+          }
+        }
+        // The opencode (zen) provider advertises many cost-0 models in models.dev,
+        // but the account can only use the ones the zen API actually returns. Query
+        // the live model list and restrict the provider to those entries so free
+        // models shown match what the account can really call.
+        if (openCodeKey && providers[ProviderV2.ID.make("opencode")]) {
+          const live = yield* fetchZenModels("https://opencode.ai/zen/v1", openCodeKey).pipe(
+            Effect.catch(() => Effect.succeed(undefined)),
+          )
+          if (live && live.size > 0) {
+            const openCodeProvider = providers[ProviderV2.ID.make("opencode")]
+            for (const modelID of Object.keys(openCodeProvider.models)) {
+              if (!live.has(modelID)) delete openCodeProvider.models[modelID]
+            }
           }
         }
 

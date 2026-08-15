@@ -102,6 +102,7 @@ export const SessionPaths = {
   deleteMessage: `${root}/:sessionID/message/:messageID`,
   deletePart: `${root}/:sessionID/message/:messageID/part/:partID`,
   updatePart: `${root}/:sessionID/message/:messageID/part/:partID`,
+  regenerateTitle: `${root}/:sessionID/title`,
 } as const
 
 export const SessionApi = HttpApi.make("session")
@@ -440,6 +441,19 @@ export const SessionApi = HttpApi.make("session")
           OpenApi.annotations({
             identifier: "part.update",
             description: "Update a part in a message.",
+          }),
+        ),
+        HttpApiEndpoint.post("regenerateTitle", SessionPaths.regenerateTitle, {
+          params: { sessionID: SessionID },
+          query: WorkspaceRoutingQuery,
+          success: described(Schema.Boolean, "Title regenerated"),
+          error: [HttpApiError.BadRequest, ApiNotFoundError],
+        }).annotateMerge(
+          OpenApi.annotations({
+            identifier: "session.regenerateTitle",
+            summary: "Regenerate session title",
+            description:
+              "Regenerate the session title from the recent conversation using the small model. Explicit manual action; ignores the auto-refresh cadence.",
           }),
         ),
       )

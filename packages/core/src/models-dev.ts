@@ -157,10 +157,10 @@ const layer = Layer.effect(
       ),
     )
 
-    const source = Flag.KLAUTCODE_MODELS_URL || "https://models.code.klaut.pro"
+    const source = Flag.KLAUTCODE_MODELS_URL || "https://models.dev"
     const filepath = path.join(
       Global.Path.cache,
-      source === "https://models.code.klaut.pro" ? "models.json" : `models-${Hash.fast(source)}.json`,
+      source === "https://models.dev" ? "models.json" : `models-${Hash.fast(source)}.json`,
     )
     const ttl = Duration.minutes(5)
     const lockKey = `models-dev:${filepath}`

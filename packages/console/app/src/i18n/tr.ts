@@ -255,7 +255,7 @@ export const dict = {
     "Tüm Zen modelleri ABD'de barındırılmaktadır. Sağlayıcılar sıfır saklama politikası izler ve verilerinizi model eğitimi için kullanmaz; şu",
   "zen.privacy.exceptionsLink": "aşağıdaki istisnalar",
 
-  "go.title": "Klautcode Go | Herkes için düşük maliyetli kodlama modelleri",
+  "go.title": "OpenCode Go | Herkes için düşük maliyetli kodlama modelleri",
   "go.banner.text": "DeepSeek V4 Flash sınırlı bir süre için 2x kullanım limiti sunuyor",
   "go.meta.description":
     "Go ilk ay $5, sonrasında ayda 10$ fiyatıyla başlar; cömert kullanım limitleri ve önde gelen kodlama modellerine güvenilir erişim sunar.",
@@ -301,7 +301,7 @@ export const dict = {
   "go.testimonials.frank.quote": "Keşke hala Nvidia'da olsaydım.",
   "go.problem.title": "Go hangi sorunu çözüyor?",
   "go.problem.body":
-    "Klautcode deneyimini mümkün olduğunca çok kişiye ulaştırmaya odaklandık. Klautcode Go düşük maliyetli bir aboneliktir: İlk ay $5, sonrasında ayda 10$. Cömert limitler ve en yetenekli açık kaynak modellere güvenilir erişim sağlar.",
+    "Klautcode deneyimini mümkün olduğunca çok kişiye ulaştırmaya odaklandık. OpenCode Go düşük maliyetli bir aboneliktir: İlk ay $5, sonrasında ayda 10$. Cömert limitler ve en yetenekli açık kaynak modellere güvenilir erişim sağlar.",
   "go.problem.subtitle": " ",
   "go.problem.item1": "Düşük maliyetli abonelik fiyatlandırması",
   "go.problem.item2": "Cömert limitler ve güvenilir erişim",
@@ -325,7 +325,7 @@ export const dict = {
   "go.privacy.beforeExceptions":
     "Go modelleri ABD'de barındırılmaktadır. Sağlayıcılar sıfır saklama politikası izler ve verilerinizi model eğitimi için kullanmaz; şu",
   "go.privacy.exceptionsLink": "aşağıdaki istisnalar",
-  "go.faq.q1": "Klautcode Go nedir?",
+  "go.faq.q1": "OpenCode Go nedir?",
   "go.faq.a1":
     "Go, ajan tabanlı kodlama için yetenekli açık kaynaklı modellere güvenilir erişim sağlayan düşük maliyetli bir aboneliktir.",
   "go.faq.q2": "Go hangi modelleri içerir?",
@@ -397,7 +397,7 @@ export const dict = {
   "zen.api.error.regionNotAllowed":
     "Bu modelin en son sürümü yalnızca Çin'de barındırılıyor ve kullanabilmek için açıkça onay vermeniz gerekiyor: {{consoleGoUrl}}",
   "zen.api.error.trialEnded":
-    "{{model}} için ücretsiz promosyon sona erdi. Klautcode Go'ya abone olarak modeli kullanmaya devam edebilirsiniz - {{link}}",
+    "{{model}} için ücretsiz promosyon sona erdi. OpenCode Go'ya abone olarak modeli kullanmaya devam edebilirsiniz - {{link}}",
 
   "black.meta.title": "Klautcode Black | Dünyanın en iyi kodlama modellerine erişin",
   "black.meta.description": "Klautcode Black abonelik planlarıyla Claude, GPT, Gemini ve daha fazlasına erişin.",
@@ -666,7 +666,7 @@ export const dict = {
   "workspace.lite.time.minute": "dakika",
   "workspace.lite.time.minutes": "dakika",
   "workspace.lite.time.fewSeconds": "birkaç saniye",
-  "workspace.lite.subscription.message": "Klautcode Go abonesisiniz.",
+  "workspace.lite.subscription.message": "OpenCode Go abonesisiniz.",
   "workspace.lite.subscription.manage": "Aboneliği Yönet",
   "workspace.lite.subscription.rollingUsage": "Devam Eden Kullanım",
   "workspace.lite.subscription.weeklyUsage": "Haftalık Kullanım",
@@ -674,16 +674,16 @@ export const dict = {
   "workspace.lite.subscription.resetsIn": "Sıfırlama süresi",
   "workspace.lite.subscription.useBalance": "Kullanım limitlerine ulaştıktan sonra mevcut bakiyenizi kullanın",
   "workspace.lite.subscription.selectProvider":
-    'Go modellerini kullanmak için klautcode yapılandırmanızda "Klautcode Go"\'yu sağlayıcı olarak seçin.',
+    'Go modellerini kullanmak için klautcode yapılandırmanızda "OpenCode Go"\'yu sağlayıcı olarak seçin.',
   "workspace.lite.providers.title": "Sağlayıcılar",
   "workspace.lite.providers.description": "Yönlendirme için hangi sağlayıcıların kullanılacağını kontrol edin.",
   "workspace.lite.providers.useChina": "Çin'de barındırılan modelleri etkinleştir",
   "workspace.lite.black.message":
     "Şu anda Klautcode Black abonesisiniz veya bekleme listesindesiniz. Go'ya geçmek istiyorsanız lütfen önce aboneliğinizi iptal edin.",
   "workspace.lite.other.message":
-    "Bu çalışma alanındaki başka bir üye zaten Klautcode Go abonesi. Çalışma alanı başına yalnızca bir üye abone olabilir.",
+    "Bu çalışma alanındaki başka bir üye zaten OpenCode Go abonesi. Çalışma alanı başına yalnızca bir üye abone olabilir.",
   "workspace.lite.promo.description":
-    "Klautcode Go {{price}} fiyatından başlar, sonrasında ayda 10$ olur ve cömert kullanım limitleriyle popüler açık kodlama modellerine güvenilir erişim sağlar.",
+    "OpenCode Go {{price}} fiyatından başlar, sonrasında ayda 10$ olur ve cömert kullanım limitleriyle popüler açık kodlama modellerine güvenilir erişim sağlar.",
   "workspace.lite.promo.price": "İlk ay $5",
   "workspace.lite.promo.modelsTitle": "Neler Dahil",
   "workspace.lite.promo.footer":

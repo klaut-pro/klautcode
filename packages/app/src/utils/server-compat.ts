@@ -401,6 +401,7 @@ function createV1Api(input: CompatibleInput): CompatibleApi {
             providerID: value.integrationID,
             auth: { type: "api", key: value.key },
           })
+          await input.current.integration.connect.key(value).catch(() => {})
           await legacy(value.location).instance.dispose()
           await input.legacy().instance.dispose()
         },

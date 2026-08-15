@@ -84,6 +84,10 @@ export const Info = Schema.Struct({
   subagent_depth: Schema.optional(NonNegativeInt).annotate({
     description: "Maximum subagent nesting depth. Defaults to 1, which prevents subagents from launching subagents.",
   }),
+  subagent_workers: Schema.optional(Schema.Union([NonNegativeInt, Schema.Literal("auto")])).annotate({
+    description:
+      "Maximum number of subagents that may run in parallel (multitask mode). 'auto' (default) sizes the worker pool to the machine's CPU core count.",
+  }),
   username: Schema.optional(Schema.String).annotate({
     description: "Custom username to display in conversations instead of system username",
   }),

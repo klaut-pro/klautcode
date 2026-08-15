@@ -190,7 +190,7 @@ const layer = Layer.effect(
               user,
             ),
             options: {},
-            mode: "subagent",
+            mode: "all",
             native: true,
           },
           explore: {

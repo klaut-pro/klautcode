@@ -28,6 +28,27 @@ export type FatalRendererErrorLog = {
   os?: DesktopOS
 }
 
+export type OpencodeImportProject = {
+  id: string
+  name: string | null
+  worktree: string
+  sessionCount: number
+}
+
+export type OpencodeImportScan = {
+  directory: string
+  dbPath: string
+  projects: OpencodeImportProject[]
+}
+
+export type OpencodeImportResult = {
+  projects: number
+  sessions: number
+  messages: number
+  parts: number
+  todos: number
+}
+
 type PlatformBase = {
   /** App version */
   version?: string
@@ -121,6 +142,12 @@ type PlatformBase = {
 
   /** Record a fatal renderer error in platform logs (desktop only) */
   recordFatalRendererError?(error: FatalRendererErrorLog): Promise<void>
+
+  /** Import projects and chats from an existing opencode instance (desktop only) */
+  opencodeImport?: {
+    scan(directory?: string): Promise<OpencodeImportScan>
+    run(directory: string, projectIds: string[]): Promise<OpencodeImportResult>
+  }
 }
 
 export type Platform = PlatformBase &

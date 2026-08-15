@@ -10,7 +10,7 @@ const TICK = 130
 // ThinkingOrbs look without the 9x7 grid footprint so it fits inline next to
 // status text.
 export function MiniOrbs(props: { color?: RGBA }) {
-  const { theme } = useTheme()
+  const { theme, mode } = useTheme()
   const kv = useKV()
   const [tick, setTick] = createSignal(0)
 
@@ -20,7 +20,8 @@ export function MiniOrbs(props: { color?: RGBA }) {
   })
 
   const color = () => props.color ?? theme.accent
-  const base = () => tint(theme.background, color(), 0.4)
+  // Trail dots keep more of the accent in light mode so they don't wash out.
+  const base = () => tint(theme.background, color(), mode() === "dark" ? 0.4 : 0.55)
 
   const renderDots = () => {
     const t = tick()

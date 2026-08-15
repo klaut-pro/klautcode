@@ -2,7 +2,7 @@ const model_id = "claude-3-7-sonnet"
 
 export const popularProviders = [
   "klautcode",
-  "klautcode-go",
+  "opencode-go",
   "anthropic",
   "github-copilot",
   "openai",
@@ -26,7 +26,7 @@ const provider = {
 
 const popular = [
   { id: "klautcode", name: "Klautcode Zen", models: {} },
-  { id: "klautcode-go", name: "Klautcode Go", models: {} },
+  { id: "opencode-go", name: "OpenCode Go", models: {} },
   { id: "openai", name: "OpenAI", models: {} },
   provider,
   { id: "google", name: "Google", models: {} },

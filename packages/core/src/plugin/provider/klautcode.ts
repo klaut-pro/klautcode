@@ -12,6 +12,7 @@ import { ProviderV2 } from "../../provider"
 import { ConfigProviderV1 } from "../../v1/config/provider"
 import { ConfigProviderOptionsV1 } from "../../v1/config/provider-options"
 import { ConfigV1 } from "../../v1/config/config"
+import { Config } from "../../config"
 
 const defaultServer = "https://console.code.klaut.pro"
 const clientID = "klautcode-cli"
@@ -74,7 +75,7 @@ function oauth(http: HttpClient.HttpClient) {
   } satisfies IntegrationOAuthMethodRegistration
 }
 
-export const KlautcodePlugin = define<HttpClient.HttpClient | EventV2.Service | Scope.Scope>({
+export const KlautcodePlugin = define({
   id: "klautcode",
   effect: Effect.fn(function* (ctx) {
     const events = yield* EventV2.Service
@@ -82,6 +83,8 @@ export const KlautcodePlugin = define<HttpClient.HttpClient | EventV2.Service | 
     const loading = Semaphore.makeUnsafe(1)
     let connected = false
     let providers: typeof ConfigV1.Info.Type.provider | undefined
+    const freeModels = (process.env.FREE_MODELS ?? "true").toLowerCase() !== "false"
+    const autoFreeMode = ((process.env.AUTO_FREE_MODE ?? "true")).toLowerCase() !== "false"
 
     const load = Effect.fn("KlautcodePlugin.load")(function* () {
       const connection = yield* ctx.integration.connection.active("klautcode")
@@ -164,16 +167,40 @@ export const KlautcodePlugin = define<HttpClient.HttpClient | EventV2.Service | 
 
       const item = catalog.provider.get(ProviderV2.ID.klautcode)
       if (!item) return
-      const hasKey = Boolean(process.env.KLAUTCODE_API_KEY || connected || item.provider.request.body.apiKey)
+      const hasOpenCodeKey = Boolean(process.env.OPENCODE_API_KEY || connected || item.provider.request.body.apiKey)
+      const hasKey = Boolean(process.env.KLAUTCODE_API_KEY || hasOpenCodeKey || item.provider.request.body.apiKey)
       catalog.provider.update(item.provider.id, (provider) => {
         if (!hasKey) provider.request.body.apiKey = "public"
       })
       if (hasKey) return
       for (const model of item.models.values()) {
-        if (!model.cost.some((cost) => cost.input > 0)) continue
-        catalog.model.update(item.provider.id, model.id, (draft) => {
-          draft.enabled = false
-        })
+        const hasInputCost = model.cost.some((cost) => cost.input > 0)
+        const isFreeModel = model.cost.some((cost) => cost.input === 0)
+        const isPaidModel = hasInputCost && !isFreeModel
+        if (freeModels && autoFreeMode) {
+          // Auto mode: enable free models, disable paid models
+          if (isFreeModel) continue
+          if (isPaidModel) {
+            catalog.model.update(item.provider.id, model.id, (draft) => {
+              draft.enabled = false
+            })
+          }
+        } else if (freeModels) {
+          // Free mode only: keep free models enabled, disable paid models only when no key
+          if (isFreeModel) continue
+          if (hasInputCost && !hasKey) {
+            catalog.model.update(item.provider.id, model.id, (draft) => {
+              draft.enabled = false
+            })
+          }
+        } else {
+          // When freeModels is false: disable all models with cost
+          if (hasInputCost) {
+            catalog.model.update(item.provider.id, model.id, (draft) => {
+              draft.enabled = false
+            })
+          }
+        }
       }
     })
 

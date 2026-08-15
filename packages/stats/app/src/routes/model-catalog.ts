@@ -1,8 +1,8 @@
 import { query } from "@solidjs/router"
 
-export const modelCatalogSourceUrl = "https://models.code.klaut.pro/catalog.json"
-export const modelCatalogPricingUrl = "https://models.code.klaut.pro/api.json"
-export const modelCatalogLabSourceUrl = "https://models.code.klaut.pro/labs"
+export const modelCatalogSourceUrl = "https://models.dev/catalog.json"
+export const modelCatalogPricingUrl = "https://models.dev/api.json"
+export const modelCatalogLabSourceUrl = "https://models.dev/labs"
 
 export type ModelCatalogCost = {
   input: number

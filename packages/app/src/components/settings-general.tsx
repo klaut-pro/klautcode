@@ -1,4 +1,4 @@
-import { Component, Show, createMemo, createResource, onMount, type JSX } from "solid-js"
+import { Component, Show, createMemo, createResource, createSignal, onMount, type JSX } from "solid-js"
 import { Button } from "@klautcode/ui/button"
 import { Icon } from "@klautcode/ui/icon"
 import { Select } from "@klautcode/ui/select"
@@ -126,6 +126,17 @@ export const SettingsGeneral: Component = () => {
   const serverSync = useServerSync()
   const serverSdk = useServerSDK()
 
+  const [reloading, setReloading] = createSignal(false)
+  const reloadChats = async () => {
+    if (reloading()) return
+    setReloading(true)
+    try {
+      await serverSync().reloadChats()
+    } finally {
+      setReloading(false)
+    }
+  }
+
   const [shells] = createResource(
     async () => {
       const sdk = serverSdk()
@@ -187,6 +198,11 @@ export const SettingsGeneral: Component = () => {
 
     return options
   })
+
+  const followupOptions = createMemo((): { value: "queue" | "steer"; label: string }[] => [
+    { value: "queue", label: language.t("settings.general.row.followup.option.queue") },
+    { value: "steer", label: language.t("settings.general.row.followup.option.steer") },
+  ])
 
   const onDisplayBackendChange = (checked: boolean) => {
     const update = platform.setDisplayBackend?.(checked ? "wayland" : "auto")
@@ -348,6 +364,24 @@ export const SettingsGeneral: Component = () => {
         </SettingsRow>
 
         <SettingsRow
+          title={language.t("settings.general.row.followup.title")}
+          description={language.t("settings.general.row.followup.description")}
+        >
+          <Select
+            data-action="settings-followup"
+            options={followupOptions()}
+            current={followupOptions().find((o) => o.value === settings.general.followup())}
+            value={(o) => o.value}
+            label={(o) => o.label}
+            onSelect={(option) => option && settings.general.setFollowup(option.value)}
+            variant="secondary"
+            size="small"
+            triggerVariant="settings"
+            triggerStyle={{ "min-width": "180px" }}
+          />
+        </SettingsRow>
+
+        <SettingsRow
           title={language.t("settings.general.row.reasoningSummaries.title")}
           description={language.t("settings.general.row.reasoningSummaries.description")}
         >
@@ -356,6 +390,34 @@ export const SettingsGeneral: Component = () => {
               checked={settings.general.showReasoningSummaries()}
               onChange={(checked) => settings.general.setShowReasoningSummaries(checked)}
             />
+          </div>
+        </SettingsRow>
+
+        <SettingsRow
+          title={language.t("settings.general.row.autoFreeMode.title")}
+          description={language.t("settings.general.row.autoFreeMode.description")}
+        >
+          <div data-action="settings-feed-auto-free-mode">
+            <Switch
+              checked={settings.general.autoFreeMode()}
+              onChange={(checked) => settings.general.setAutoFreeMode(checked)}
+            />
+          </div>
+        </SettingsRow>
+
+        <SettingsRow
+          title={language.t("settings.general.row.reloadChats.title")}
+          description={language.t("settings.general.row.reloadChats.description")}
+        >
+          <div data-action="settings-reload-chats">
+            <Button
+              variant="secondary"
+              size="small"
+              disabled={reloading()}
+              onClick={() => void reloadChats()}
+            >
+              {language.t(reloading() ? "settings.general.row.reloadChats.reloading" : "settings.general.row.reloadChats.action")}
+            </Button>
           </div>
         </SettingsRow>
 

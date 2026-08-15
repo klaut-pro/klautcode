@@ -4,6 +4,7 @@ import { ProviderIcon } from "@klautcode/ui/provider-icon"
 import { ButtonV2 } from "@klautcode/ui/v2/button-v2"
 import { Icon } from "@klautcode/ui/v2/icon"
 import { KeybindV2 } from "@klautcode/ui/v2/keybind-v2"
+import { Switch } from "@klautcode/ui/v2/switch-v2"
 import { TooltipV2 } from "@klautcode/ui/v2/tooltip-v2"
 import type { ReferenceInfo } from "@klautcode/sdk/v2/client"
 import { createEffect, createMemo, on, Show } from "solid-js"
@@ -23,6 +24,7 @@ import { usePermission } from "@/context/permission"
 import { type ImageAttachmentPart, usePrompt } from "@/context/prompt"
 import { usePlatform } from "@/context/platform"
 import { useSDK } from "@/context/sdk"
+import { useSettings } from "@/context/settings"
 import { useSync } from "@/context/sync"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { showToast } from "@/utils/toast"
@@ -48,6 +50,7 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
   const dialog = useDialog()
   const command = useCommand()
   const language = useLanguage()
+  const settings = useSettings()
 
   return (
     <div class="flex flex-col gap-3">
@@ -59,19 +62,35 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
         attachKeybind={command.keybindParts("file.attach")}
         attachShortcut={command.keybind("file.attach")}
         modelControl={
-          <PromptInputV2ModelControl
-            loading={props.controller.model.loading}
-            paid={props.controller.model.paid}
-            title={language.t("command.model.choose")}
-            keybind={command.keybindParts("model.choose")}
-            model={props.controller.model.selection}
-            providerID={props.controller.model.selection.current()?.provider?.id}
-            modelName={props.controller.model.selection.current()?.name ?? language.t("dialog.model.select.title")}
-            onClose={props.controller.restoreFocus}
-            onUnpaidClick={() =>
-              dialog.show(() => <DialogSelectModelUnpaidV2 model={props.controller.model.selection} />)
-            }
-          />
+          <>
+            <PromptInputV2ModelControl
+              loading={props.controller.model.loading}
+              paid={props.controller.model.paid}
+              title={language.t("command.model.choose")}
+              keybind={command.keybindParts("model.choose")}
+              model={props.controller.model.selection}
+              providerID={props.controller.model.selection.current()?.provider?.id}
+              modelName={props.controller.model.selection.current()?.name ?? language.t("dialog.model.select.title")}
+              onClose={props.controller.restoreFocus}
+              onUnpaidClick={() =>
+                dialog.show(() => <DialogSelectModelUnpaidV2 model={props.controller.model.selection} />)
+              }
+            />
+            <TooltipV2
+              placement="top"
+              gutter={4}
+              value={settings.general.autoFreeMode() ? language.t("settings.general.row.autoFreeMode.title") : language.t("settings.general.row.autoFreeMode.description")}
+            >
+              <label class="flex items-center gap-1 text-xs text-v2-text-text-muted">
+                <Switch
+                  checked={settings.general.autoFreeMode()}
+                  onChange={(checked) => settings.general.setAutoFreeMode(checked)}
+                  class="scale-75"
+                />
+                Auto free
+              </label>
+            </TooltipV2>
+          </>
         }
       />
     </div>
@@ -491,7 +510,9 @@ function PromptInputV2ModelControl(props: {
           />
         )}
       </Show>
-      <span class="truncate leading-4">{props.modelName}</span>
+      <span data-prompt-control-label class="min-w-0 truncate leading-4">
+        {props.modelName}
+      </span>
       <span class="-ml-0.5 -mr-1 flex shrink-0">
         <Icon name="chevron-down" />
       </span>
@@ -517,6 +538,7 @@ function PromptInputV2ModelControl(props: {
               data-control-type="dialog"
               variant="ghost-muted"
               size="normal"
+              data-prompt-control
               class="min-w-0 max-w-[220px] justify-start ![font-weight:440] group"
               classList={{ "animate-in fade-in": shouldAnimate() }}
               style={{ height: "28px" }}
@@ -534,6 +556,7 @@ function PromptInputV2ModelControl(props: {
                 variant="ghost-muted"
                 size="normal"
                 style={{ height: "28px" }}
+                data-prompt-control
                 class="min-w-0 max-w-[220px] justify-start ![font-weight:440] group"
                 classList={{ "animate-in fade-in": shouldAnimate() }}
                 data-action="prompt-model"

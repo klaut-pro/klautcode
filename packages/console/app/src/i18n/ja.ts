@@ -252,7 +252,7 @@ export const dict = {
     "すべてのZenモデルは米国でホストされています。プロバイダーはゼロ保持ポリシーに従い、モデルのトレーニングにデータを使用しません（",
   "zen.privacy.exceptionsLink": "以下の例外",
 
-  "go.title": "Klautcode Go | すべての人のための低価格なコーディングモデル",
+  "go.title": "OpenCode Go | すべての人のための低価格なコーディングモデル",
   "go.banner.text": "DeepSeek V4 Flashの利用上限が期間限定で2倍に",
   "go.meta.description":
     "Goは最初の月$5、その後$10/月で、主要なコーディングモデルへのゆとりある利用上限と安定したアクセスを提供します。",
@@ -298,7 +298,7 @@ export const dict = {
   "go.testimonials.frank.quote": "まだNvidiaにいられたらよかったのに。",
   "go.problem.title": "Goはどのような問題を解決していますか？",
   "go.problem.body":
-    "私たちはKlautcodeの体験をできるだけ多くの人に届けることに注力しています。Klautcode Goは低価格のサブスクリプションで、最初の月は$5、その後は$10/月です。ゆとりある上限と、最も高性能なオープンソースモデルへの信頼できるアクセスを提供します。",
+    "私たちはKlautcodeの体験をできるだけ多くの人に届けることに注力しています。OpenCode Goは低価格のサブスクリプションで、最初の月は$5、その後は$10/月です。ゆとりある上限と、最も高性能なオープンソースモデルへの信頼できるアクセスを提供します。",
   "go.problem.subtitle": " ",
   "go.problem.item1": "低価格なサブスクリプション料金",
   "go.problem.item2": "十分な制限と安定したアクセス",
@@ -321,7 +321,7 @@ export const dict = {
   "go.privacy.beforeExceptions":
     "Goのモデルは米国でホストされています。プロバイダーはゼロ保持ポリシーに従い、モデルのトレーニングにデータを使用しません（",
   "go.privacy.exceptionsLink": "以下の例外",
-  "go.faq.q1": "Klautcode Goとは？",
+  "go.faq.q1": "OpenCode Goとは？",
   "go.faq.a1":
     "Goは、エージェント型コーディングのための有能なオープンソースモデルへの安定したアクセスを提供する低価格なサブスクリプションです。",
   "go.faq.q2": "Goにはどのモデルが含まれますか？",
@@ -391,7 +391,7 @@ export const dict = {
   "zen.api.error.regionNotAllowed":
     "このモデルの最新バージョンは中国でのみホスト提供されており、利用するには明示的なオプトインが必要です: {{consoleGoUrl}}",
   "zen.api.error.trialEnded":
-    "{{model}} の無料プロモーションは終了しました。Klautcode Go を購読するとモデルを引き続き使用できます - {{link}}",
+    "{{model}} の無料プロモーションは終了しました。OpenCode Go を購読するとモデルを引き続き使用できます - {{link}}",
 
   "black.meta.title": "Klautcode Black | 世界最高峰のコーディングモデルすべてにアクセス",
   "black.meta.description": "Klautcode Black サブスクリプションプランで、Claude、GPT、Gemini などにアクセス。",
@@ -661,7 +661,7 @@ export const dict = {
   "workspace.lite.time.minute": "分",
   "workspace.lite.time.minutes": "分",
   "workspace.lite.time.fewSeconds": "数秒",
-  "workspace.lite.subscription.message": "あなたは Klautcode Go を購読しています。",
+  "workspace.lite.subscription.message": "あなたは OpenCode Go を購読しています。",
   "workspace.lite.subscription.manage": "サブスクリプションの管理",
   "workspace.lite.subscription.rollingUsage": "ローリング利用量",
   "workspace.lite.subscription.weeklyUsage": "週間利用量",
@@ -669,16 +669,16 @@ export const dict = {
   "workspace.lite.subscription.resetsIn": "リセットまで",
   "workspace.lite.subscription.useBalance": "利用限度額に達したら利用可能な残高を使用する",
   "workspace.lite.subscription.selectProvider":
-    "Go モデルを使用するには、klautcode の設定で「Klautcode Go」をプロバイダーとして選択してください。",
+    "Go モデルを使用するには、klautcode の設定で「OpenCode Go」をプロバイダーとして選択してください。",
   "workspace.lite.providers.title": "プロバイダー",
   "workspace.lite.providers.description": "ルーティングに使用するプロバイダーを管理します。",
   "workspace.lite.providers.useChina": "中国でホストされているモデルを有効にする",
   "workspace.lite.black.message":
     "現在 Klautcode Black を購読中、またはウェイティングリストに登録されています。Go に切り替える場合は、先に登録を解除してください。",
   "workspace.lite.other.message":
-    "このワークスペースの別のメンバーが既に Klautcode Go を購読しています。ワークスペースにつき1人のメンバーのみが購読できます。",
+    "このワークスペースの別のメンバーが既に OpenCode Go を購読しています。ワークスペースにつき1人のメンバーのみが購読できます。",
   "workspace.lite.promo.description":
-    "Klautcode Goは{{price}}で始まり、その後は$10/月で、人気の高いオープンコーディングモデルへの安定したアクセスと余裕のある利用枠を提供します。",
+    "OpenCode Goは{{price}}で始まり、その後は$10/月で、人気の高いオープンコーディングモデルへの安定したアクセスと余裕のある利用枠を提供します。",
   "workspace.lite.promo.price": "初月$5",
   "workspace.lite.promo.modelsTitle": "含まれるもの",
   "workspace.lite.promo.footer":

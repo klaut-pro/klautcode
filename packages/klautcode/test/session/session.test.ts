@@ -282,4 +282,37 @@ describe("Session", () => {
       expect(saved.metadata).toBeUndefined()
     }),
   )
+
+  it.instance("setAutoTitle marks the title as auto-generated with message count", () =>
+    Effect.gen(function* () {
+      const session = yield* SessionNs.Service
+      const created = yield* Effect.acquireRelease(
+        session.create({ title: "New session - 2024-01-01T00:00:00.000Z", metadata: { source: "sdk" } }),
+        (info) => session.remove(info.id).pipe(Effect.ignore),
+      )
+
+      yield* session.setAutoTitle({ sessionID: created.id, title: "Refactor user service", messageCount: 10 })
+      const saved = yield* session.get(created.id)
+
+      expect(saved.title).toBe("Refactor user service")
+      expect(saved.metadata).toMatchObject({ source: "sdk", title_auto: true, title_count: 10 })
+    }),
+  )
+
+  it.instance("setTitle clears the auto-title marker when renamed manually", () =>
+    Effect.gen(function* () {
+      const session = yield* SessionNs.Service
+      const created = yield* Effect.acquireRelease(
+        session.create({ title: "New session - 2024-01-01T00:00:00.000Z", metadata: { title_auto: true } }),
+        (info) => session.remove(info.id).pipe(Effect.ignore),
+      )
+
+      yield* session.setAutoTitle({ sessionID: created.id, title: "Auto title", messageCount: 1 })
+      yield* session.setTitle({ sessionID: created.id, title: "Manual title" })
+      const saved = yield* session.get(created.id)
+
+      expect(saved.title).toBe("Manual title")
+      expect(saved.metadata?.title_auto).toBe(false)
+    }),
+  )
 })

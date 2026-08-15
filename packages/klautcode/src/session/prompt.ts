@@ -70,6 +70,8 @@ const SUPPORTED_MCP_RESOURCE_ATTACHMENT_MIMES = new Set([
   "image/png",
   "image/webp",
 ])
+const TITLE_REFRESH_EVERY = 10
+const TITLE_REFRESH_CONTEXT = 8
 
 const STRUCTURED_OUTPUT_DESCRIPTION = `Use this tool to return your final response in the requested structured format.
 
@@ -99,6 +101,9 @@ function isOrphanedInterruptedTool(part: SessionV1.ToolPart) {
   return part.state.status === "error" && part.state.metadata?.interrupted === true
 }
 
+const isRealUser = (m: SessionV1.WithParts) =>
+  m.info.role === "user" && !m.parts.every((p) => "synthetic" in p && p.synthetic)
+
 export interface Interface {
   readonly cancel: (sessionID: SessionID) => Effect.Effect<void>
   readonly prompt: (input: PromptInput) => Effect.Effect<SessionV1.WithParts, Image.Error>
@@ -106,6 +111,7 @@ export interface Interface {
   readonly shell: (input: ShellInput) => Effect.Effect<SessionV1.WithParts, Session.BusyError>
   readonly command: (input: CommandInput) => Effect.Effect<SessionV1.WithParts, Image.Error>
   readonly resolvePromptParts: (template: string) => Effect.Effect<PromptInput["parts"]>
+  readonly regenerateTitle: (sessionID: SessionID) => Effect.Effect<void>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@klautcode/SessionPrompt") {}
@@ -190,28 +196,23 @@ const layer = Layer.effect(
       return parts
     })
 
-    const title = Effect.fn("SessionPrompt.ensureTitle")(function* (input: {
+    const streamTitle = Effect.fn("SessionPrompt.streamTitle")(function* (input: {
       session: Session.Info
       history: SessionV1.WithParts[]
       providerID: ProviderV2.ID
       modelID: ModelV2.ID
     }) {
-      if (input.session.parentID) return
-      if (!Session.isDefaultTitle(input.session.title)) return
-
-      const real = (m: SessionV1.WithParts) =>
-        m.info.role === "user" && !m.parts.every((p) => "synthetic" in p && p.synthetic)
-      const idx = input.history.findIndex(real)
-      if (idx === -1) return
-      if (input.history.filter(real).length !== 1) return
-
-      const context = input.history.slice(0, idx + 1)
-      const firstUser = context[idx]
+      const users = input.history.filter(isRealUser)
+      if (users.length === 0) return
+      const idx = input.history.findIndex(isRealUser)
+      const firstUser = input.history[idx]
       if (!firstUser || firstUser.info.role !== "user") return
       const firstInfo = firstUser.info
+      const initial = users.length === 1
+      const context = initial ? input.history.slice(0, idx + 1) : input.history.slice(-TITLE_REFRESH_CONTEXT)
 
       const subtasks = firstUser.parts.filter((p): p is SessionV1.SubtaskPart => p.type === "subtask")
-      const onlySubtasks = subtasks.length > 0 && firstUser.parts.every((p) => p.type === "subtask")
+      const onlySubtasks = initial && subtasks.length > 0 && firstUser.parts.every((p) => p.type === "subtask")
 
       const ag = yield* agents.get("title")
       if (!ag) return
@@ -246,9 +247,57 @@ const layer = Layer.effect(
         .map((line) => line.trim())
         .find((line) => line.length > 0)
       if (!cleaned) return
-      const t = cleaned.length > 100 ? cleaned.substring(0, 97) + "..." : cleaned
+      return cleaned.length > 100 ? cleaned.substring(0, 97) + "..." : cleaned
+    })
+
+    const title = Effect.fn("SessionPrompt.ensureTitle")(function* (input: {
+      session: Session.Info
+      history: SessionV1.WithParts[]
+      providerID: ProviderV2.ID
+      modelID: ModelV2.ID
+    }) {
+      if (input.session.parentID) return
+
+      const users = input.history.filter(isRealUser)
+      if (users.length === 0) return
+
+      // Default titles get named once the first user message lands; auto-titles
+      // are refreshed every TITLE_REFRESH_EVERY user turns so the name tracks
+      // the conversation. Manual titles (title_auto === false) are never touched.
+      const initial = Session.isDefaultTitle(input.session.title)
+      const autoTitle = input.session.metadata?.title_auto === true
+      const lastRefresh =
+        typeof input.session.metadata?.title_count === "number" ? input.session.metadata.title_count : 0
+      const refreshDue = users.length % TITLE_REFRESH_EVERY === 0 && users.length !== lastRefresh
+      const shouldGenerate = initial ? users.length === 1 || refreshDue : autoTitle && refreshDue
+      if (!shouldGenerate) return
+
+      const t = yield* streamTitle(input)
+      if (!t) return
       yield* sessions
-        .setTitle({ sessionID: input.session.id, title: t })
+        .setAutoTitle({ sessionID: input.session.id, title: t, messageCount: users.length })
+        .pipe(Effect.catchCause((cause) => Effect.logError("failed to generate title", { error: Cause.squash(cause) })))
+    })
+
+    const regenerateTitle = Effect.fn("SessionPrompt.regenerateTitle")(function* (sessionID: SessionID) {
+      const session = yield* sessions.get(sessionID).pipe(Effect.orDie)
+      if (session.parentID) return
+      const msgs = yield* MessageV2.filterCompactedEffect(sessionID).pipe(
+        Effect.provideService(Database.Service, database),
+      )
+      const users = msgs.filter(isRealUser)
+      if (users.length === 0) return
+      const lastUser = users.at(-1)
+      if (!lastUser || lastUser.info.role !== "user") return
+      const t = yield* streamTitle({
+        session,
+        history: msgs,
+        providerID: lastUser.info.model.providerID,
+        modelID: lastUser.info.model.modelID,
+      }).pipe(Effect.catchTag("ProviderModelNotFoundError", () => Effect.succeed(undefined)))
+      if (!t) return
+      yield* sessions
+        .setAutoTitle({ sessionID, title: t, messageCount: users.length })
         .pipe(Effect.catchCause((cause) => Effect.logError("failed to generate title", { error: Cause.squash(cause) })))
     })
 
@@ -1487,6 +1536,7 @@ const layer = Layer.effect(
       shell,
       command,
       resolvePromptParts,
+      regenerateTitle,
     })
   }),
 )

@@ -1,0 +1,33 @@
+/* Collapse the composer toolbar controls when the chat panel is narrow (e.g.
+   both sidebars open): keep the provider/agent icons and chevrons, drop the
+   text labels. The chat panel wrapper is an inline-size container (@container). */
+
+@container (max-width: 640px) {
+  [data-prompt-control] {
+    max-width: 36px;
+    justify-content: center;
+    gap: 0;
+    padding-inline: 8px;
+  }
+
+  [data-prompt-control-label] {
+    display: none;
+  }
+
+  [data-prompt-control-label] + span {
+    margin-inline: 0;
+  }
+}
+
+@container (max-width: 460px) {
+  [data-prompt-control] {
+    max-width: 30px;
+    padding-inline: 6px;
+  }
+
+  [data-prompt-control] [data-slot="icon-svg"],
+  [data-prompt-control] [data-component="provider-icon"] {
+    width: 14px;
+    height: 14px;
+  }
+}

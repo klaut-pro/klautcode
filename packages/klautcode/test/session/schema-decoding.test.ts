@@ -238,7 +238,7 @@ describe("SessionStatus.Info", () => {
         reason: "free_tier_limit",
         provider: "klautcode",
         title: "Free limit reached",
-        message: "Subscribe to Klautcode Go.",
+        message: "Subscribe to OpenCode Go.",
         label: "subscribe",
         link: "https://code.klaut.pro/go",
       },

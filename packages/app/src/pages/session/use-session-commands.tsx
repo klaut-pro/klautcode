@@ -577,6 +577,12 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
         ]
       : []),
     viewCommand({
+      id: "projectSidebar.toggle",
+      title: language.t("command.projectSidebar.toggle"),
+      keybind: "mod+shift+e",
+      onSelect: () => layout.projectSidebar.toggle(),
+    }),
+    viewCommand({
       id: "input.focus",
       title: language.t("command.input.focus"),
       keybind: "ctrl+l",

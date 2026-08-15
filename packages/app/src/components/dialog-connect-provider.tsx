@@ -166,7 +166,9 @@ function ProviderPicker(props: {
     if (id === "anthropic") return language.t("dialog.provider.anthropic.note")
     if (id === "openai") return language.t("dialog.provider.openai.note")
     if (id.startsWith("github-copilot")) return language.t("dialog.provider.copilot.note")
-    if (id === "klautcode-go") return language.t("dialog.provider.klautcodeGo.tagline")
+    if (id === "opencode-go") return language.t("dialog.provider.opencodeGo.tagline")
+    if (id === "opencode") return language.t("dialog.provider.opencodeGo.tagline")
+    if (id === "hetzner") return language.t("dialog.provider.hetzner.note")
     return undefined
   }
 
@@ -215,7 +217,7 @@ function ProviderPicker(props: {
             <Tag>{language.t("dialog.provider.tag.recommended")}</Tag>
           </Show>
           <Show when={note(i.id)}>{(value) => <div class="text-14-regular text-text-weak">{value()}</div>}</Show>
-          <Show when={i.id === "klautcode-go"}>
+          <Show when={i.id === "opencode-go" || i.id === "opencode"}>
             <Tag>{language.t("dialog.provider.tag.recommended")}</Tag>
           </Show>
         </div>
@@ -236,7 +238,7 @@ function ProviderPickerV2(props: {
     active: undefined as string | undefined,
     connecting: undefined as string | undefined,
   })
-  const featured = ["klautcode", "klautcode-go", "anthropic", "openai", "google", "openrouter", "vercel"]
+  const featured = ["klautcode", "opencode-go", "opencode", "hetzner", "anthropic", "openai", "google", "openrouter", "vercel"]
   const custom = () => ({ id: CUSTOM_ID, name: language.t("dialog.provider.custom.label") })
   const all = createMemo(() => {
     language.locale()
@@ -333,12 +335,12 @@ function ProviderPickerV2(props: {
                       >
                         <ProviderIcon id={provider.id} class="size-4 shrink-0 text-v2-icon-icon-base" />
                         <span class="min-w-0 truncate font-[530] text-v2-text-text-base">{provider.name}</span>
-                        <Show when={provider.id === "klautcode" || provider.id === "klautcode-go"}>
+                        <Show when={provider.id === "klautcode" || provider.id === "opencode-go" || provider.id === "opencode"}>
                           <span class="min-w-0 truncate font-[440] text-v2-text-text-muted">
                             {language.t(
                               provider.id === "klautcode"
                                 ? "dialog.provider.klautcode.tagline"
-                                : "dialog.provider.klautcodeGo.tagline",
+                                : "dialog.provider.opencodeGo.tagline",
                             )}
                           </span>
                           <span class="flex h-4 shrink-0 items-center rounded-xs border-[0.5px] border-v2-border-border-base bg-v2-background-bg-layer-03 px-1 text-[11px] font-[530] leading-none tracking-[0.05px] text-v2-text-text-muted">

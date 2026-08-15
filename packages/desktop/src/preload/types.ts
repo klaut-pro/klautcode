@@ -42,6 +42,27 @@ export type FatalRendererError = {
   os?: string
 }
 
+export type OpencodeImportProject = {
+  id: string
+  name: string | null
+  worktree: string
+  sessionCount: number
+}
+
+export type OpencodeImportScan = {
+  directory: string
+  dbPath: string
+  projects: OpencodeImportProject[]
+}
+
+export type OpencodeImportResult = {
+  projects: number
+  sessions: number
+  messages: number
+  parts: number
+  todos: number
+}
+
 export type ElectronAPI = {
   killSidecar: () => Promise<void>
   installCli: () => Promise<string>
@@ -113,4 +134,6 @@ export type ElectronAPI = {
   setForceFocus: (enabled: boolean) => Promise<void>
   recordFatalRendererError: (error: FatalRendererError) => Promise<void>
   setNativeTranslations: (bundle: DesktopNativeBundle) => Promise<void>
+  opencodeScan: (directory?: string) => Promise<OpencodeImportScan>
+  opencodeImport: (directory: string, projectIds: string[]) => Promise<OpencodeImportResult>
 }

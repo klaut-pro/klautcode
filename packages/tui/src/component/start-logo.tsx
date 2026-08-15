@@ -7,7 +7,6 @@ export function StartLogo() {
   return (
     <box flexDirection="column" alignItems="center">
       <ThinkingOrbs />
-      <box height={1} />
       <DottedWordmark />
     </box>
   )

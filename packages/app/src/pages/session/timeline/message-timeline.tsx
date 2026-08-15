@@ -692,6 +692,30 @@ export function MessageTimeline(props: {
     },
   }))
 
+  const regenerateTitleMutation = useMutation(() => ({
+    mutationFn: (id: string) =>
+      sdk().client.session.regenerateTitle({ sessionID: id, directory: sdk().directory }),
+    onSuccess: () => {
+      showToast({
+        variant: "success",
+        icon: "circle-check",
+        title: language.t("session.title.regenerated"),
+      })
+    },
+    onError: (err) => {
+      showToast({
+        title: language.t("common.requestFailed"),
+        description: errorMessage(err),
+      })
+    },
+  }))
+
+  const regenerateSessionTitle = () => {
+    const id = sessionID()
+    if (!id || regenerateTitleMutation.isPending) return
+    regenerateTitleMutation.mutate(id)
+  }
+
   const shareSession = () => {
     const id = sessionID()
     if (!id || shareMutation.isPending) return
@@ -1579,6 +1603,16 @@ export function MessageTimeline(props: {
                                 >
                                   <DropdownMenu.ItemLabel>{language.t("common.rename")}</DropdownMenu.ItemLabel>
                                 </DropdownMenu.Item>
+                                <DropdownMenu.Item
+                                  onSelect={() => {
+                                    setTitle("menuOpen", false)
+                                    regenerateSessionTitle()
+                                  }}
+                                >
+                                  <DropdownMenu.ItemLabel>
+                                    {language.t("session.title.regenerate")}
+                                  </DropdownMenu.ItemLabel>
+                                </DropdownMenu.Item>
                                 <Show when={shareEnabled()}>
                                   <DropdownMenu.Item
                                     onSelect={() => {
@@ -1654,6 +1688,14 @@ export function MessageTimeline(props: {
                                 }}
                               >
                                 {language.t("common.rename")}
+                              </MenuV2.Item>
+                              <MenuV2.Item
+                                onSelect={() => {
+                                  setTitle("menuOpen", false)
+                                  regenerateSessionTitle()
+                                }}
+                              >
+                                {language.t("session.title.regenerate")}
                               </MenuV2.Item>
                               <Show when={shareEnabled()}>
                                 <MenuV2.Item

@@ -45,7 +45,7 @@ function providerIconsPlugin() {
 }
 
 async function fetchProviderIcons() {
-  const url = process.env.KLAUTCODE_MODELS_URL || "https://models.code.klaut.pro"
+  const url = process.env.KLAUTCODE_MODELS_URL || "https://models.dev"
   const providers = await fetch(`${url}/api.json`)
     .then((res) => res.json())
     .then((json) => Object.keys(json))

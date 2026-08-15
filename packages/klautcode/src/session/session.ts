@@ -428,6 +428,11 @@ export interface Interface {
   readonly touch: (sessionID: SessionID) => Effect.Effect<void>
   readonly get: (id: SessionID) => Effect.Effect<Info, NotFound>
   readonly setTitle: (input: { sessionID: SessionID; title: string }) => Effect.Effect<void>
+  readonly setAutoTitle: (input: {
+    sessionID: SessionID
+    title: string
+    messageCount: number
+  }) => Effect.Effect<void>
   readonly setArchived: (input: { sessionID: SessionID; time?: number }) => Effect.Effect<void>
   readonly setMetadata: (input: typeof SetMetadataInput.Type) => Effect.Effect<void>
   readonly setAgentModel: (input: {
@@ -753,7 +758,23 @@ const layer: Layer.Layer<
     })
 
     const setTitle = Effect.fn("Session.setTitle")(function* (input: { sessionID: SessionID; title: string }) {
-      yield* patch(input.sessionID, { title: input.title }).pipe(Effect.orDie)
+      const current = yield* get(input.sessionID).pipe(Effect.orDie)
+      yield* patch(input.sessionID, {
+        title: input.title,
+        metadata: { ...current.metadata, title_auto: false },
+      }).pipe(Effect.orDie)
+    })
+
+    const setAutoTitle = Effect.fn("Session.setAutoTitle")(function* (input: {
+      sessionID: SessionID
+      title: string
+      messageCount: number
+    }) {
+      const current = yield* get(input.sessionID).pipe(Effect.orDie)
+      yield* patch(input.sessionID, {
+        title: input.title,
+        metadata: { ...current.metadata, title_auto: true, title_count: input.messageCount },
+      }).pipe(Effect.orDie)
     })
 
     const setArchived = Effect.fn("Session.setArchived")(function* (input: { sessionID: SessionID; time?: number }) {
@@ -913,6 +934,7 @@ const layer: Layer.Layer<
       touch,
       get,
       setTitle,
+      setAutoTitle,
       setArchived,
       setMetadata,
       setAgentModel,
