@@ -51,6 +51,7 @@ jobs:
         run: ./script/version.ts
         env:
           GH_TOKEN: ${{ github.token }}
+          KLAUTCODE_CHANNEL: ${{ (github.ref_name == 'beta' && 'beta') || 'latest' }}
           KLAUTCODE_BUMP: ${{ inputs.bump }}
           KLAUTCODE_VERSION: ${{ inputs.version }}
           KLAUTCODE_API_KEY: ${{ secrets.KLAUTCODE_API_KEY }}
