@@ -1,6 +1,6 @@
 import { describe, expect } from "bun:test"
 import { Effect } from "effect"
-import { sql } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import { Database } from "@klautcode/core/database/database"
 import { AppNodeBuilder } from "@klautcode/core/effect/app-node-builder"
 import { LayerNode } from "@klautcode/core/effect/layer-node"
@@ -145,11 +145,11 @@ describe("knowledge schema", () => {
         })
         .run()
         .pipe(Effect.orDie)
-      yield* db.delete(SessionTable).where(sql`${SessionTable.id} = ${sessionID}`).run().pipe(Effect.orDie)
+      yield* db.delete(SessionTable).where(eq(SessionTable.id, sessionID)).run().pipe(Effect.orDie)
       const remaining = yield* db
         .select()
         .from(KnowledgeNodeTable)
-        .where(sql`${KnowledgeNodeTable.id} = ${nodeID}`)
+        .where(eq(KnowledgeNodeTable.id, nodeID))
         .all()
         .pipe(Effect.orDie)
       expect(remaining).toHaveLength(0)
@@ -174,7 +174,7 @@ describe("knowledge fts", () => {
 
       const hits = yield* KnowledgeFts.search(db, "memory")
       expect(hits).toHaveLength(1)
-      expect(hits[0]!.rowid).toBe(rowid)
+      expect(hits[0]!.rowid).toBe(rowid!)
 
       const misses = yield* KnowledgeFts.search(db, "unrelated")
       expect(misses).toHaveLength(0)
