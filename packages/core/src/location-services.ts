@@ -12,9 +12,12 @@ import { FileSystemSearch } from "./filesystem/search"
 import { Watcher } from "./filesystem/watcher"
 import { Image } from "./image"
 import { Integration } from "./integration"
+import { KnowledgeGuidance } from "./knowledge/guidance"
+import { KnowledgeService } from "./knowledge/service"
 import { Location } from "./location"
 import { LocationMutation } from "./location-mutation"
 import { LocationServiceMap } from "./location-service-map"
+import { MemoryTool } from "./tool/memory"
 import { PermissionV2 } from "./permission"
 import { PluginV2 } from "./plugin"
 import { PluginInternal } from "./plugin/internal"
@@ -69,6 +72,9 @@ export const locationServices = LayerNode.group([
   Image.node,
   SkillGuidance.node,
   ReferenceGuidance.node,
+  KnowledgeService.node,
+  KnowledgeGuidance.node,
+  MemoryTool.node,
   SessionTodo.node,
   QuestionV2.node,
   ReadToolFileSystem.node,

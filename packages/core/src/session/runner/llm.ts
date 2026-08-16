@@ -22,6 +22,7 @@ import { SystemContext } from "../../system-context/index"
 import { SystemContextRegistry } from "../../system-context/registry"
 import { SkillGuidance } from "../../skill/guidance"
 import { ReferenceGuidance } from "../../reference/guidance"
+import { KnowledgeGuidance } from "../../knowledge/guidance"
 import { ToolRegistry } from "../../tool/registry"
 import { ToolOutputStore } from "../../tool-output-store"
 import { SessionContextEpoch } from "../context-epoch"
@@ -103,6 +104,7 @@ const layer = Layer.effect(
     const systemContext = yield* SystemContextRegistry.Service
     const skillGuidance = yield* SkillGuidance.Service
     const referenceGuidance = yield* ReferenceGuidance.Service
+    const knowledgeGuidance = yield* KnowledgeGuidance.Service
     const config = yield* Config.Service
     const snapshots = yield* Snapshot.Service
     const db = (yield* Database.Service).db
@@ -166,9 +168,15 @@ const layer = Layer.effect(
       new TurnTransitionError({ _tag: "ContinueAfterOverflowCompaction", step })
 
     const loadSystemContext = (agent: AgentV2.Selection) =>
-      Effect.all([systemContext.load(), skillGuidance.load(agent), referenceGuidance.load()], {
-        concurrency: "unbounded",
-      }).pipe(Effect.map(SystemContext.combine))
+      Effect.all(
+        [
+          systemContext.load(),
+          skillGuidance.load(agent),
+          referenceGuidance.load(),
+          knowledgeGuidance.load(location.project.id),
+        ],
+        { concurrency: "unbounded" },
+      ).pipe(Effect.map(SystemContext.combine))
 
     const runTurnAttempt = Effect.fn("SessionRunner.runTurn")(function* (
       sessionID: SessionSchema.ID,
@@ -425,6 +433,7 @@ export const node = makeLocationNode({
     SystemContextRegistry.node,
     SkillGuidance.node,
     ReferenceGuidance.node,
+    KnowledgeGuidance.node,
     Config.node,
     Snapshot.node,
     Database.node,

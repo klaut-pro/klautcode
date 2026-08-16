@@ -7,6 +7,7 @@ import { SessionID, MessageID, PartID } from "./schema"
 import { MessageV2 } from "./message-v2"
 import { SessionRevert } from "./revert"
 import { Session } from "./session"
+import { Todo } from "./todo"
 import { Agent } from "../agent/agent"
 import { Provider } from "@/provider/provider"
 
@@ -49,6 +50,7 @@ import { SessionRunState } from "./run-state"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { Database } from "@klautcode/core/database/database"
+import { KnowledgeService } from "@klautcode/core/knowledge/service"
 import { ModelV2 } from "@klautcode/core/model"
 import { ProviderV2 } from "@klautcode/core/provider"
 import { eq } from "drizzle-orm"
@@ -72,6 +74,39 @@ const SUPPORTED_MCP_RESOURCE_ATTACHMENT_MIMES = new Set([
 ])
 const TITLE_REFRESH_EVERY = 10
 const TITLE_REFRESH_CONTEXT = 8
+const TODO_RECONCILE_CONTEXT = 12
+const TODO_RECONCILE_MIN_MS = 30_000
+const VALID_TODO_STATUS = new Set(["pending", "in_progress", "completed", "cancelled"])
+
+function validTodoStatus(value: string): Todo.Info["status"] | undefined {
+  return VALID_TODO_STATUS.has(value) ? (value as Todo.Info["status"]) : undefined
+}
+
+// Extracts a JSON array from the model's reconcile output, tolerating markdown
+// fences or stray prose around it.
+function parseTodoReconcile(text: string): Array<Pick<Todo.Info, "content" | "status" | "priority">> {
+  const match = text.match(/\[\s*\{[\s\S]*\}\s*\]/)
+  if (!match) return []
+  try {
+    const value: unknown = JSON.parse(match[0])
+    if (!Array.isArray(value)) return []
+    return value.flatMap((item) => {
+      if (!item || typeof item !== "object") return []
+      const record = item as Record<string, unknown>
+      if (typeof record.content !== "string") return []
+      const status = validTodoStatus(typeof record.status === "string" ? record.status : "pending")
+      return [
+        {
+          content: record.content,
+          status: status ?? "pending",
+          priority: typeof record.priority === "string" ? record.priority : "medium",
+        },
+      ]
+    })
+  } catch {
+    return []
+  }
+}
 
 const STRUCTURED_OUTPUT_DESCRIPTION = `Use this tool to return your final response in the requested structured format.
 
@@ -141,12 +176,14 @@ const layer = Layer.effect(
     const state = yield* SessionRunState.Service
     const revert = yield* SessionRevert.Service
     const summary = yield* SessionSummary.Service
+    const todo = yield* Todo.Service
     const sys = yield* SystemPrompt.Service
     const llm = yield* LLM.Service
     const events = yield* EventV2Bridge.Service
     const flags = yield* RuntimeFlags.Service
     const database = yield* Database.Service
     const { db } = database
+    const knowledge = yield* KnowledgeService.Service
     const ops = Effect.fn("SessionPrompt.ops")(function* () {
       return {
         cancel: (sessionID: SessionID) => cancel(sessionID),
@@ -299,6 +336,67 @@ const layer = Layer.effect(
       yield* sessions
         .setAutoTitle({ sessionID, title: t, messageCount: users.length })
         .pipe(Effect.catchCause((cause) => Effect.logError("failed to generate title", { error: Cause.squash(cause) })))
+    })
+
+    const lastTodoReconcile = new Map<SessionID, number>()
+
+    const reconcileTodos = Effect.fn("SessionPrompt.reconcileTodos")(function* (input: { sessionID: SessionID }) {
+      const { sessionID } = input
+      const now = Date.now()
+      const previous = lastTodoReconcile.get(sessionID) ?? 0
+      if (now - previous < TODO_RECONCILE_MIN_MS) return
+      const todos = yield* todo.get(sessionID).pipe(Effect.orDie)
+      if (todos.length === 0) return
+      if (todos.every((t) => t.status === "completed" || t.status === "cancelled")) return
+
+      const msgs = yield* sessions.messages({ sessionID }).pipe(Effect.orDie)
+      const lastUser = msgs.filter(isRealUser).at(-1)
+      if (!lastUser || lastUser.info.role !== "user") return
+      const ag = yield* agents.get("todocheck")
+      if (!ag) return
+      const mdl = ag.model
+        ? yield* provider.getModel(ag.model.providerID, ag.model.modelID)
+        : ((yield* provider.getSmallModel(lastUser.info.model.providerID)) ??
+          (yield* provider.getModel(lastUser.info.model.providerID, lastUser.info.model.modelID)))
+
+      const recent = msgs.slice(-TODO_RECONCILE_CONTEXT)
+      const modelMessages = yield* MessageV2.toModelMessagesEffect(recent, mdl)
+      const promptText = [
+        "Current todo list (JSON):",
+        JSON.stringify(todos, null, 2),
+        "",
+        "Return the updated todo list as a JSON array with corrected statuses.",
+      ].join("\n")
+
+      const text = yield* llm
+        .stream({
+          agent: ag,
+          user: lastUser.info,
+          system: [],
+          small: true,
+          tools: {},
+          model: mdl,
+          sessionID,
+          retries: 1,
+          messages: [...modelMessages, { role: "user", content: promptText }],
+        })
+        .pipe(
+          Stream.filter(LLMEvent.is.textDelta),
+          Stream.map((e) => e.text),
+          Stream.mkString,
+          Effect.orDie,
+        )
+
+      const parsed = parseTodoReconcile(text)
+      if (parsed.length === 0) return
+      lastTodoReconcile.set(sessionID, now)
+      const merged = todos.map((t) => {
+        const match = parsed.find((p) => p.content === t.content)
+        if (!match) return t
+        const status = validTodoStatus(match.status)
+        return status && status !== t.status ? { ...t, status } : t
+      })
+      yield* todo.update({ sessionID, todos: merged })
     })
 
     const handleSubtask = Effect.fn("SessionPrompt.handleSubtask")(function* (input: {
@@ -1127,6 +1225,38 @@ const layer = Layer.effect(
       throw new Error("Impossible")
     })
 
+    const ingestSessionMemory = Effect.fn("SessionPrompt.ingestSessionMemory")(function* (sessionID: SessionID) {
+      const session = yield* sessions.get(sessionID).pipe(Effect.orDie)
+      const ctx = yield* InstanceState.context
+      const history = yield* sessions.messages({ sessionID }).pipe(Effect.orDie)
+      const messages: KnowledgeService.IngestProjectionInput["messages"] = history.flatMap((m, seq) => {
+        const text = m.parts
+          .flatMap((part) => (part.type === "text" ? [part.text ?? ""] : []))
+          .join("\n")
+          .trim()
+        const files = m.parts.flatMap((part) => (part.type === "file" && part.filename ? [part.filename] : []))
+        if (!text && files.length === 0) return []
+        return [
+          {
+            id: m.info.id,
+            seq,
+            type: m.info.role === "assistant" ? "assistant" : "user",
+            text: text.slice(0, 4000),
+            files,
+          } satisfies KnowledgeService.IngestMessage,
+        ]
+      })
+      yield* knowledge.ingestProjection({
+        id: sessionID,
+        title: session.title,
+        projectID: session.projectID,
+        agent: session.agent,
+        directory: ctx.directory,
+        parentID: session.parentID,
+        messages,
+      })
+    })
+
     const runLoop: (sessionID: SessionID) => Effect.Effect<SessionV1.WithParts> = Effect.fn("SessionPrompt.run")(
       function* (sessionID: SessionID) {
         const ctx = yield* InstanceState.context
@@ -1175,6 +1305,7 @@ const layer = Layer.effect(
               })
             }
             yield* Effect.logInfo("exiting loop", { "session.id": sessionID })
+            yield* reconcileTodos({ sessionID }).pipe(Effect.ignore, Effect.forkIn(scope))
             break
           }
 
@@ -1303,9 +1434,10 @@ const layer = Layer.effect(
 
             yield* plugin.trigger("experimental.chat.messages.transform", {}, { messages: msgs })
 
-            const [skills, env, instructions, mcpInstructions, modelMsgs] = yield* Effect.all([
+            const [skills, env, memory, instructions, mcpInstructions, modelMsgs] = yield* Effect.all([
               sys.skills(agent),
               sys.environment(model),
+              sys.memory(),
               instruction.system().pipe(Effect.orDie),
               sys.mcp(agent, session.permission),
               MessageV2.toModelMessagesEffect(msgs, model),
@@ -1313,6 +1445,7 @@ const layer = Layer.effect(
             const system = [
               ...env,
               ...instructions,
+              ...(memory ? [memory] : []),
               ...(mcpInstructions ? [mcpInstructions] : []),
               ...(skills ? [skills] : []),
             ]
@@ -1385,6 +1518,7 @@ const layer = Layer.effect(
         }
 
         yield* compaction.prune({ sessionID }).pipe(Effect.ignore, Effect.forkIn(scope))
+        yield* ingestSessionMemory(sessionID).pipe(Effect.ignore, Effect.forkIn(scope))
         return yield* lastAssistant(sessionID)
       },
     )
@@ -1670,11 +1804,13 @@ export const node = LayerNode.make({
     SessionRunState.node,
     SessionRevert.node,
     SessionSummary.node,
+    Todo.node,
     SystemPrompt.node,
     LLM.node,
     EventV2Bridge.node,
     RuntimeFlags.node,
     Database.node,
+    KnowledgeService.node,
   ],
 })
 

@@ -23,6 +23,8 @@ import { LocationServiceMap, locationServiceMapLayer } from "@klautcode/core/loc
 import { Reference } from "@klautcode/core/reference"
 import { MCP } from "@/mcp"
 import { PermissionV1 } from "@klautcode/core/v1/permission"
+import { KnowledgeService } from "@klautcode/core/knowledge/service"
+import { ProjectV2 } from "@klautcode/core/project"
 
 export function provider(model: Provider.Model) {
   if (model.api.id.includes("muse-spark")) return [PROMPT_META]
@@ -45,6 +47,7 @@ export interface Interface {
   readonly environment: (model: Provider.Model) => Effect.Effect<string[]>
   readonly skills: (agent: Agent.Info) => Effect.Effect<string | undefined>
   readonly mcp: (agent: Agent.Info, permission?: PermissionV1.Ruleset) => Effect.Effect<string | undefined>
+  readonly memory: () => Effect.Effect<string | undefined>
 }
 
 export class Service extends Context.Service<Service, Interface>()("@klautcode/SystemPrompt") {}
@@ -54,6 +57,7 @@ const layer = Layer.effect(
   Effect.gen(function* () {
     const skill = yield* Skill.Service
     const mcp = yield* MCP.Service
+    const knowledge = yield* KnowledgeService.Service
     const locations = yield* LocationServiceMap.Service
 
     return Service.of({
@@ -93,6 +97,27 @@ const layer = Layer.effect(
                 "</available_references>",
               ].join("\n"),
         ].filter((part): part is string => part !== undefined)
+      }),
+
+      memory: Effect.fn("SystemPrompt.memory")(function* () {
+        const ctx = yield* InstanceState.context
+        const projectID = ProjectV2.ID.make(ctx.project.id)
+        const nodes = yield* knowledge.recent({ scope: "project", projectID, limit: 8 }).pipe(Effect.orDie)
+        if (nodes.length === 0) return undefined
+        const entries = nodes.map((node) => {
+          const body = node.body && node.body.length > 600 ? `${node.body.slice(0, 599)}…` : node.body
+          const lines = [`  <entry>`, `    <title>${node.title}</title>`]
+          if (body) lines.push(`    <body>${body}</body>`)
+          lines.push("  </entry>")
+          return lines.join("\n")
+        })
+        return [
+          "Project memory (shared across sessions and agents in this project):",
+          "<project_memory>",
+          ...entries,
+          "</project_memory>",
+          "Recall these memories before re-discovering things already learned in this project. Add or update memories with the memory_store tool when you learn something durable.",
+        ].join("\n")
       }),
 
       skills: Effect.fn("SystemPrompt.skills")(function* (agent: Agent.Info) {
@@ -139,7 +164,7 @@ const locationServiceMapNode = LayerNode.make({
 export const node = LayerNode.make({
   service: Service,
   layer: layer,
-  deps: [Skill.node, MCP.node, locationServiceMapNode],
+  deps: [Skill.node, MCP.node, KnowledgeService.node, locationServiceMapNode],
 })
 
 export * as SystemPrompt from "./system"

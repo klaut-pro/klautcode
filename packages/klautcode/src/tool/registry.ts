@@ -16,6 +16,7 @@ import { WebFetchTool } from "./webfetch"
 import { WriteTool } from "./write"
 import { InvalidTool } from "./invalid"
 import { SkillTool } from "./skill"
+import { MemoryStoreTool, MemoryRecallTool } from "./memory"
 import * as Tool from "./tool"
 import { Config } from "@/config/config"
 import { type ToolContext as PluginToolContext, type ToolDefinition } from "@klautcode/plugin"
@@ -51,6 +52,7 @@ import { BackgroundJob } from "@/background/job"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { ProviderV2 } from "@klautcode/core/provider"
 import { ModelV2 } from "@klautcode/core/model"
+import { KnowledgeService } from "@klautcode/core/knowledge/service"
 import { MCP } from "@/mcp"
 import { PermissionV1 } from "@klautcode/core/v1/permission"
 import { McpCatalog } from "@/mcp/catalog"
@@ -109,6 +111,8 @@ const layer = Layer.effect(
     const greptool = yield* GrepTool
     const patchtool = yield* ApplyPatchTool
     const skilltool = yield* SkillTool
+    const memoryStore = yield* MemoryStoreTool
+    const memoryRecall = yield* MemoryRecallTool
     const agent = yield* Agent.Service
     const codeMode = flags.experimentalCodeMode ? yield* Effect.promise(() => import("./code-mode")) : undefined
     const codeModeTool = codeMode ? yield* codeMode.CodeModeTool : undefined
@@ -218,6 +222,8 @@ const layer = Layer.effect(
           question: Tool.init(question),
           lsp: Tool.init(lsptool),
           plan: Tool.init(plan),
+          memory_store: Tool.init(memoryStore),
+          memory_recall: Tool.init(memoryRecall),
           ...(codeModeTool ? { execute: Tool.init(codeModeTool) } : {}),
         })
 
@@ -238,6 +244,8 @@ const layer = Layer.effect(
             tool.search,
             tool.skill,
             tool.patch,
+            tool.memory_store,
+            tool.memory_recall,
             ...(tool.execute ? [tool.execute] : []),
             ...(flags.experimentalLspTool ? [tool.lsp] : []),
             ...(flags.experimentalPlanMode && flags.client === "cli" ? [tool.plan] : []),
@@ -443,6 +451,7 @@ export const node = LayerNode.make({
     RuntimeFlags.node,
     MCP.node,
     Database.node,
+    KnowledgeService.node,
     Ripgrep.node,
   ],
 })
