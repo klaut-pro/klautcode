@@ -1422,6 +1422,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
 
   const agentsLoading = () => props.controls.agents.loading
   const agentsShouldFadeIn = createMemo<boolean>((prev) => prev ?? agentsLoading())
+  const modeLabel = (name: string) => (name === "general" ? language.t("agent.mode.multitask") : name)
   const providersLoading = () => props.controls.model.loading
   const providersShouldFadeIn = createMemo<boolean>((prev) => prev ?? providersLoading())
 
@@ -1664,6 +1665,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
                         size="normal"
                         options={props.controls.agents.options}
                         current={props.controls.agents.current}
+                        label={modeLabel}
                         onSelect={(value) => {
                           props.controls.agents.select(value)
                           restoreFocus()
