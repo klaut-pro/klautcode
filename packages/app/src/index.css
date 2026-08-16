@@ -172,6 +172,25 @@
     }
   }
 
+  @keyframes chats-working-dot {
+    0%,
+    60%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(0);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot="chats-working-dot"] {
+      animation: none;
+    }
+  }
+
   @keyframes home-projects-fade-top {
     from {
       visibility: hidden;

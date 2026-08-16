@@ -22,6 +22,25 @@ const PROJECT_SIDEBAR_MIN = 200
 const PROJECT_SIDEBAR_MAX = 480
 const PROJECT_CHATS_PREVIEW = 3
 
+/** Three staggered pulsing dots shown next to a chat while its agent is working. */
+function WorkingDots() {
+  return (
+    <span class="flex shrink-0 items-center gap-0.5" aria-hidden="true">
+      {[0, 1, 2].map((index) => (
+        <span
+          data-slot="chats-working-dot"
+          class="size-1 rounded-full"
+          style={{
+            "background-color": "var(--v2-icon-icon-accent)",
+            animation: "chats-working-dot 1.2s ease-in-out infinite",
+            "animation-delay": `${index * 0.2}s`,
+          }}
+        />
+      ))}
+    </span>
+  )
+}
+
 // Cursor-style persistent left project sidebar. Renders the project chats: one
 // collapsible section per project listing that project's sessions, resizable
 // and collapsible; the state (open + width) persists per server so it stays put
@@ -93,6 +112,8 @@ export function ProjectChatsSidebar() {
       .filter((group) => group.sessions.length > 0),
   )
 
+  const isWorking = (sessionID: string) => serverSync().session.data.session_working(sessionID)
+
   const openChat = (session: Session) => {
     const tab = tabs.addSessionTab({ server: server.key, sessionId: session.id })
     tabs.select(tab)
@@ -100,6 +121,17 @@ export function ProjectChatsSidebar() {
 
   const newChat = (project: LocalProject) => {
     void tabs.newDraft({ server: server.key, directory: project.worktree, worktree: project.worktree })
+  }
+
+  const openNewChat = () => {
+    const id = params.id
+    const info = id ? serverSync().session.data.info[id] : undefined
+    const directory =
+      info?.directory ??
+      groups().find((group) => group.sessions.some((session) => session.id === id))?.project.worktree ??
+      layout.projects.list()[0]?.worktree
+    if (!directory) return
+    void tabs.newDraft({ server: server.key, directory })
   }
 
   return (
@@ -122,13 +154,23 @@ export function ProjectChatsSidebar() {
     >
       <div
         id="project-chats-sidebar"
-        class="relative flex self-stretch flex-col shrink-0 my-2 ml-2 rounded-[10px] overflow-hidden bg-v2-background-bg-base shadow-[var(--v2-elevation-raised)]"
+        class="relative flex h-full min-h-0 flex-col shrink-0 my-2 ml-2 rounded-[10px] overflow-hidden bg-v2-background-bg-base shadow-[var(--v2-elevation-raised)]"
         style={{ width: `${width()}px` }}
       >
         <div class="flex items-center gap-1 px-3 h-10 shrink-0 border-b border-v2-border-border-base">
           <span class="flex-1 min-w-0 text-12-medium text-v2-text-text-base truncate">
             {language.t("projectSidebar.chats")}
           </span>
+          <TooltipV2 placement="bottom" value={language.t("command.session.new")}>
+            <IconButtonV2
+              type="button"
+              variant="ghost-muted"
+              size="small"
+              icon={<IconV2 name="plus" />}
+              onClick={openNewChat}
+              aria-label={language.t("command.session.new")}
+            />
+          </TooltipV2>
           <TooltipV2 placement="bottom" value={language.t("projectSidebar.collapse")}>
             <IconButtonV2
               type="button"
@@ -149,6 +191,7 @@ export function ProjectChatsSidebar() {
                     project={group.project}
                     sessions={group.sessions}
                     activeSessionID={params.id}
+                    isWorking={isWorking}
                     language={language}
                     onToggle={() => {
                       if (group.project.expanded) layout.projects.collapse(group.project.worktree)
@@ -200,6 +243,7 @@ function ProjectChatGroup(props: {
   project: LocalProject
   sessions: Session[]
   activeSessionID: string | undefined
+  isWorking: (sessionID: string) => boolean
   language: ReturnType<typeof useLanguage>
   onToggle: () => void
   onOpen: (session: Session) => void
@@ -256,6 +300,9 @@ function ProjectChatGroup(props: {
               }}
               onClick={() => props.onOpen(session)}
             >
+              <Show when={props.isWorking(session.id)}>
+                <WorkingDots />
+              </Show>
               <span class="min-w-0 flex-1 truncate">{sessionTitle(session.title) || session.id}</span>
             </button>
           )}
