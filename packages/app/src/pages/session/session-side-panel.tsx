@@ -21,6 +21,7 @@ import { TooltipKeybind } from "@klautcode/ui/tooltip"
 import { ResizeHandle } from "@klautcode/ui/resize-handle"
 import { Mark } from "@klautcode/ui/logo"
 import { IconButtonV2 } from "@klautcode/ui/v2/icon-button-v2"
+import { Icon as IconV2 } from "@klautcode/ui/v2/icon"
 import { KeybindV2 } from "@klautcode/ui/v2/keybind-v2"
 import { TooltipV2 } from "@klautcode/ui/v2/tooltip-v2"
 import type { SnapshotFileDiff, VcsFileDiff } from "@klautcode/sdk/v2"
@@ -31,6 +32,7 @@ import { useDialog } from "@klautcode/ui/context/dialog"
 import FileTree from "@/components/file-tree"
 import { normalizeFileTreeV2Path } from "@/components/file-tree-v2-model"
 import { SessionContextUsage } from "@/components/session-context-usage"
+import { MenuV2 } from "@klautcode/ui/v2/menu-v2"
 
 const reviewTabID = "session-side-panel-review-tab"
 const reviewTabPanelID = "session-side-panel-review-tabpanel"
@@ -52,9 +54,13 @@ import {
   getTabReorderIndex,
   shouldShowFileTree,
   type Sizing,
+  browserTabForUrl,
+  browserUrlFromTab,
 } from "@/pages/session/helpers"
 import { setSessionHandoff } from "@/pages/session/handoff"
 import { useSessionLayout } from "@/pages/session/session-layout"
+import { BrowserTab } from "@/pages/session/browser/browser-tab"
+import { BROWSER_HOME_URL, clearBrowserTabState } from "@/pages/session/browser/browser-state"
 import { SessionFileBrowserTab, type SessionFileBrowserState } from "@/pages/session/v2/session-file-browser-tab"
 
 type ReviewDiff = FileDiffInfo | SnapshotFileDiff | VcsFileDiff
@@ -227,7 +233,39 @@ export function SessionSidePanel(props: {
     const active = activeTab()
     if (active === SESSION_OPEN_FILE_TAB) return SESSION_OPEN_FILE_TAB
     if (active && file.pathFromTab(active)) return active
+    if (active && browserUrlFromTab(active)) return active
     return activeFileTab()
+  })
+  const activeBrowserTab = createMemo(() => {
+    const active = activeTab()
+    return active && browserUrlFromTab(active) ? active : undefined
+  })
+  // Release persisted browser state once its tab is closed.
+  const closedBrowserTabs = new Set<string>()
+  createEffect(() => {
+    const current = new Set(openedTabs().filter((tab) => !!browserUrlFromTab(tab)))
+    for (const tab of closedBrowserTabs) {
+      if (!current.has(tab)) clearBrowserTabState(tab)
+    }
+    closedBrowserTabs.clear()
+    for (const tab of current) closedBrowserTabs.add(tab)
+  })
+  const openBrowserTab = (url: string) => {
+    const tab = browserTabForUrl(url)
+    tabs().open(tab)
+    tabs().setActive(tab)
+  }
+  const openActiveFileAsBrowser = () => {
+    const active = activeTab()
+    if (!active) return
+    const path = file.pathFromTab(active)
+    if (!path) return
+    openBrowserTab(`file://${path}`)
+  }
+  const activeTabMode = createMemo<"file" | "browser" | undefined>(() => {
+    const active = activeTab()
+    if (!active || active === "context" || active === "review" || active === "empty") return undefined
+    return browserUrlFromTab(active) ? "browser" : "file"
   })
   // Keep the file-browser shell mounted while any file tab exists. Kobalte briefly
   // selects Review while the tab For replaces a preview trigger, which would
@@ -442,6 +480,13 @@ export function SessionSidePanel(props: {
                                   "bg-background-stronger": !settings.general.newLayoutDesigns(),
                                 }}
                               >
+                                <IconButtonV2
+                                  icon={<IconV2 name="monitor" />}
+                                  variant="ghost-muted"
+                                  size="large"
+                                  onClick={() => openBrowserTab(BROWSER_HOME_URL)}
+                                  aria-label={language.t("browser.newTab")}
+                                />
                                 <TooltipKeybind
                                   title={language.t("command.file.open")}
                                   keybind={command.keybind("file.open")}
@@ -500,6 +545,10 @@ export function SessionSidePanel(props: {
 
                           <Show when={activeFileTab()} keyed>
                             {(tab) => <FileTabContent tab={tab} />}
+                          </Show>
+
+                          <Show when={activeBrowserTab()} keyed>
+                            {(tab) => <BrowserTab tab={tab} />}
                           </Show>
                         </Tabs>
                         <DragOverlay>
@@ -661,6 +710,40 @@ export function SessionSidePanel(props: {
                                 "bg-background-stronger": !settings.general.newLayoutDesigns(),
                               }}
                             >
+                              <MenuV2 gutter={4} modal={false} placement="bottom-end">
+                                <MenuV2.Trigger
+                                  as={IconButtonV2}
+                                  icon={<IconV2 name={activeTabMode() === "browser" ? "monitor" : "folder"} />}
+                                  variant="ghost-muted"
+                                  size="large"
+                                  aria-label={language.t("browser.mode")}
+                                />
+                                <MenuV2.Portal>
+                                  <MenuV2.Content>
+                                    <MenuV2.Item onSelect={() => openFileBrowser()}>
+                                      <span class="flex items-center gap-2">
+                                        <Icon name="open-file" size="small" />
+                                        {language.t("browser.newFileTab")}
+                                      </span>
+                                    </MenuV2.Item>
+                                    <MenuV2.Item onSelect={() => openBrowserTab(BROWSER_HOME_URL)}>
+                                      <span class="flex items-center gap-2">
+                                        <IconV2 name="monitor" size="small" />
+                                        {language.t("browser.newTab")}
+                                      </span>
+                                    </MenuV2.Item>
+                                    <Show when={activeTabMode() === "file" && !!activeFileTab()}>
+                                      <MenuV2.Separator />
+                                      <MenuV2.Item onSelect={openActiveFileAsBrowser}>
+                                        <span class="flex items-center gap-2">
+                                          <IconV2 name="monitor" size="small" />
+                                          {language.t("browser.openActiveAsBrowser")}
+                                        </span>
+                                      </MenuV2.Item>
+                                    </Show>
+                                  </MenuV2.Content>
+                                </MenuV2.Portal>
+                              </MenuV2>
                               <TooltipV2
                                 value={
                                   <>

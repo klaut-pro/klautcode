@@ -1,7 +1,13 @@
 import { describe, expect, test } from "bun:test"
 import type { PermissionRequest, Session } from "@klautcode/sdk/v2/client"
 import { base64Encode } from "@klautcode/core/util/encode"
-import { autoRespondsPermission, isDirectoryAutoAccepting, sessionAutoAccept } from "./permission-auto-respond"
+import {
+  autoRespondsPermission,
+  isDirectoryAutoAccepting,
+  sessionAutoAccept,
+  configAllowsPermission,
+  isAllowAllPermission,
+} from "./permission-auto-respond"
 
 const session = (input: { id: string; parentID?: string }) =>
   ({
@@ -121,5 +127,83 @@ describe("isDirectoryAutoAccepting", () => {
     const directory = "/tmp/project"
     const autoAccept = { [`${base64Encode(directory)}/*`]: false }
     expect(isDirectoryAutoAccepting(autoAccept, directory)).toBe(false)
+  })
+})
+
+describe("configAllowsPermission", () => {
+  test("allows a permission when the config has a wildcard allow", () => {
+    expect(
+      configAllowsPermission({ "*": "allow" }, { permission: "edit", patterns: ["src/foo.ts"] }),
+    ).toBe(true)
+  })
+
+  test("allows a permission when the config allows that tool", () => {
+    expect(
+      configAllowsPermission({ edit: "allow" }, { permission: "edit", patterns: ["src/foo.ts"] }),
+    ).toBe(true)
+  })
+
+  test("does not allow a permission that is not configured", () => {
+    expect(
+      configAllowsPermission({ edit: "allow" }, { permission: "read", patterns: ["src/foo.ts"] }),
+    ).toBe(false)
+  })
+
+  test("respects pattern-specific rules with ask precedence", () => {
+    expect(
+      configAllowsPermission(
+        { read: { "*": "allow", "*.env": "ask" } },
+        { permission: "read", patterns: [".env"] },
+      ),
+    ).toBe(false)
+    expect(
+      configAllowsPermission(
+        { read: { "*": "allow", "*.env": "ask" } },
+        { permission: "read", patterns: ["src/foo.ts"] },
+      ),
+    ).toBe(true)
+  })
+
+  test("requires every pattern to be allowed", () => {
+    expect(
+      configAllowsPermission(
+        { edit: "allow", read: "ask" },
+        { permission: "edit", patterns: ["a.ts", "b.ts"] },
+      ),
+    ).toBe(true)
+    expect(
+      configAllowsPermission(
+        { edit: "allow", read: "ask" },
+        { permission: "read", patterns: ["a.ts", "b.ts"] },
+      ),
+    ).toBe(false)
+  })
+
+  test("normalizes a string config permission to a wildcard rule", () => {
+    expect(configAllowsPermission("allow", { permission: "bash", patterns: ["*"] })).toBe(true)
+    expect(configAllowsPermission("ask", { permission: "bash", patterns: ["*"] })).toBe(false)
+  })
+
+  test("returns false when no permission rules are configured", () => {
+    expect(configAllowsPermission(undefined, { permission: "edit", patterns: ["a.ts"] })).toBe(false)
+    expect(configAllowsPermission({}, { permission: "edit", patterns: ["a.ts"] })).toBe(false)
+  })
+})
+
+describe("isAllowAllPermission", () => {
+  test("accepts the string allow form", () => {
+    expect(isAllowAllPermission("allow")).toBe(true)
+    expect(isAllowAllPermission("ask")).toBe(false)
+  })
+
+  test("accepts an object whose rules all allow", () => {
+    expect(isAllowAllPermission({ "*": "allow" })).toBe(true)
+    expect(isAllowAllPermission({ edit: "allow", read: "allow" })).toBe(true)
+    expect(isAllowAllPermission({ edit: "allow", read: "ask" })).toBe(false)
+  })
+
+  test("rejects empty or non-object input", () => {
+    expect(isAllowAllPermission(undefined)).toBe(false)
+    expect(isAllowAllPermission({})).toBe(false)
   })
 })

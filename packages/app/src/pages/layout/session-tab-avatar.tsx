@@ -4,7 +4,7 @@ import type { ServerConnection } from "@/context/server"
 import { displayName, getProjectAvatarSource } from "@/pages/layout/helpers"
 import { useSessionTabAvatarState } from "@/pages/layout/project-avatar-state"
 import { ProjectAvatar } from "@klautcode/ui/v2/project-avatar-v2"
-import { SessionProgressIndicatorV2 } from "@klautcode/session-ui/v2/session-progress-indicator-v2"
+import { ThinkingOrbs } from "@klautcode/session-ui/v2/thinking-orbs"
 import { Show } from "solid-js"
 
 export function SessionTabAvatar(props: {
@@ -48,7 +48,9 @@ export function SessionTabAvatarView(props: {
   return (
     <Show when={props.loading} fallback={projectAvatar()}>
       <span class="relative block size-4 shrink-0">
-        <SessionProgressIndicatorV2
+        <ThinkingOrbs
+          width={16}
+          height={16}
           class={`absolute inset-0 ${props.revealProjectOnHover === false ? "" : "group-hover:invisible"}`}
         />
         <Show when={props.revealProjectOnHover !== false}>

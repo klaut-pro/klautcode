@@ -102,7 +102,7 @@ function inputChanged(
     ])
   }
 
-  const command = value.match(/^\/(\S*)$/)
+  const command = value.slice(0, cursor ?? value.length).match(/(?:^|\s)\/([^\s]*)$/)
   if (command) {
     const query = command[1] ?? ""
     return changed({ ...state, popover: { type: "command-inline", query }, focus: "editor" }, [

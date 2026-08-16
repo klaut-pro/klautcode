@@ -12,6 +12,8 @@ import { ProviderTransform } from "@/provider/transform"
 import PROMPT_GENERATE from "./generate.txt"
 import PROMPT_COMPACTION from "./prompt/compaction.txt"
 import PROMPT_EXPLORE from "./prompt/explore.txt"
+import PROMPT_GENERAL from "./prompt/general.txt"
+import PROMPT_TODOCHECK from "./prompt/todocheck.txt"
 import PROMPT_SUMMARY from "./prompt/summary.txt"
 import PROMPT_TITLE from "./prompt/title.txt"
 import { Permission } from "@/permission"
@@ -182,6 +184,7 @@ const layer = Layer.effect(
           general: {
             name: "general",
             description: `General-purpose agent for researching complex questions and executing multi-step tasks. Use this agent to execute multiple units of work in parallel.`,
+            prompt: PROMPT_GENERAL,
             permission: Permission.merge(
               defaults,
               Permission.fromConfig({
@@ -191,6 +194,26 @@ const layer = Layer.effect(
             ),
             options: {},
             mode: "all",
+            native: true,
+          },
+          ask: {
+            name: "ask",
+            description: `Ask questions and get direct answers. Read-only mode — never modifies files or runs commands.`,
+            permission: Permission.merge(
+              defaults,
+              Permission.fromConfig({
+                "*": "deny",
+                read: "allow",
+                grep: "allow",
+                glob: "allow",
+                list: "allow",
+                webfetch: "allow",
+                websearch: "allow",
+              }),
+              user,
+            ),
+            options: {},
+            mode: "primary",
             native: true,
           },
           explore: {
@@ -261,6 +284,21 @@ const layer = Layer.effect(
               user,
             ),
             prompt: PROMPT_SUMMARY,
+          },
+          todocheck: {
+            name: "todocheck",
+            mode: "primary",
+            options: {},
+            native: true,
+            hidden: true,
+            permission: Permission.merge(
+              defaults,
+              Permission.fromConfig({
+                "*": "deny",
+              }),
+              user,
+            ),
+            prompt: PROMPT_TODOCHECK,
           },
         }
 

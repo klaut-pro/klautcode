@@ -69,6 +69,7 @@ const api: ElectronAPI = {
   resolveAppPath: (appName) => ipcRenderer.invoke("resolve-app-path", appName),
   storeGet: (name, key) => ipcRenderer.invoke("store-get", name, key),
   storeSet: (name, key, value) => ipcRenderer.invoke("store-set", name, key, value),
+  storeSetSync: (name, key, value) => ipcRenderer.sendSync("store-set-sync", name, key, value),
   storeDelete: (name, key) => ipcRenderer.invoke("store-delete", name, key),
   storeClear: (name) => ipcRenderer.invoke("store-clear", name),
   storeKeys: (name) => ipcRenderer.invoke("store-keys", name),

@@ -140,9 +140,14 @@ const createPlatform = (windowState: DesktopWindowState): Platform => {
     const cache = new Map<string, AsyncStorage>()
 
     const createStorage = (name: string) => {
+      // Window-scoped state (open tabs, tab metadata, recently closed) must be
+      // committed to disk before the window is torn down on quit, so those
+      // writes go through a synchronous IPC round-trip.
+      const syncWrite = name.startsWith("klautcode.window")
       const api: AsyncStorage = {
         getItem: (key: string) => window.api.storeGet(name, key),
-        setItem: (key: string, value: string) => window.api.storeSet(name, key, value),
+        setItem: (key: string, value: string) =>
+          syncWrite ? Promise.resolve(window.api.storeSetSync(name, key, value)) : window.api.storeSet(name, key, value),
         removeItem: (key: string) => window.api.storeDelete(name, key),
         clear: () => window.api.storeClear(name),
         key: async (index: number) => (await window.api.storeKeys(name))[index],

@@ -201,12 +201,14 @@ export function createMainWindow(id: string = randomUUID()) {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      webviewTag: true,
     },
   })
 
   allowRendererPermissions(win)
   wireWindowRecovery(win, id)
   wireNavigationPolicy(win)
+  wireWebviewGuests(win)
 
   win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details
@@ -264,6 +266,23 @@ function wireNavigationPolicy(win: BrowserWindow) {
     if (isRendererUrl(url)) return
     event.preventDefault()
     openExternalURL(url)
+  })
+}
+
+// Guest webContents hosting the internal browser (<webview>). Links that open
+// new windows leave through the OS browser, and the embedded browser must never
+// navigate to the app's own renderer URL.
+function wireWebviewGuests(win: BrowserWindow) {
+  win.webContents.on("did-attach-webview", (_event, contents) => {
+    contents.setWindowOpenHandler(({ url }) => {
+      openExternalURL(url)
+      return { action: "deny" }
+    })
+    contents.on("will-navigate", (event, url) => {
+      if (!isRendererUrl(url)) return
+      event.preventDefault()
+      openExternalURL(url)
+    })
   })
 }
 

@@ -17,12 +17,23 @@ function persisted(value = ""): PromptInputV2PersistedState {
 }
 
 describe("prompt input v2 interaction machine", () => {
-  test("opens inline commands only when slash is the entire prompt", () => {
+  test("opens inline commands from anywhere in the prompt", () => {
     const state = createPromptInputV2InteractionState()
-    const open = transitionPromptInputV2(state, { type: "input.changed", value: "/re" }, persisted())
-    const closed = transitionPromptInputV2(state, { type: "input.changed", value: "explain /re" }, persisted())
+    const open = transitionPromptInputV2(state, { type: "input.changed", value: "/re" }, persisted("/re"))
+    const mid = transitionPromptInputV2(
+      state,
+      { type: "input.changed", value: "explain /re" },
+      persisted("explain /re"),
+    )
 
     expect(open.state.popover).toEqual({ type: "command-inline", query: "re" })
+    expect(mid.state.popover).toEqual({ type: "command-inline", query: "re" })
+  })
+
+  test("keeps inline commands closed when slash is mid-word", () => {
+    const state = createPromptInputV2InteractionState()
+    const closed = transitionPromptInputV2(state, { type: "input.changed", value: "src/foo.ts" }, persisted())
+
     expect(closed.state.popover).toEqual({ type: "closed" })
   })
 
@@ -30,7 +41,7 @@ describe("prompt input v2 interaction machine", () => {
     const open = transitionPromptInputV2(
       createPromptInputV2InteractionState(),
       { type: "input.changed", value: "/review/" },
-      persisted(),
+      persisted("/review/"),
     )
     const item = { ...command, label: "/review/nested" }
     const selected = transitionPromptInputV2(open.state, { type: "popover.select", item }, persisted("/review/"))

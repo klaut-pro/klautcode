@@ -3,12 +3,15 @@ import type { JSX } from "solid-js"
 import { createSortable } from "@thisbeyond/solid-dnd"
 import { FileIcon } from "@klautcode/ui/file-icon"
 import { IconButton } from "@klautcode/ui/icon-button"
+import { Icon as IconV2 } from "@klautcode/ui/v2/icon"
 import { TooltipKeybind } from "@klautcode/ui/tooltip"
 import { Tabs } from "@klautcode/ui/tabs"
 import { getFilename } from "@klautcode/core/util/path"
 import { useFile } from "@/context/file"
 import { useLanguage } from "@/context/language"
 import { useCommand } from "@/context/command"
+import { browserUrlFromTab } from "@/pages/session/helpers"
+import { getBrowserTabState } from "@/pages/session/browser/browser-state"
 
 export function FileVisual(props: { path: string; active?: boolean; temporary?: boolean }): JSX.Element {
   return (
@@ -29,6 +32,28 @@ export function FileVisual(props: { path: string; active?: boolean; temporary?: 
   )
 }
 
+export function BrowserVisual(props: { tab: string; active?: boolean; temporary?: boolean }): JSX.Element {
+  const title = createMemo(() => {
+    const state = getBrowserTabState(props.tab)
+    if (state?.title) return state.title
+    const url = state?.url ?? browserUrlFromTab(props.tab)
+    if (!url) return undefined
+    try {
+      return new URL(url).hostname || url
+    } catch {
+      return url
+    }
+  })
+  return (
+    <div class="flex items-center gap-x-1.5 min-w-0">
+      <IconV2 name="monitor" size="small" class="size-4 shrink-0" />
+      <span class="text-14-medium truncate" classList={{ italic: props.temporary }}>
+        {title()}
+      </span>
+    </div>
+  )
+}
+
 export function SortableTab(props: {
   tab: string
   temporary?: boolean
@@ -42,8 +67,9 @@ export function SortableTab(props: {
   const path = createMemo(() => file.pathFromTab(props.tab))
   const content = createMemo(() => {
     const value = path()
-    if (!value) return
-    return <FileVisual path={value} temporary={props.temporary} />
+    if (value) return <FileVisual path={value} temporary={props.temporary} />
+    if (browserUrlFromTab(props.tab)) return <BrowserVisual tab={props.tab} temporary={props.temporary} />
+    return
   })
   return (
     <div use:sortable class="h-full flex items-center" classList={{ "opacity-0": sortable.isActiveDraggable }}>

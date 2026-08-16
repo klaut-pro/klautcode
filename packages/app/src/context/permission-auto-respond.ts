@@ -1,4 +1,5 @@
 import { base64Encode } from "@klautcode/core/util/encode"
+import { Wildcard } from "@klautcode/core/util/wildcard"
 
 export function acceptKey(sessionID: string, directory?: string) {
   if (!directory) return sessionID
@@ -57,4 +58,52 @@ export function sessionAutoAccept(
   return sessionLineage(session, permission.sessionID)
     .map((id) => accepted(autoAccept, id, directory))
     .find((item): item is boolean => item !== undefined)
+}
+
+export type ConfigPermissionRule = { permission: string; pattern: string; action: "allow" | "ask" | "deny" }
+
+// Mirrors the server's `Permission.fromConfig` so the client can honor the
+// global config permission (Settings -> Permissions) when deciding whether to
+// auto-respond to a prompt, even if the server still asks.
+export function permissionConfigRules(permission: unknown): ConfigPermissionRule[] {
+  const rules: ConfigPermissionRule[] = []
+  const entries =
+    typeof permission === "string" ? ([["*", permission]] as const) : Object.entries(permission ?? {})
+  for (const [key, value] of entries) {
+    if (value === "allow" || value === "ask" || value === "deny") {
+      rules.push({ permission: key, pattern: "*", action: value })
+      continue
+    }
+    if (typeof value !== "object" || value === null || Array.isArray(value)) continue
+    for (const [pattern, action] of Object.entries(value)) {
+      if (action === "allow" || action === "ask" || action === "deny") {
+        rules.push({ permission: key, pattern, action })
+      }
+    }
+  }
+  return rules
+}
+
+export function configAllowsPermission(
+  configPermission: unknown,
+  permission: { permission: string; patterns: string[] },
+) {
+  const rules = permissionConfigRules(configPermission)
+  if (rules.length === 0) return false
+  return permission.patterns.every((pattern) => {
+    for (let i = rules.length - 1; i >= 0; i--) {
+      const rule = rules[i]
+      if (Wildcard.match(permission.permission, rule.permission) && Wildcard.match(pattern, rule.pattern)) {
+        return rule.action === "allow"
+      }
+    }
+    return false
+  })
+}
+
+export function isAllowAllPermission(permission: unknown) {
+  if (permission === "allow") return true
+  if (typeof permission !== "object" || permission === null || Array.isArray(permission)) return false
+  const rules = permissionConfigRules(permission)
+  return rules.length > 0 && rules.every((rule) => rule.action === "allow")
 }

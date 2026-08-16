@@ -129,6 +129,17 @@ export function registerIpcHandlers(deps: Deps) {
   ipcMain.handle("store-set", (_event: IpcMainInvokeEvent, name: string, key: string, value: string) => {
     getStore(name).set(key, value)
   })
+  // Synchronous variant so the renderer can commit window-scoped state (e.g.
+  // open tabs) to disk before it is torn down on quit, instead of risking an
+  // in-flight async write being dropped.
+  ipcMain.on("store-set-sync", (event: IpcMainEvent, name: string, key: string, value: string) => {
+    try {
+      getStore(name).set(key, value)
+      event.returnValue = true
+    } catch {
+      event.returnValue = false
+    }
+  })
   ipcMain.handle("store-delete", (_event: IpcMainInvokeEvent, name: string, key: string) => {
     getStore(name).delete(key)
     void removeStoreFileIfEmpty(name)

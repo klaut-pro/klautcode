@@ -81,6 +81,7 @@ export type ElectronAPI = {
   resolveAppPath: (appName: string) => Promise<string | null>
   storeGet: (name: string, key: string) => Promise<string | null>
   storeSet: (name: string, key: string, value: string) => Promise<void>
+  storeSetSync: (name: string, key: string, value: string) => boolean
   storeDelete: (name: string, key: string) => Promise<void>
   storeClear: (name: string) => Promise<void>
   storeKeys: (name: string) => Promise<string[]>

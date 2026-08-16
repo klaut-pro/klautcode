@@ -1823,6 +1823,16 @@ export default function Page() {
     setFollowup("edit", id, undefined)
   }
 
+  const deleteFollowup = (id: string) => {
+    const sessionID = params.id
+    if (!sessionID) return
+    if (followupBusy(sessionID)) return
+
+    setFollowup("items", sessionID, (items) => (items ?? []).filter((entry) => entry.id !== id))
+    setFollowup("failed", sessionID, (value) => (value === id ? undefined : value))
+    setFollowup("edit", sessionID, (value) => (value?.id === id ? undefined : value))
+  }
+
   const halt = (sessionID: string) =>
     busy(sessionID)
       ? sdk()
@@ -2154,6 +2164,7 @@ export default function Page() {
                     sending: sendingFollowup(),
                     onSend: (id) => void sendFollowup(params.id!, id, { manual: true }),
                     onEdit: editFollowup,
+                    onDelete: deleteFollowup,
                   }
                 : undefined,
             revert: () =>

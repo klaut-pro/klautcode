@@ -4,6 +4,7 @@ import { useLanguage } from "@/context/language"
 import { useSync } from "@/context/sync"
 import { useSDK } from "@/context/sdk"
 import { Icon } from "@klautcode/ui/icon"
+import { ThinkingOrbs } from "@klautcode/session-ui/v2/thinking-orbs"
 import { useLayout } from "@/context/layout"
 import { base64Encode } from "@klautcode/core/util/encode"
 import { getFilename } from "@klautcode/core/util/path"
@@ -95,13 +96,20 @@ export function SessionSubagentDock() {
                 class="group flex items-center gap-1.5 rounded-md border border-border-weak-base bg-background-base/50 px-2 py-1 text-13-regular text-text-strong transition-colors hover:bg-surface-raised-base-hover"
                 onClick={() => openSubagent(subagent.sessionId)}
               >
-                <span
-                  class="size-1.5 rounded-full shrink-0"
-                  classList={{
-                    "bg-icon-info-active animate-pulse": subagent.status === "working",
-                    "bg-icon-warning-active": subagent.status === "blocked",
-                  }}
-                />
+                <Show
+                  when={subagent.status === "working"}
+                  fallback={
+                    <span
+                      class="size-1.5 rounded-full shrink-0"
+                      classList={{
+                        "bg-icon-warning-active": subagent.status === "blocked",
+                        "bg-icon-info-active": subagent.status === "done",
+                      }}
+                    />
+                  }
+                >
+                  <ThinkingOrbs width={14} height={14} class="shrink-0 text-icon-info-active" />
+                </Show>
                 <span class="truncate max-w-52">{subagent.description || getFilename(subagent.sessionId)}</span>
                 <button
                   type="button"

@@ -81,7 +81,11 @@ const layer = Layer.effect(
   Effect.gen(function* () {
     const fs = yield* FSUtil.Service
     const location = yield* Location.Service
-    const locationRoot = yield* fs.realPath(location.directory)
+    const locationRoot = yield* fs.realPath(location.directory).pipe(
+      // A project directory may be missing; keep the layer bootable so session
+      // data can still be read.
+      Effect.catchReason("PlatformError", "NotFound", () => Effect.succeed(location.directory)),
+    )
 
     function notFound<A>(effect: Effect.Effect<A, FSUtil.Error>) {
       return effect.pipe(Effect.catchReason("PlatformError", "NotFound", () => Effect.succeed(undefined)))

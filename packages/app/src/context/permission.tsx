@@ -19,6 +19,8 @@ import {
   directoryAcceptKey,
   isDirectoryAutoAccepting,
   autoRespondsPermission,
+  configAllowsPermission,
+  isAllowAllPermission,
   sessionAutoAccept,
 } from "./permission-auto-respond"
 
@@ -215,7 +217,7 @@ function createServerPermissionState(input: { sdk: ServerSDK; sync: ServerSync }
     if (input.sdk.protocolKind() !== "v1") return
     if (meta.disposed || !ready()) return
     const [childStore] = input.sync.child(directory)
-    if (childStore.config.permission !== "allow") return
+    if (!isAllowAllPermission(childStore.config.permission)) return
     const key = directoryAcceptKey(directory)
     if (store.autoAccept[key] !== undefined) return
     setStore(
@@ -296,7 +298,10 @@ function createServerPermissionState(input: { sdk: ServerSDK; sync: ServerSync }
   }
 
   function shouldAutoRespond(permission: PermissionRequest, directory?: string) {
-    return autoRespondsPermission(store.autoAccept, sessions(directory), permission, directory)
+    const override = sessionAutoAccept(store.autoAccept, sessions(directory), permission, directory)
+    if (override !== undefined) return override
+    if (directory && isDirectoryAutoAccepting(store.autoAccept, directory)) return true
+    return configAllowsPermission(input.sync.data.config.permission, permission)
   }
 
   function isPending(permission: PermissionRequest) {
@@ -307,6 +312,7 @@ function createServerPermissionState(input: { sdk: ServerSDK; sync: ServerSync }
   async function shouldAutoRespondResolved(permission: PermissionRequest, directory?: string) {
     const override = sessionAutoAccept(store.autoAccept, sessions(directory), permission, directory)
     if (override !== undefined) return override
+    if (configAllowsPermission(input.sync.data.config.permission, permission)) return true
     if (input.sync.session.lineage.peek(permission.sessionID)) return shouldAutoRespond(permission, directory)
     const lineage = await input.sync.session.lineage.resolve(permission.sessionID).catch(() => undefined)
     if (meta.disposed || !lineage) return false
@@ -466,7 +472,7 @@ function createServerPermissionState(input: { sdk: ServerSDK; sync: ServerSync }
     isPermissionAllowAll(directory: string) {
       if (meta.disposed) return false
       const [childStore] = input.sync.child(directory)
-      return childStore.config.permission === "allow"
+      return isAllowAllPermission(childStore.config.permission)
     },
   }
 

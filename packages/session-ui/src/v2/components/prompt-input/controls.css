@@ -17,6 +17,23 @@
   [data-prompt-control-label] + span {
     margin-inline: 0;
   }
+
+  /* The mode (agent) selector stays labelled so users can always see which
+     mode is active, even when the panel is narrow. */
+  [data-prompt-control][data-prompt-mode="true"] {
+    max-width: 132px;
+    justify-content: flex-start;
+    gap: 4px;
+    padding-inline: 8px;
+  }
+
+  [data-prompt-control][data-prompt-mode="true"] [data-prompt-control-label] {
+    display: inline;
+  }
+
+  [data-prompt-control][data-prompt-mode="true"] [data-prompt-control-label] + span {
+    margin-inline: 0;
+  }
 }
 
 @container (max-width: 460px) {

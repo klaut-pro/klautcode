@@ -1,0 +1,10 @@
+[data-component="thinking-orbs"] {
+  display: block;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-component="thinking-orbs"] {
+    color: var(--v2-icon-icon-muted, #808080);
+  }
+}

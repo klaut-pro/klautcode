@@ -62,7 +62,13 @@ const baseLayer = Layer.effect(
     const fs = yield* FSUtil.Service
     const location = yield* Location.Service
     const search = yield* FileSystemSearch.Service
-    const root = yield* fs.realPath(location.directory).pipe(Effect.orDie)
+    const root = yield* fs.realPath(location.directory).pipe(
+      // A project directory may be missing (deleted/moved). Fall back to the
+      // unresolved path so the instance can still boot and its session data can
+      // be read; individual file operations fail on their own instead.
+      Effect.catchReason("PlatformError", "NotFound", () => Effect.succeed(location.directory)),
+      Effect.orDie,
+    )
     const resolve = Effect.fnUntraced(function* (input?: RelativePath) {
       const absolute = path.resolve(location.directory, input ?? ".")
       if (!FSUtil.contains(location.directory, absolute))

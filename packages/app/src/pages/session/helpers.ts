@@ -24,6 +24,15 @@ type TabsInput = {
 
 export const getSessionKey = (dir: string | undefined, id: string | undefined) => `${dir ?? ""}${id ? `/${id}` : ""}`
 
+const BROWSER_TAB_PREFIX = "browser://"
+
+export const tabMode = (tab: string): "file" | "browser" => (browserUrlFromTab(tab) ? "browser" : "file")
+
+export const browserTabForUrl = (url: string) => `${BROWSER_TAB_PREFIX}${url}`
+
+export const browserUrlFromTab = (tab: string) =>
+  tab.startsWith(BROWSER_TAB_PREFIX) ? tab.slice(BROWSER_TAB_PREFIX.length) : undefined
+
 export function shouldShowFileTree(input: { visible: boolean; opened: boolean }) {
   return input.opened && input.visible
 }
@@ -65,6 +74,7 @@ export const createSessionTabs = (input: TabsInput) => {
     if (active === SESSION_OPEN_FILE_TAB && openFileOpen()) return active
     if (active === "review" && review()) return active
     if (active && input.pathFromTab(active)) return input.normalizeTab(active)
+    if (active && browserUrlFromTab(active)) return active
 
     const first = openedTabs()[0]
     if (first) return first
