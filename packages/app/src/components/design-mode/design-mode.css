@@ -11,6 +11,7 @@
   position: absolute;
   inset: 0;
   z-index: 20;
+  overflow: hidden;
 }
 
 html[data-design-mode] [data-component="browser-webview"] webview {
@@ -233,68 +234,11 @@ html[data-design-mode] [data-component="browser-webview"] webview {
   accent-color: #0a84ff;
 }
 
-.dm-footer {
-  position: absolute;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: calc(100% - 16px);
-  gap: 16px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(28, 28, 30, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(12px);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 13px;
-}
-
-.dm-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.dm-hint-key {
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.dm-count {
-  font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.dm-note-count {
-  font-variant-numeric: tabular-nums;
-  color: #64b5ff;
-}
-
-.dm-vision-warning {
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(255, 149, 0, 0.2);
-  color: #ffb340;
-}
-
-.dm-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .dm-button {
-  padding: 6px 14px;
+  padding: 6px 10px;
   border: none;
   border-radius: 8px;
-  font: 600 13px/1.2 system-ui, -apple-system, sans-serif;
+  font: 600 12px/1.2 system-ui, -apple-system, sans-serif;
   cursor: pointer;
   transition: background 120ms ease;
 }
@@ -304,24 +248,25 @@ html[data-design-mode] [data-component="browser-webview"] webview {
   cursor: default;
 }
 
-.dm-cancel {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.dm-cancel:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .dm-primary {
-  background: #0a84ff;
+  background: var(--v2-icon-icon-accent, #0a84ff);
   color: #ffffff;
 }
 
 .dm-primary:hover {
-  background: #1f90ff;
+  background: var(--v2-icon-icon-accent-hover, #1f90ff);
 }
 
 .dm-primary:disabled {
-  background: #0a84ff;
+  background: var(--v2-icon-icon-accent, #0a84ff);
+}
+
+[data-action="prompt-design-mode"].dm-toggle-active {
+  color: var(--v2-icon-icon-accent);
+  background-color: color-mix(in srgb, var(--v2-icon-icon-accent) 16%, transparent);
+}
+
+[data-action="prompt-design-mode"].dm-toggle-active:is(:hover, [data-state="hover"]):not(:disabled) {
+  color: var(--v2-icon-icon-accent-hover);
+  background-color: color-mix(in srgb, var(--v2-icon-icon-accent) 24%, transparent);
 }

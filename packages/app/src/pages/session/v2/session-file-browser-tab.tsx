@@ -97,7 +97,13 @@ export function SessionFileBrowserTab(props: {
   const isBrowser = createMemo(() => !!browserUrlFromTab(props.tab))
   const isMarkdown = createMemo(() => !!markdownPathFromTab(props.tab))
 
-  if (isBrowser()) return <BrowserTab tab={props.tab} />
+  if (isBrowser()) {
+    return (
+      <div class="flex h-full min-h-0 flex-col">
+        <BrowserTab tab={props.tab} />
+      </div>
+    )
+  }
   if (isMarkdown()) {
     const path = markdownPathFromTab(props.tab)!
     return <MarkdownPreview path={path} />

@@ -406,7 +406,7 @@ export function SessionSidePanel(props: {
                       >
                         <DragDropSensors />
                         <ConstrainDragYAxis />
-                        <Tabs value={activeTab()} onChange={activateTab}>
+                        <Tabs class="flex h-full min-h-0 flex-col" value={activeTab()} onChange={activateTab}>
                           <div class="sticky top-0 shrink-0 flex">
                             <Tabs.List
                               ref={(el: HTMLDivElement) => {
@@ -581,7 +581,11 @@ export function SessionSidePanel(props: {
                           </Show>
 
                           <Show when={activeBrowserTab()} keyed>
-                            {(tab) => <BrowserTab tab={tab} />}
+                            {(tab) => (
+                              <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+                                <BrowserTab tab={tab} />
+                              </div>
+                            )}
                           </Show>
 
                           <Show when={activeMarkdownTab()} keyed>
@@ -630,7 +634,7 @@ export function SessionSidePanel(props: {
                         tabs().move(source.id.toString(), source.index)
                       }}
                     >
-                      <Tabs value={activeTab()} onChange={activateTab}>
+                      <Tabs class="flex h-full min-h-0 flex-col" value={activeTab()} onChange={activateTab}>
                         <div class="session-review-v2-tabs-bar sticky top-0 shrink-0 flex items-center">
                           <Tabs.List
                             ref={(el: HTMLDivElement) => {
@@ -843,7 +847,7 @@ export function SessionSidePanel(props: {
                             id={fileBrowserTabPanelID}
                             role="tabpanel"
                             data-slot="tabs-content"
-                            class="h-full min-h-0 overflow-hidden"
+                            class="flex min-h-0 flex-1 flex-col overflow-hidden"
                             classList={{ hidden: !fileBrowserVisible() }}
                             inert={!fileBrowserVisible() || undefined}
                           >

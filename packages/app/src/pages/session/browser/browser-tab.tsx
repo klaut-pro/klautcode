@@ -10,6 +10,7 @@ import { useLayout } from "@/context/layout"
 import { usePlatform } from "@/context/platform"
 import { browserUrlFromTab } from "@/pages/session/helpers"
 import { BROWSER_HOME_URL } from "./browser-state"
+import { BROWSER_WEBVIEW_HOST_CLASS, sizeWebviewToHost } from "./webview-layout"
 
 // Minimal surface of Electron's <webview> guest element used by the internal
 // browser. It only exists in the desktop shell; the web build shows a fallback.
@@ -88,11 +89,17 @@ export function BrowserTab(props: { tab: string }) {
     el.setAttribute("partition", "persist:klautcode-browser")
     el.setAttribute("allowpopups", "false")
     el.style.display = "flex"
-    el.style.width = "100%"
-    el.style.flex = "1"
-    el.style.minHeight = "0"
+    el.style.position = "absolute"
+    el.style.left = "0"
+    el.style.top = "0"
+    el.style.right = "0"
+    el.style.bottom = "0"
+    const syncBox = () => sizeWebviewToHost(ref, el)
     ref.appendChild(el)
     webview = el
+    syncBox()
+    const observer = new ResizeObserver(syncBox)
+    observer.observe(ref)
 
     const onNavigate = () => {
       const url = webview?.getURL() ?? ""
@@ -109,12 +116,18 @@ export function BrowserTab(props: { tab: string }) {
       syncTitle()
     }
     const onTitle = () => syncTitle()
+    const onFail = (event: Event) => {
+      const detail = event as Event & { errorCode?: number; errorDescription?: string; validatedURL?: string }
+      console.error("webview did-fail-load", detail.errorCode, detail.errorDescription, detail.validatedURL)
+    }
 
     el.addEventListener("did-navigate", onNavigate)
     el.addEventListener("did-navigate-in-page", onNavigate)
     el.addEventListener("did-start-loading", onLoadingStart)
     el.addEventListener("did-stop-loading", onLoadingStop)
     el.addEventListener("page-title-updated", onTitle)
+    el.addEventListener("did-fail-load", onFail)
+    el.addEventListener("did-fail-provisional-load", onFail)
 
     load(initialUrl())
     onCleanup(() => {
@@ -123,6 +136,9 @@ export function BrowserTab(props: { tab: string }) {
       el.removeEventListener("did-start-loading", onLoadingStart)
       el.removeEventListener("did-stop-loading", onLoadingStop)
       el.removeEventListener("page-title-updated", onTitle)
+      el.removeEventListener("did-fail-load", onFail)
+      el.removeEventListener("did-fail-provisional-load", onFail)
+      observer.disconnect()
       el.remove()
       webview = undefined
     })
@@ -264,7 +280,7 @@ export function BrowserTab(props: { tab: string }) {
       >
         <div
           ref={ref}
-          class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+          class={BROWSER_WEBVIEW_HOST_CLASS}
           data-component="browser-webview"
         />
       </Show>

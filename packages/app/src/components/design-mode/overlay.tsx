@@ -322,10 +322,16 @@ export function DesignModeOverlay() {
         if (event.key === "Enter" && textAt()) {
           commitText()
           event.preventDefault()
+          return
+        }
+        if (event.key === "Escape" && !target.closest("[data-component=design-mode]")) {
+          event.preventDefault()
+          design.exit()
         }
         return
       }
       if (event.key === "Escape") {
+        event.preventDefault()
         if (draft()) {
           setDraft(undefined)
           setDrawing(undefined)
@@ -535,30 +541,15 @@ export function DesignModeOverlay() {
                 <ToolIcon path="M5 5l10 10M15 5L5 15" />
               </button>
             </TooltipV2>
-          </div>
-
-          <div class="dm-footer">
-            <div class="dm-status">
-              <span>{language.t("designMode.hint.main")}</span>
-              <span class="dm-hint-key">{language.t("designMode.hint.ancestor")}</span>
-              <span class="dm-count">
-                {selection().length} {language.t(selection().length === 1 ? "designMode.count.element" : "designMode.count.elements")}
-              </span>
-              <Show when={selection().some((item) => item.note)}>
-                <span class="dm-note-count">{selection().filter((item) => item.note).length} {language.t("designMode.count.notes")}</span>
-              </Show>
-              <Show when={hasContent() && design.vision() === false}>
-                <span class="dm-vision-warning">{language.t("designMode.visionWarning")}</span>
-              </Show>
-            </div>
-            <div class="dm-actions">
-              <button type="button" class="dm-button dm-cancel" onClick={() => design.exit()}>
-                {language.t("designMode.actions.cancel")}
-              </button>
-              <button type="button" class="dm-button dm-primary" disabled={!hasContent() || busy()} onClick={() => void addToChat()}>
-                {busy() ? language.t("designMode.actions.busy") : language.t("designMode.actions.addToChat")}
-              </button>
-            </div>
+            <div class="dm-divider" />
+            <button
+              type="button"
+              class="dm-button dm-primary"
+              disabled={!hasContent() || busy()}
+              onClick={() => void addToChat()}
+            >
+              {busy() ? language.t("designMode.actions.busy") : language.t("designMode.actions.addToChat")}
+            </button>
           </div>
         </div>
       </Show>
@@ -571,7 +562,7 @@ function annotationCardPosition(info: DesignElementInfo, viewport: { width: numb
   const CARD_HEIGHT = 88
   const GAP = 8
   const TOP_SAFE = 56
-  const BOTTOM_SAFE = 72
+  const BOTTOM_SAFE = 16
   const clampX = (value: number) => Math.max(GAP, Math.min(value, Math.max(GAP, viewport.width - CARD_WIDTH - GAP)))
   const clampY = (value: number) => Math.max(TOP_SAFE, Math.min(value, Math.max(TOP_SAFE, viewport.height - BOTTOM_SAFE - CARD_HEIGHT)))
   const preferredLeft = info.x + info.width + GAP
