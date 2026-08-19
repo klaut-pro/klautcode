@@ -1,5 +1,5 @@
 import type { ReferenceGitSource, ReferenceLocalSource } from "@klautcode/sdk/v2/types"
-import type { Hooks } from "./registration.js"
+import type { Hooks } from "./registration.ts"
 
 export interface ReferenceDraft {
   add(name: string, source: ReferenceLocalSource | ReferenceGitSource): void

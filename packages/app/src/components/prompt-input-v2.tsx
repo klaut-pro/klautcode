@@ -8,6 +8,8 @@ import { Switch } from "@klautcode/ui/v2/switch-v2"
 import { TooltipV2 } from "@klautcode/ui/v2/tooltip-v2"
 import type { ReferenceInfo } from "@klautcode/sdk/v2/client"
 import { createEffect, createMemo, on, Show } from "solid-js"
+import { DesignModeButton } from "@/components/design-mode/button"
+import { useDesignMode } from "@/components/design-mode/controller"
 import { ModelSelectorPopoverV2 } from "@/components/dialog-select-model"
 import { DialogSelectModelUnpaidV2 } from "@/components/dialog-select-model-unpaid-v2"
 import type { PromptInputProps } from "@/components/prompt-input/contracts"
@@ -61,6 +63,7 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
         variantControlVisible={!props.controller.model.loading}
         attachKeybind={command.keybindParts("file.attach")}
         attachShortcut={command.keybind("file.attach")}
+        designModeControl={<DesignModeButton />}
         modelControl={
           <>
             <PromptInputV2ModelControl
@@ -109,6 +112,7 @@ export function usePromptInputV2Controller(props: PromptInputV2ControllerProps):
   const language = useLanguage()
   const platform = usePlatform()
   const prompt = props.state ?? usePrompt()
+  const design = useDesignMode()
   let editor: HTMLDivElement | undefined
 
   const interaction = createPromptInputV2State()
@@ -238,6 +242,7 @@ export function usePromptInputV2Controller(props: PromptInputV2ControllerProps):
     onAbort: props.onAbort,
     onSubmit: props.onSubmit,
     model: props.controls.model.selection,
+    designMetadata: () => design.consumeMetadata(),
   })
 
   const referenceDescription = (reference: ReferenceInfo) =>
@@ -432,6 +437,12 @@ export function usePromptInputV2Controller(props: PromptInputV2ControllerProps):
     },
   })
   Object.defineProperty(controller, "model", { get: () => props.controls.model })
+
+  createEffect(() => {
+    design.setAttachHandler((file) => controller.addAttachments([file]))
+    const model = props.controls.model.selection.current()
+    design.setVision(model?.capabilities?.input?.image ?? false)
+  })
 
   command.register("prompt-input", () => [
     {

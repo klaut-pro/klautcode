@@ -120,6 +120,32 @@ function preserveRecentBudget(input: { cfg: ConfigV1.Info; model: Provider.Model
   )
 }
 
+// Bounds the messages a compaction pass will summarize to a safe fraction of the
+// model's usable context so compaction succeeds even after switching to a
+// smaller-context model. Token estimates undercount vs the provider's tokenizer
+// and the summary output must also fit, so a wide safety margin is kept. The
+// most recent messages are preserved; the oldest are dropped first.
+export function boundCompactionHead(input: {
+  messages: SessionV1.WithParts[]
+  nextPrompt: string
+  usableBudget: number
+}): SessionV1.WithParts[] {
+  const { messages, nextPrompt, usableBudget } = input
+  if (messages.length === 0) return messages
+  const budget = Math.max(0, Math.floor(usableBudget * 0.7) - Token.estimate(nextPrompt) - 4096)
+  let total = 0
+  const kept: SessionV1.WithParts[] = []
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const text = serialize(messages[i])
+    const size = text ? Token.estimate(text) : 0
+    if (kept.length > 0 && total + size > budget) break
+    kept.unshift(messages[i])
+    total += size
+  }
+  if (kept.length === messages.length) return messages
+  return kept
+}
+
 function turns(messages: SessionV1.WithParts[]) {
   const result: Turn[] = []
   for (let i = 0; i < messages.length; i++) {
@@ -384,7 +410,12 @@ const layer = Layer.effect(
       const nextPrompt = compacting.prompt ?? buildPrompt({ previousSummary, context: compacting.context })
       const msgs = structuredClone(selected.head)
       yield* plugin.trigger("experimental.chat.messages.transform", {}, { messages: msgs })
-      const conversation = msgs.map(serialize).filter(Boolean).join("\n\n")
+      const bounded = boundCompactionHead({
+        messages: msgs,
+        nextPrompt,
+        usableBudget: usable({ cfg, model }),
+      })
+      const conversation = bounded.map(serialize).filter(Boolean).join("\n\n")
       const ctx = yield* InstanceState.context
       const msg: SessionV1.Assistant = {
         id: MessageID.ascending(),

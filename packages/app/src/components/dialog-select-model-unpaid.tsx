@@ -9,6 +9,7 @@ import { type Component, Show } from "solid-js"
 import { useLocal } from "@/context/local"
 import { popularProviders, useProviders } from "@/hooks/use-providers"
 import { ModelTooltip } from "./model-tooltip"
+import { isFreeModel } from "@/hooks/provider-catalog"
 import { useLanguage } from "@/context/language"
 import { decode64 } from "@/utils/base64"
 
@@ -61,7 +62,7 @@ export const DialogSelectModelUnpaid: Component<{ model?: ModelState }> = (props
                 <ModelTooltip
                   model={item}
                   latest={item.latest}
-                  free={item.provider.id === "klautcode" && (!item.cost || item.cost.input === 0)}
+                  free={isFreeModel(item.provider.id, item.cost)}
                 />
               }
             >

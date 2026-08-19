@@ -20,8 +20,9 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 480px;
+    width: min(480px, calc(100vw - 32px));
     height: 368px;
+    max-height: calc(100dvh - 32px);
     background: var(--v2-background-bg-layer-01);
     box-shadow: var(--v2-elevation-overlay);
     border-radius: 6px;

@@ -1,13 +1,15 @@
-import { createEffect, createMemo, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, createMemo, For, onCleanup, onMount, Show } from "solid-js"
 import { createStore } from "solid-js/store"
 import { Icon } from "@klautcode/ui/icon"
 import { IconButtonV2 } from "@klautcode/ui/v2/icon-button-v2"
 import { Icon as IconV2 } from "@klautcode/ui/v2/icon"
+import { MenuV2 } from "@klautcode/ui/v2/menu-v2"
 import { TooltipV2 } from "@klautcode/ui/v2/tooltip-v2"
 import { useLanguage } from "@/context/language"
+import { useLayout } from "@/context/layout"
 import { usePlatform } from "@/context/platform"
 import { browserUrlFromTab } from "@/pages/session/helpers"
-import { getBrowserTabState, setBrowserTabState, BROWSER_HOME_URL } from "./browser-state"
+import { BROWSER_HOME_URL } from "./browser-state"
 
 // Minimal surface of Electron's <webview> guest element used by the internal
 // browser. It only exists in the desktop shell; the web build shows a fallback.
@@ -46,10 +48,13 @@ function openWebviewUrl(webview: WebviewTag, url: string) {
 export function BrowserTab(props: { tab: string }) {
   const language = useLanguage()
   const platform = usePlatform()
+  const layout = useLayout()
   const initialUrl = createMemo(() => {
+    const state = layout.browser.get(props.tab)
+    if (state?.url) return state.url
     const url = browserUrlFromTab(props.tab)
     if (url) return url
-    return getBrowserTabState(props.tab)?.url ?? BROWSER_HOME_URL
+    return BROWSER_HOME_URL
   })
   const [store, setStore] = createStore({
     input: initialUrl(),
@@ -65,10 +70,16 @@ export function BrowserTab(props: { tab: string }) {
     openWebviewUrl(webview, url)
   }
 
+  const recordVisit = (url: string) => {
+    if (!url || url === "about:blank") return
+    layout.browser.set(props.tab, { url })
+    layout.browser.pushHistory(props.tab, url)
+  }
+
   const syncTitle = () => {
     if (!webview) return
     const title = webview.getTitle()
-    setBrowserTabState(props.tab, { url: webview.getURL() || store.input, title: title || undefined })
+    layout.browser.set(props.tab, { url: webview.getURL() || store.input, title: title || undefined })
   }
 
   onMount(() => {
@@ -76,7 +87,7 @@ export function BrowserTab(props: { tab: string }) {
     const el = document.createElement("webview") as WebviewTag
     el.setAttribute("partition", "persist:klautcode-browser")
     el.setAttribute("allowpopups", "false")
-    el.style.display = "block"
+    el.style.display = "flex"
     el.style.width = "100%"
     el.style.flex = "1"
     el.style.minHeight = "0"
@@ -88,6 +99,7 @@ export function BrowserTab(props: { tab: string }) {
       if (url) {
         loadedUrl = url
         setStore("input", url)
+        recordVisit(url)
       }
       syncTitle()
     }
@@ -118,7 +130,7 @@ export function BrowserTab(props: { tab: string }) {
 
   createEffect(() => {
     if (!webview || platform.platform !== "desktop") return
-    const url = getBrowserTabState(props.tab)?.url
+    const url = layout.browser.get(props.tab)?.url
     if (url && url !== loadedUrl) load(url)
   })
 
@@ -127,9 +139,9 @@ export function BrowserTab(props: { tab: string }) {
     if (!webview) return
     const url = normalizeUrl(store.input)
     if (!url) return
-    setBrowserTabState(props.tab, { url })
     setStore("input", url)
     load(url)
+    recordVisit(url)
   }
 
   const reload = () => {
@@ -140,9 +152,16 @@ export function BrowserTab(props: { tab: string }) {
   const goForward = () => webview?.goForward()
   const goHome = () => {
     if (!webview) return
-    setBrowserTabState(props.tab, { url: BROWSER_HOME_URL })
     setStore("input", BROWSER_HOME_URL)
     load(BROWSER_HOME_URL)
+    recordVisit(BROWSER_HOME_URL)
+  }
+
+  const navigateTo = (url: string) => {
+    if (!webview) return
+    setStore("input", url)
+    load(url)
+    recordVisit(url)
   }
 
   return (
@@ -198,6 +217,36 @@ export function BrowserTab(props: { tab: string }) {
             aria-label={language.t("browser.home")}
           />
         </TooltipV2>
+        <MenuV2 gutter={4} placement="bottom-end">
+          <MenuV2.Trigger
+            as={IconButtonV2}
+            type="button"
+            variant="ghost-muted"
+            size="small"
+            icon={<IconV2 name="reset" />}
+            aria-label={language.t("browser.history")}
+          />
+          <MenuV2.Portal>
+            <MenuV2.Content>
+              <Show
+                when={layout.browser.get(props.tab)?.history?.length}
+                fallback={
+                  <MenuV2.Item disabled>
+                    <span class="text-12-regular text-text-weak">{language.t("browser.history.empty")}</span>
+                  </MenuV2.Item>
+                }
+              >
+                <For each={[...(layout.browser.get(props.tab)?.history ?? [])].reverse()}>
+                  {(url) => (
+                    <MenuV2.Item onSelect={() => navigateTo(url)}>
+                      <span class="block max-w-64 truncate">{url}</span>
+                    </MenuV2.Item>
+                  )}
+                </For>
+              </Show>
+            </MenuV2.Content>
+          </MenuV2.Portal>
+        </MenuV2>
       </form>
       <Show
         when={platform.platform === "desktop"}
@@ -213,7 +262,11 @@ export function BrowserTab(props: { tab: string }) {
           </div>
         }
       >
-        <div ref={ref} class="flex min-h-0 flex-1 flex-col" data-component="browser-webview" />
+        <div
+          ref={ref}
+          class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
+          data-component="browser-webview"
+        />
       </Show>
     </div>
   )

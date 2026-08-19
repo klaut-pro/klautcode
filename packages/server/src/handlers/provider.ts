@@ -1,24 +1,10 @@
 import { Catalog } from "@klautcode/core/catalog"
-import { Global } from "@klautcode/core/global"
 import { Effect } from "effect"
 import { HttpApiBuilder } from "effect/unstable/httpapi"
 import { Api } from "../api"
 import { ProviderNotFoundError } from "@klautcode/protocol/errors"
+import { readAuthKeys } from "./auth-keys"
 import { response } from "../location"
-
-function readAuthKeys(): Set<string> {
-  try {
-    const raw = require("node:fs").readFileSync(Global.Path.data + "/auth.json", "utf8")
-    const parsed = JSON.parse(raw) as Record<string, { type?: string }>
-    return new Set(
-      Object.entries(parsed)
-        .filter(([, info]) => info.type === "api")
-        .map(([id]) => id),
-    )
-  } catch {
-    return new Set<string>()
-  }
-}
 
 export const ProviderHandler = HttpApiBuilder.group(Api, "server.provider", (handlers) =>
   Effect.gen(function* () {

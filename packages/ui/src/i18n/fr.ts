@@ -85,6 +85,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "Délégation du travail",
   "ui.sessionTurn.status.planning": "Planification des prochaines étapes",
   "ui.sessionTurn.status.gatheringContext": "Exploration",
+  "ui.messagePart.thinking": "Réflexion…",
+  "ui.messagePart.thinkingDone": "Processus de réflexion",
   "ui.sessionTurn.status.gatheredContext": "Exploré",
   "ui.sessionTurn.status.searchingCodebase": "Recherche dans la base de code",
   "ui.sessionTurn.status.searchingWeb": "Recherche sur le Web",
@@ -182,6 +184,7 @@ export const dict = {
   "ui.common.showMore": "Afficher plus",
 
   "ui.permission.deny": "Refuser",
+  "ui.permission.allowAlwaysGlobal": "Autoriser globalement",
   "ui.permission.allowAlways": "Toujours autoriser",
   "ui.permission.allowOnce": "Autoriser une fois",
 

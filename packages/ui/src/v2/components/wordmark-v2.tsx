@@ -3,7 +3,7 @@ import { For, createUniqueId, type ComponentProps } from "solid-js"
 const LETTERS: Array<{ x: number; d: string }> = [
   {
     x: 0,
-    d: "M0 18H18V110H0ZM30.73 76.73L76.73 30.73L51.27 5.27L5.27 51.27ZM5.27 76.73L51.27 122.73L76.73 97.27L30.73 51.27Z",
+    d: "M0 18H18V110H0ZM18 60L64 16L48 4L10 44ZM10 50L48 88L64 76L18 38Z",
   },
   {
     x: 80,
@@ -11,7 +11,7 @@ const LETTERS: Array<{ x: number; d: string }> = [
   },
   {
     x: 160,
-    d: "M27.51 114.19L49.51 22.19L14.49 13.81L-7.51 105.81ZM71.51 105.81L49.51 13.81L14.49 22.19L36.49 114.19ZM14 54H50V72H14Z",
+    d: "M20 14L32 14L44 106L32 106ZM48 14L60 14L48 106L36 106ZM22 54L58 54L58 72L22 72Z",
   },
   {
     x: 240,

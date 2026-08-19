@@ -1,5 +1,5 @@
 import type { Effect, Scope } from "effect"
-import type { PluginContext } from "./context.js"
+import type { PluginContext } from "./context.ts"
 
 export interface Plugin<R = Scope.Scope> {
   readonly id: string

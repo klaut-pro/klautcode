@@ -10,7 +10,7 @@ import type {
   IntegrationRef,
 } from "@klautcode/sdk/v2/types"
 import type { Effect, Scope } from "effect"
-import type { Hooks } from "./registration.js"
+import type { Hooks } from "./registration.ts"
 
 export type IntegrationOAuthAuthorization = {
   readonly url: string

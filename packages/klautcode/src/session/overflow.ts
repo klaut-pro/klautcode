@@ -28,7 +28,15 @@ export function isOverflow(input: {
   if (input.cfg.compaction?.auto === false) return false
   if (input.model.limit.context === 0) return false
 
+  // Account for everything the provider counts toward the context window,
+  // including cached and reasoning tokens, so reasoning-heavy models trigger
+  // compaction before the request exceeds the model's real capacity.
   const count =
-    input.tokens.total || input.tokens.input + input.tokens.output + input.tokens.cache.read + input.tokens.cache.write
+    input.tokens.total ||
+    input.tokens.input +
+      input.tokens.output +
+      input.tokens.reasoning +
+      input.tokens.cache.read +
+      input.tokens.cache.write
   return count >= usable(input)
 }

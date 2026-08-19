@@ -9,6 +9,7 @@ import { SettingsKeybinds } from "../settings-keybinds"
 import { SettingsPermissionsV2 } from "./permissions"
 import { SettingsProvidersV2 } from "./providers"
 import { SettingsModelsV2 } from "./models"
+import { SettingsMcpV2 } from "./mcp"
 import "./settings-v2.css"
 import { SettingsServersV2 } from "./servers"
 import { SettingsOpencodeImportV2 } from "./opencode-import"
@@ -71,6 +72,10 @@ export const DialogSettings: Component<{
                       <Icon name="shield" />
                       {language.t("settings.tab.permissions")}
                     </TabsV2.Trigger>
+                    <TabsV2.Trigger value="mcp">
+                      <Icon name="mcp" />
+                      {language.t("settings.tab.mcp")}
+                    </TabsV2.Trigger>
                     <Show when={platform.opencodeImport}>
                       <TabsV2.Trigger value="import">
                         <Icon name="download" />
@@ -113,6 +118,9 @@ export const DialogSettings: Component<{
         </TabsV2.Content>
         <TabsV2.Content value="permissions" class="settings-v2-panel">
           <SettingsPermissionsV2 />
+        </TabsV2.Content>
+        <TabsV2.Content value="mcp" class="settings-v2-panel">
+          <SettingsMcpV2 />
         </TabsV2.Content>
         <Show when={platform.opencodeImport}>
           <TabsV2.Content value="import" class="settings-v2-panel">

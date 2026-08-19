@@ -84,6 +84,8 @@ export const dict: Record<string, string> = {
   "ui.sessionTurn.status.delegating": "Mendelegasikan pekerjaan",
   "ui.sessionTurn.status.planning": "Merencanakan langkah selanjutnya",
   "ui.sessionTurn.status.gatheringContext": "Menjelajah",
+  "ui.messagePart.thinking": "Berpikir…",
+  "ui.messagePart.thinkingDone": "Proses berpikir",
   "ui.sessionTurn.status.gatheredContext": "Selesai menjelajah",
   "ui.sessionTurn.status.searchingCodebase": "Mencari di basis kode",
   "ui.sessionTurn.status.searchingWeb": "Mencari di web",
@@ -188,6 +190,7 @@ export const dict: Record<string, string> = {
   "ui.common.showMore": "Tampilkan lebih banyak",
 
   "ui.permission.deny": "Tolak",
+  "ui.permission.allowAlwaysGlobal": "Izinkan secara global",
   "ui.permission.allowAlways": "Izinkan selalu",
   "ui.permission.allowOnce": "Izinkan sekali",
 

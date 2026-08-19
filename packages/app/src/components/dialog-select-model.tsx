@@ -23,10 +23,7 @@ import { createMenuDismissController } from "@/utils/menu-dismiss-controller"
 import { createEventListener } from "@solid-primitives/event-listener"
 import { matchesModelSearch } from "./dialog-select-model-search"
 
-const isFree = (provider: string, cost: { input: number } | undefined) =>
-  provider === "klautcode" ||
-  provider === "opencode-go" ||
-  (provider === "opencode" && (!cost || cost.input === 0))
+import { isFreeModel } from "@/hooks/provider-catalog"
 
 type ModelState = ReturnType<typeof useLocal>["model"]
 type ModelItem = ReturnType<ModelState["list"]>[number]
@@ -74,10 +71,10 @@ const ModelList: Component<{
       current={model.current()}
       filterKeys={["provider.name", "name", "id"]}
       sortBy={(a, b) => a.name.localeCompare(b.name)}
-      groupBy={(x) => (isFree(x.provider.id, x.cost) ? language.t("dialog.model.unpaid.freeModels.title") : x.provider.name)}
+      groupBy={(x) => (isFreeModel(x.provider.id, x.cost) ? language.t("dialog.model.unpaid.freeModels.title") : x.provider.name)}
       sortGroupsBy={(a, b) => {
-        const aFree = isFree(a.items[0].provider.id, a.items[0].cost)
-        const bFree = isFree(b.items[0].provider.id, b.items[0].cost)
+        const aFree = isFreeModel(a.items[0].provider.id, a.items[0].cost)
+        const bFree = isFreeModel(b.items[0].provider.id, b.items[0].cost)
         if (aFree && !bFree) return -1
         if (!aFree && bFree) return 1
         const aProvider = a.items[0].provider.id
@@ -92,7 +89,7 @@ const ModelList: Component<{
           placement="right-start"
           gutter={12}
           openDelay={0}
-          value={<ModelTooltip model={item} latest={item.latest} free={isFree(item.provider.id, item.cost)} />}
+          value={<ModelTooltip model={item} latest={item.latest} free={isFreeModel(item.provider.id, item.cost)} />}
         >
           {node}
         </Tooltip>
@@ -107,7 +104,7 @@ const ModelList: Component<{
       {(i) => (
         <div class="w-full flex items-center gap-x-2 text-13-regular">
           <span class="truncate">{i.name}</span>
-          <Show when={isFree(i.provider.id, i.cost)}>
+          <Show when={isFreeModel(i.provider.id, i.cost)}>
             <Tag>{language.t("model.tag.free")}</Tag>
           </Show>
           <Show when={i.latest}>
@@ -281,8 +278,8 @@ function createModelSelectorController(input: {
       return [...filtered].sort((a, b) => a.name.localeCompare(b.name))
     },
     groups: (models: ModelItem[]) => {
-      const free = models.filter((item) => isFree(item.provider.id, item.cost))
-      const rest = models.filter((item) => !isFree(item.provider.id, item.cost))
+      const free = models.filter((item) => isFreeModel(item.provider.id, item.cost))
+      const rest = models.filter((item) => !isFreeModel(item.provider.id, item.cost))
       const byProvider = new Map<string, ModelItem[]>()
       for (const item of rest) {
         byProvider.set(item.provider.id, [...(byProvider.get(item.provider.id) ?? []), item])
@@ -480,7 +477,7 @@ function ModelSelectorPopoverV2View(props: {
                                 <ModelTooltip
                                   model={item}
                                   latest={item.latest}
-                                  free={isFree(item.provider.id, item.cost)}
+                                  free={isFreeModel(item.provider.id, item.cost)}
                                   v2
                                 />
                               }
@@ -498,7 +495,7 @@ function ModelSelectorPopoverV2View(props: {
                                 onSelect={() => selectModel(item)}
                               >
                                 <span class="min-w-0 truncate leading-5">{item.name}</span>
-                                <Show when={isFree(item.provider.id, item.cost)}>
+                                <Show when={isFreeModel(item.provider.id, item.cost)}>
                                   <TagV2 class="shrink-0">{language.t("model.tag.free")}</TagV2>
                                 </Show>
                                 <Show when={item.latest}>

@@ -10,6 +10,15 @@ export function directoryAcceptKey(directory: string) {
   return `${base64Encode(directory)}/*`
 }
 
+/** Global auto-accept for every request of one permission type (e.g. external_directory). */
+export function globalAcceptKey(permission: string) {
+  return `*:${permission}`
+}
+
+export function isGlobalAutoAccepting(autoAccept: Record<string, boolean>, permission: string) {
+  return autoAccept[globalAcceptKey(permission)] === true
+}
+
 function accepted(autoAccept: Record<string, boolean>, sessionID: string, directory?: string) {
   const key = acceptKey(sessionID, directory)
   return autoAccept[key] ?? autoAccept[sessionID]
@@ -41,9 +50,11 @@ function sessionLineage(session: { id: string; parentID?: string }[], sessionID:
 export function autoRespondsPermission(
   autoAccept: Record<string, boolean>,
   session: { id: string; parentID?: string }[],
-  permission: { sessionID: string },
+  permission: { sessionID: string; permission?: string },
   directory?: string,
 ) {
+  const global = permission.permission ? isGlobalAutoAccepting(autoAccept, permission.permission) : false
+  if (global) return true
   const value = sessionAutoAccept(autoAccept, session, permission, directory)
   if (value !== undefined) return value
   return directory ? isDirectoryAutoAccepting(autoAccept, directory) : false

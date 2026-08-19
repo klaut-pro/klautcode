@@ -20,6 +20,7 @@ import { Message, Part, UserMessage } from "@klautcode/sdk/v2"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { createSessionOwnership } from "./session-ownership"
 import { useLocal } from "@/context/local"
+import { useDesignMode } from "@/components/design-mode/controller"
 
 export type SessionCommandContext = {
   navigateMessageByOffset: (offset: number) => void
@@ -650,6 +651,19 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
     }),
   ]
 
+  const designMode = useDesignMode()
+  const designModeCmds = () =>
+    sessionCommand({
+      id: "design-mode.toggle",
+      title: language.t("command.designMode.toggle"),
+      keybind: "mod+shift+d",
+      disabled: designMode.capturing(),
+      onSelect: () => {
+        if (designMode.active()) designMode.exit()
+        else void designMode.enter()
+      },
+    })
+
   command.register("session", () => [
     ...sessionCmds(),
     ...shareCmds(),
@@ -660,5 +674,6 @@ export const useSessionCommands = (actions: SessionCommandContext) => {
     ...messageCmds(),
     ...mcpCmds(),
     ...permissionsCmds(),
+    designModeCmds(),
   ])
 }

@@ -75,10 +75,15 @@ export function createSessionComposerController(options?: { closeMs?: number | (
     return store.responding === perm.id
   })
 
-  const decide = (response: "once" | "always" | "reject") => {
+  const decide = (response: "once" | "always" | "global" | "reject") => {
     const perm = permissionRequest()
     if (!perm) return
     if (store.responding === perm.id) return
+
+    if (response === "global") {
+      permission.enableGlobalAutoAccept(perm.permission)
+      return
+    }
 
     setStore("responding", perm.id)
     sdk()

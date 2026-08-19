@@ -1,5 +1,5 @@
-import type { CommandDraft } from "../effect/command.js"
-import type { Hooks } from "./registration.js"
+import type { CommandDraft } from "../effect/command.ts"
+import type { Hooks } from "./registration.ts"
 
 export type { CommandDraft }
 

@@ -81,6 +81,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "Delegerer arbejde",
   "ui.sessionTurn.status.planning": "Planlægger næste trin",
   "ui.sessionTurn.status.gatheringContext": "Udforsker",
+  "ui.messagePart.thinking": "Tænker…",
+  "ui.messagePart.thinkingDone": "Tankeproces",
   "ui.sessionTurn.status.gatheredContext": "Udforsket",
   "ui.sessionTurn.status.searchingCodebase": "Søger i koden",
   "ui.sessionTurn.status.searchingWeb": "Søger på nettet",
@@ -155,6 +157,7 @@ export const dict = {
   "ui.common.showMore": "Vis mere",
 
   "ui.permission.deny": "Afvis",
+  "ui.permission.allowAlwaysGlobal": "Tillad globalt",
   "ui.permission.allowAlways": "Tillad altid",
   "ui.permission.allowOnce": "Tillad én gang",
 

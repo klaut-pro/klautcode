@@ -1,6 +1,6 @@
-import type { IntegrationDraft, IntegrationMethodRegistration } from "../effect/integration.js"
+import type { IntegrationDraft, IntegrationMethodRegistration } from "../effect/integration.ts"
 import type { CredentialValue } from "@klautcode/sdk/v2/types"
-import type { Hooks } from "./registration.js"
+import type { Hooks } from "./registration.ts"
 
 export type { IntegrationDraft, IntegrationMethodRegistration }
 

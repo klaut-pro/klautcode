@@ -1,5 +1,5 @@
-import type { AgentDraft } from "../effect/agent.js"
-import type { Hooks } from "./registration.js"
+import type { AgentDraft } from "../effect/agent.ts"
+import type { Hooks } from "./registration.ts"
 
 export type { AgentDraft }
 

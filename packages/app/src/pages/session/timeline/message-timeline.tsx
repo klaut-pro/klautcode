@@ -695,12 +695,20 @@ export function MessageTimeline(props: {
   const regenerateTitleMutation = useMutation(() => ({
     mutationFn: (id: string) =>
       sdk().client.session.regenerateTitle({ sessionID: id, directory: sdk().directory }),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       showToast({
         variant: "success",
         icon: "circle-check",
         title: language.t("session.title.regenerated"),
       })
+      // Refresh the session info so the regenerated title appears immediately
+      // in the top tab and the project sidebar (both read the remembered info).
+      void sdk()
+        .client.session.get({ sessionID: id, directory: sdk().directory })
+        .then((result) => {
+          if (result.data) sync().session.remember(result.data)
+        })
+        .catch(() => {})
     },
     onError: (err) => {
       showToast({

@@ -88,6 +88,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "Delegiranje posla",
   "ui.sessionTurn.status.planning": "Planiranje sljedećih koraka",
   "ui.sessionTurn.status.gatheringContext": "Istraživanje",
+  "ui.messagePart.thinking": "Razmišljanje…",
+  "ui.messagePart.thinkingDone": "Proces razmišljanja",
   "ui.sessionTurn.status.gatheredContext": "Istraženo",
   "ui.sessionTurn.status.searchingCodebase": "Pretraživanje baze koda",
   "ui.sessionTurn.status.searchingWeb": "Pretraživanje weba",
@@ -184,6 +186,7 @@ export const dict = {
   "ui.common.showMore": "Prikaži više",
 
   "ui.permission.deny": "Odbij",
+  "ui.permission.allowAlwaysGlobal": "Dozvoli globalno",
   "ui.permission.allowAlways": "Uvijek dozvoli",
   "ui.permission.allowOnce": "Dozvoli jednom",
 

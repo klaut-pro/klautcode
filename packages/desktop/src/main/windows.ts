@@ -53,6 +53,10 @@ let relaunchHandler = () => {
 const titlebarThemes = new WeakMap<BrowserWindow, Partial<TitlebarTheme>>()
 const pinchZoomEnabled = new WeakMap<BrowserWindow, boolean>()
 const windowIDs = new WeakMap<BrowserWindow, string>()
+// The embedded browser's <webview> guest for each window. The app renders the
+// webview only while its browser tab is active, so at most one guest exists per
+// window. Used to route design-mode probing/capture onto the page itself.
+const webviewGuests = new WeakMap<BrowserWindow, Electron.WebContents>()
 const registry = createWindowRegistry<BrowserWindow>({
   read: () => getStore().get(WINDOW_IDS_KEY),
   write: (ids) => getStore().set(WINDOW_IDS_KEY, ids),
@@ -274,6 +278,10 @@ function wireNavigationPolicy(win: BrowserWindow) {
 // navigate to the app's own renderer URL.
 function wireWebviewGuests(win: BrowserWindow) {
   win.webContents.on("did-attach-webview", (_event, contents) => {
+    webviewGuests.set(win, contents)
+    contents.once("destroyed", () => {
+      if (webviewGuests.get(win) === contents) webviewGuests.delete(win)
+    })
     contents.setWindowOpenHandler(({ url }) => {
       openExternalURL(url)
       return { action: "deny" }
@@ -284,6 +292,15 @@ function wireWebviewGuests(win: BrowserWindow) {
       openExternalURL(url)
     })
   })
+}
+
+// The active browser tab's guest webContents for this window, when attached.
+// The app only mounts the <webview> while its browser tab is active, so this is
+// undefined for ordinary windows (design mode then targets the app renderer).
+export function getWebviewGuest(win: BrowserWindow) {
+  const guest = webviewGuests.get(win)
+  if (!guest || guest.isDestroyed()) return undefined
+  return guest
 }
 
 function registerWindow(win: BrowserWindow, id: string) {

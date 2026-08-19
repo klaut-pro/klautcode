@@ -12,10 +12,10 @@ import type {
 } from "@klautcode/sdk"
 import type { Provider as ProviderV2, Model as ModelV2, Auth } from "@klautcode/sdk/v2"
 
-import type { BunShell } from "./shell.js"
-import { type ToolDefinition } from "./tool.js"
+import type { BunShell } from "./shell.ts"
+import { type ToolDefinition } from "./tool.ts"
 
-export * from "./tool.js"
+export * from "./tool.ts"
 
 export type ProviderContext = {
   source: "env" | "config" | "custom" | "api"

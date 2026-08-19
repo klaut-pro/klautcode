@@ -12,7 +12,8 @@ import { displayName } from "@/pages/layout/helpers"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { SessionFileView } from "@/pages/session/file-tabs"
 import { BrowserTab } from "@/pages/session/browser/browser-tab"
-import { browserUrlFromTab } from "@/pages/session/helpers"
+import { MarkdownPreview } from "@/pages/session/browser/markdown-preview"
+import { browserUrlFromTab, markdownPathFromTab } from "@/pages/session/helpers"
 import { applyFileListKeyDown, SessionFileListV2 } from "@/pages/session/v2/session-file-list-v2"
 import { pathKey } from "@/utils/path-key"
 
@@ -94,8 +95,13 @@ export function SessionFileBrowserTab(props: {
   // Keep the sidebar outside Kobalte Tabs.Content: a morphing content value
   // unmounts the whole panel on every file-tab switch and resets sidebar scroll.
   const isBrowser = createMemo(() => !!browserUrlFromTab(props.tab))
+  const isMarkdown = createMemo(() => !!markdownPathFromTab(props.tab))
 
   if (isBrowser()) return <BrowserTab tab={props.tab} />
+  if (isMarkdown()) {
+    const path = markdownPathFromTab(props.tab)!
+    return <MarkdownPreview path={path} />
+  }
 
   return (
     <SessionFilePanelV2

@@ -251,6 +251,10 @@ const createPlatform = (windowState: DesktopWindowState): Platform => {
 
     recordFatalRendererError: (error) => window.api.recordFatalRendererError(error),
 
+    captureWindow: () => window.api.captureWindow(),
+
+    runProbeScript: (script) => window.api.runProbeScript(script),
+
     opencodeImport: {
       scan: (directory) => window.api.opencodeScan(directory),
       run: (directory, projectIds) => window.api.opencodeImport(directory, projectIds),

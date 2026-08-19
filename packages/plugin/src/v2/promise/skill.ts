@@ -1,5 +1,5 @@
-import type { SkillDraft } from "../effect/skill.js"
-import type { Hooks } from "./registration.js"
+import type { SkillDraft } from "../effect/skill.ts"
+import type { Hooks } from "./registration.ts"
 
 export type { SkillDraft }
 

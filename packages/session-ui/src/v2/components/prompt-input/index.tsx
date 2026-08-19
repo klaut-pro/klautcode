@@ -45,6 +45,7 @@ export type PromptInputV2Props = {
   variantControlVisible?: boolean
   attachKeybind?: string[]
   attachShortcut?: string
+  designModeControl?: JSX.Element
 }
 
 export function PromptInputV2(props: PromptInputV2Props) {
@@ -255,6 +256,7 @@ export function PromptInputV2(props: PromptInputV2Props) {
                 </Show>
               )}
             </Show>
+            <Show when={props.designModeControl}>{props.designModeControl}</Show>
           </div>
           <PromptInputV2SubmitButton
             mode={state.mode}

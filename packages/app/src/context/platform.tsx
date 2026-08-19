@@ -148,6 +148,12 @@ type PlatformBase = {
     scan(directory?: string): Promise<OpencodeImportScan>
     run(directory: string, projectIds: string[]): Promise<OpencodeImportResult>
   }
+
+  /** Capture the app window as a PNG data URL at native resolution (desktop only) */
+  captureWindow?(): Promise<{ dataUrl: string; width: number; height: number }>
+
+  /** Execute a script string against the app window and return a JSON-serializable result (desktop only) */
+  runProbeScript?(script: string): Promise<unknown>
 }
 
 export type Platform = PlatformBase &

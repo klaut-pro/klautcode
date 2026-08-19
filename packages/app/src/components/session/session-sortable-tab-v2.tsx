@@ -8,8 +8,8 @@ import { Tabs } from "@klautcode/ui/tabs"
 import { useFile } from "@/context/file"
 import { useLanguage } from "@/context/language"
 import { useCommand } from "@/context/command"
-import { browserUrlFromTab } from "@/pages/session/helpers"
-import { BrowserVisual, FileVisual } from "./session-sortable-tab"
+import { browserUrlFromTab, markdownPathFromTab } from "@/pages/session/helpers"
+import { BrowserVisual, FileVisual, MarkdownVisual } from "./session-sortable-tab"
 
 export function SortableTabV2(props: {
   tab: string
@@ -35,6 +35,8 @@ export function SortableTabV2(props: {
     const value = path()
     if (value) return <FileVisual path={value} temporary={props.temporary} />
     if (browserUrlFromTab(props.tab)) return <BrowserVisual tab={props.tab} temporary={props.temporary} />
+    const markdown = markdownPathFromTab(props.tab)
+    if (markdown) return <MarkdownVisual path={markdown} temporary={props.temporary} />
     return
   })
   return (

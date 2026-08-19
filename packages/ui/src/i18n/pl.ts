@@ -84,6 +84,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "Delegowanie pracy",
   "ui.sessionTurn.status.planning": "Planowanie kolejnych kroków",
   "ui.sessionTurn.status.gatheringContext": "Eksplorowanie",
+  "ui.messagePart.thinking": "Myślenie…",
+  "ui.messagePart.thinkingDone": "Proces myślowy",
   "ui.sessionTurn.status.gatheredContext": "Eksplorowanie zakończone",
   "ui.sessionTurn.status.searchingCodebase": "Przeszukiwanie bazy kodu",
   "ui.sessionTurn.status.searchingWeb": "Przeszukiwanie sieci",
@@ -184,6 +186,7 @@ export const dict = {
   "ui.common.file": "Plik",
 
   "ui.permission.deny": "Odmów",
+  "ui.permission.allowAlwaysGlobal": "Zezwalaj globalnie",
   "ui.permission.allowAlways": "Zezwalaj zawsze",
   "ui.permission.allowOnce": "Zezwól raz",
 

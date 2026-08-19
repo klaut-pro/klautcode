@@ -62,6 +62,8 @@ export const dict: Record<Keys, string> = {
   "ui.sessionTurn.status.delegating": "Delegerer arbeid",
   "ui.sessionTurn.status.planning": "Planlegger neste trinn",
   "ui.sessionTurn.status.gatheringContext": "Utforsker",
+  "ui.messagePart.thinking": "Tenker…",
+  "ui.messagePart.thinkingDone": "Tankeprosess",
   "ui.sessionTurn.status.gatheredContext": "Utforsket",
   "ui.sessionTurn.status.searchingCodebase": "Søker i kodebasen",
   "ui.sessionTurn.status.searchingWeb": "Søker på nettet",
@@ -155,6 +157,7 @@ export const dict: Record<Keys, string> = {
   "ui.common.file": "Fil",
 
   "ui.permission.deny": "Avslå",
+  "ui.permission.allowAlwaysGlobal": "Tillat globalt",
   "ui.permission.allowAlways": "Tillat alltid",
   "ui.permission.allowOnce": "Tillat én gang",
 

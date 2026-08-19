@@ -1,0 +1,51 @@
+[data-component="running-dots"] {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 3px);
+  grid-template-rows: repeat(3, 3px);
+  gap: 1.5px;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+[data-component="running-dots"] [data-dot] {
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.25;
+  animation: running-dots-pulse 1.2s ease-in-out infinite;
+}
+
+[data-component="running-dots"] [data-dot="1"],
+[data-component="running-dots"] [data-dot="4"],
+[data-component="running-dots"] [data-dot="7"] {
+  animation-delay: 0.2s;
+}
+
+[data-component="running-dots"] [data-dot="2"],
+[data-component="running-dots"] [data-dot="5"],
+[data-component="running-dots"] [data-dot="8"] {
+  animation-delay: 0.4s;
+}
+
+[data-component="running-dots"] [data-dot="3"],
+[data-component="running-dots"] [data-dot="6"] {
+  animation-delay: 0.6s;
+}
+
+@keyframes running-dots-pulse {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-component="running-dots"] [data-dot] {
+    animation: none;
+    opacity: 0.6;
+  }
+}

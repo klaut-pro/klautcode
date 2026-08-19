@@ -27,6 +27,7 @@ type BuildRequestPartsInput = {
   messageID: string
   sessionID: string
   sessionDirectory: string
+  designMetadata?: string
 }
 
 const absolute = (directory: string, path: string) => {
@@ -98,6 +99,15 @@ export function buildRequestParts(input: BuildRequestPartsInput) {
         },
       ]
     : []
+
+  if (input.designMetadata) {
+    requestParts.push({
+      id: Identifier.ascending("part"),
+      type: "text",
+      text: input.designMetadata,
+      synthetic: true,
+    })
+  }
 
   const files = input.prompt.filter(isFileAttachment).map((attachment) => {
     const path = absolute(input.sessionDirectory, attachment.path)

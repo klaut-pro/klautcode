@@ -634,6 +634,7 @@ describe("prompt submit worktree selection", () => {
 
     shouldQueue = false
     await submit.handleSubmit(event)
+    await Bun.sleep(0)
 
     expect(sentPrompts).toEqual(["/repo/main"])
     expect(queuedDrafts).toHaveLength(1)

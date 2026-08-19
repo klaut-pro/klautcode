@@ -56,11 +56,14 @@ import {
   type Sizing,
   browserTabForUrl,
   browserUrlFromTab,
+  markdownPathFromTab,
+  markdownTabForPath,
 } from "@/pages/session/helpers"
 import { setSessionHandoff } from "@/pages/session/handoff"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { BrowserTab } from "@/pages/session/browser/browser-tab"
-import { BROWSER_HOME_URL, clearBrowserTabState } from "@/pages/session/browser/browser-state"
+import { MarkdownPreview } from "@/pages/session/browser/markdown-preview"
+import { BROWSER_HOME_URL } from "@/pages/session/browser/browser-state"
 import { SessionFileBrowserTab, type SessionFileBrowserState } from "@/pages/session/v2/session-file-browser-tab"
 
 type ReviewDiff = FileDiffInfo | SnapshotFileDiff | VcsFileDiff
@@ -234,24 +237,34 @@ export function SessionSidePanel(props: {
     if (active === SESSION_OPEN_FILE_TAB) return SESSION_OPEN_FILE_TAB
     if (active && file.pathFromTab(active)) return active
     if (active && browserUrlFromTab(active)) return active
+    if (active && markdownPathFromTab(active)) return active
     return activeFileTab()
   })
   const activeBrowserTab = createMemo(() => {
     const active = activeTab()
     return active && browserUrlFromTab(active) ? active : undefined
   })
+  const activeMarkdownTab = createMemo(() => {
+    const active = activeTab()
+    return active && markdownPathFromTab(active) ? active : undefined
+  })
   // Release persisted browser state once its tab is closed.
   const closedBrowserTabs = new Set<string>()
   createEffect(() => {
     const current = new Set(openedTabs().filter((tab) => !!browserUrlFromTab(tab)))
     for (const tab of closedBrowserTabs) {
-      if (!current.has(tab)) clearBrowserTabState(tab)
+      if (!current.has(tab)) layout.browser.clear(tab)
     }
     closedBrowserTabs.clear()
     for (const tab of current) closedBrowserTabs.add(tab)
   })
   const openBrowserTab = (url: string) => {
     const tab = browserTabForUrl(url)
+    tabs().open(tab)
+    tabs().setActive(tab)
+  }
+  const openMarkdownTab = (path: string) => {
+    const tab = markdownTabForPath(path)
     tabs().open(tab)
     tabs().setActive(tab)
   }
@@ -262,10 +275,24 @@ export function SessionSidePanel(props: {
     if (!path) return
     openBrowserTab(`file://${path}`)
   }
-  const activeTabMode = createMemo<"file" | "browser" | undefined>(() => {
+  const openActiveFileAsMarkdown = () => {
+    const active = activeTab()
+    if (!active) return
+    const path = file.pathFromTab(active)
+    if (!path) return
+    openMarkdownTab(path)
+  }
+  const openMarkdownPicker = () => {
+    void import("@/components/dialog-select-file").then((x) => {
+      dialog.show(() => <x.DialogSelectFile mode="files" onOpenFile={openActiveFileAsMarkdown} />)
+    })
+  }
+  const activeTabMode = createMemo<"file" | "browser" | "markdown" | undefined>(() => {
     const active = activeTab()
     if (!active || active === "context" || active === "review" || active === "empty") return undefined
-    return browserUrlFromTab(active) ? "browser" : "file"
+    if (browserUrlFromTab(active)) return "browser"
+    if (markdownPathFromTab(active)) return "markdown"
+    return "file"
   })
   // Keep the file-browser shell mounted while any file tab exists. Kobalte briefly
   // selects Review while the tab For replaces a preview trigger, which would
@@ -480,31 +507,37 @@ export function SessionSidePanel(props: {
                                   "bg-background-stronger": !settings.general.newLayoutDesigns(),
                                 }}
                               >
-                                <IconButtonV2
-                                  icon={<IconV2 name="monitor" />}
-                                  variant="ghost-muted"
-                                  size="large"
-                                  onClick={() => openBrowserTab(BROWSER_HOME_URL)}
-                                  aria-label={language.t("browser.newTab")}
-                                />
-                                <TooltipKeybind
-                                  title={language.t("command.file.open")}
-                                  keybind={command.keybind("file.open")}
-                                  class="flex items-center"
-                                >
-                                  <IconButton
-                                    icon="plus-small"
-                                    variant="ghost"
-                                    iconSize="large"
-                                    class="!rounded-md"
-                                    onClick={() => {
-                                      void import("@/components/dialog-select-file").then((x) => {
-                                        dialog.show(() => <x.DialogSelectFile mode="files" onOpenFile={showAllFiles} />)
-                                      })
-                                    }}
-                                    aria-label={language.t("command.file.open")}
+                                <MenuV2 gutter={4} modal={false} placement="bottom-end">
+                                  <MenuV2.Trigger
+                                    as={IconButtonV2}
+                                    icon={<Icon name="plus-small" />}
+                                    variant="ghost-muted"
+                                    size="large"
+                                    aria-label={language.t("browser.open")}
                                   />
-                                </TooltipKeybind>
+                                  <MenuV2.Portal>
+                                    <MenuV2.Content>
+                                      <MenuV2.Item onSelect={() => openFileBrowser()}>
+                                        <span class="flex items-center gap-2">
+                                          <Icon name="open-file" size="small" />
+                                          {language.t("browser.newFileTab")}
+                                        </span>
+                                      </MenuV2.Item>
+                                      <MenuV2.Item onSelect={() => openBrowserTab(BROWSER_HOME_URL)}>
+                                        <span class="flex items-center gap-2">
+                                          <IconV2 name="monitor" size="small" />
+                                          {language.t("browser.newTab")}
+                                        </span>
+                                      </MenuV2.Item>
+                                      <MenuV2.Item onSelect={openMarkdownPicker}>
+                                        <span class="flex items-center gap-2">
+                                          <Icon name="file-tree" size="small" />
+                                          {language.t("browser.markdownTab")}
+                                        </span>
+                                      </MenuV2.Item>
+                                    </MenuV2.Content>
+                                  </MenuV2.Portal>
+                                </MenuV2>
                               </div>
                             </Tabs.List>
                           </div>
@@ -549,6 +582,10 @@ export function SessionSidePanel(props: {
 
                           <Show when={activeBrowserTab()} keyed>
                             {(tab) => <BrowserTab tab={tab} />}
+                          </Show>
+
+                          <Show when={activeMarkdownTab()} keyed>
+                            {(tab) => <MarkdownPreview path={markdownPathFromTab(tab)!} />}
                           </Show>
                         </Tabs>
                         <DragOverlay>
@@ -713,10 +750,10 @@ export function SessionSidePanel(props: {
                               <MenuV2 gutter={4} modal={false} placement="bottom-end">
                                 <MenuV2.Trigger
                                   as={IconButtonV2}
-                                  icon={<IconV2 name={activeTabMode() === "browser" ? "monitor" : "folder"} />}
+                                  icon={<Icon name="plus-small" />}
                                   variant="ghost-muted"
                                   size="large"
-                                  aria-label={language.t("browser.mode")}
+                                  aria-label={language.t("browser.open")}
                                 />
                                 <MenuV2.Portal>
                                   <MenuV2.Content>
@@ -732,6 +769,12 @@ export function SessionSidePanel(props: {
                                         {language.t("browser.newTab")}
                                       </span>
                                     </MenuV2.Item>
+                                    <MenuV2.Item onSelect={openMarkdownPicker}>
+                                      <span class="flex items-center gap-2">
+                                        <Icon name="file-tree" size="small" />
+                                        {language.t("browser.markdownTab")}
+                                      </span>
+                                    </MenuV2.Item>
                                     <Show when={activeTabMode() === "file" && !!activeFileTab()}>
                                       <MenuV2.Separator />
                                       <MenuV2.Item onSelect={openActiveFileAsBrowser}>
@@ -740,30 +783,16 @@ export function SessionSidePanel(props: {
                                           {language.t("browser.openActiveAsBrowser")}
                                         </span>
                                       </MenuV2.Item>
+                                      <MenuV2.Item onSelect={openActiveFileAsMarkdown}>
+                                        <span class="flex items-center gap-2">
+                                          <Icon name="file-tree" size="small" />
+                                          {language.t("browser.openActiveAsMarkdown")}
+                                        </span>
+                                      </MenuV2.Item>
                                     </Show>
                                   </MenuV2.Content>
                                 </MenuV2.Portal>
                               </MenuV2>
-                              <TooltipV2
-                                value={
-                                  <>
-                                    {language.t("command.file.open")}
-                                    <Show when={openFileKeybind().length > 0}>
-                                      <KeybindV2 keys={openFileKeybind()} variant="neutral" />
-                                    </Show>
-                                  </>
-                                }
-                                placement="bottom"
-                                class="flex items-center"
-                              >
-                                <IconButtonV2
-                                  icon={<Icon name="plus-small" />}
-                                  variant="ghost-muted"
-                                  size="large"
-                                  onClick={() => openFileBrowser()}
-                                  aria-label={language.t("command.file.open")}
-                                />
-                              </TooltipV2>
                             </div>
                           </Tabs.List>
                           <div

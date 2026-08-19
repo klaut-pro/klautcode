@@ -82,6 +82,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "作業を委任中",
   "ui.sessionTurn.status.planning": "次のステップを計画中",
   "ui.sessionTurn.status.gatheringContext": "探索中",
+  "ui.messagePart.thinking": "思考中…",
+  "ui.messagePart.thinkingDone": "思考プロセス",
   "ui.sessionTurn.status.gatheredContext": "探索済み",
   "ui.sessionTurn.status.searchingCodebase": "コードベースを検索中",
   "ui.sessionTurn.status.searchingWeb": "ウェブを検索中",
@@ -175,6 +177,7 @@ export const dict = {
   "ui.common.showMore": "さらに表示",
 
   "ui.permission.deny": "拒否",
+  "ui.permission.allowAlwaysGlobal": "グローバルに許可",
   "ui.permission.allowAlways": "常に許可",
   "ui.permission.allowOnce": "今回のみ許可",
 

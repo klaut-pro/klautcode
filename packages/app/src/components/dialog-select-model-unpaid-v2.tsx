@@ -11,6 +11,7 @@ import { useProviders } from "@/hooks/use-providers"
 import { decode64 } from "@/utils/base64"
 import { useLanguage } from "@/context/language"
 import { ModelTooltip } from "./model-tooltip"
+import { isFreeModel } from "@/hooks/provider-catalog"
 
 type ModelState = ReturnType<typeof useLocal>["model"]
 const featuredProviders = ["klautcode", "opencode-go", "opencode", "hetzner", "openai", "anthropic", "google", "github-copilot"]
@@ -29,10 +30,7 @@ export const DialogSelectModelUnpaidV2: Component<{ model?: ModelState }> = (pro
     const c = model.current()
     return c ? `${c.provider.id}:${c.id}` : undefined
   })
-  const isFree = (item: ReturnType<ModelState["list"]>[number]) =>
-    item.provider.id === "klautcode" ||
-    item.provider.id === "opencode-go" ||
-    (item.provider.id === "opencode" && (!item.cost || item.cost.input === 0))
+  const isFree = (item: ReturnType<ModelState["list"]>[number]) => isFreeModel(item.provider.id, item.cost)
   const freeModels = createMemo(() => model.list().filter(isFree))
 
   const openProviders = (provider?: string) => {

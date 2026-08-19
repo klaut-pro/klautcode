@@ -270,7 +270,14 @@ const layer = Layer.effect(
           model: mdl,
           sessionID: input.session.id,
           retries: 2,
-          messages: [{ role: "user", content: "Generate a title for this conversation:\n" }, ...msgs],
+          messages: [
+            {
+              role: "user",
+              content:
+                "Generate a short, meaningful title (max 6 words) for this conversation. Return ONLY the title on a single line — no quotes, no punctuation like a period at the end, no explanation.",
+            },
+            ...msgs,
+          ],
         })
         .pipe(
           Stream.filter(LLMEvent.is.textDelta),
@@ -279,10 +286,11 @@ const layer = Layer.effect(
           Effect.orDie,
         )
       const cleaned = text
-        .replace(/<think>[\s\S]*?<\/think>\s*/g, "")
+        .replace(/ thinking[\s\S]*?<\/think>\s*/g, "")
         .split("\n")
-        .map((line) => line.trim())
-        .find((line) => line.length > 0)
+        .map((line) => line.trim().replace(/^["']|["']$/g, "").replace(/[.…]+$/, ""))
+        .filter((line) => line.length > 0)
+        .find((line) => line.length >= 2)
       if (!cleaned) return
       return cleaned.length > 100 ? cleaned.substring(0, 97) + "..." : cleaned
     })

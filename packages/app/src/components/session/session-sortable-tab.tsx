@@ -9,9 +9,9 @@ import { Tabs } from "@klautcode/ui/tabs"
 import { getFilename } from "@klautcode/core/util/path"
 import { useFile } from "@/context/file"
 import { useLanguage } from "@/context/language"
+import { useLayout } from "@/context/layout"
 import { useCommand } from "@/context/command"
-import { browserUrlFromTab } from "@/pages/session/helpers"
-import { getBrowserTabState } from "@/pages/session/browser/browser-state"
+import { browserUrlFromTab, markdownPathFromTab } from "@/pages/session/helpers"
 
 export function FileVisual(props: { path: string; active?: boolean; temporary?: boolean }): JSX.Element {
   return (
@@ -33,8 +33,9 @@ export function FileVisual(props: { path: string; active?: boolean; temporary?: 
 }
 
 export function BrowserVisual(props: { tab: string; active?: boolean; temporary?: boolean }): JSX.Element {
+  const layout = useLayout()
   const title = createMemo(() => {
-    const state = getBrowserTabState(props.tab)
+    const state = layout.browser.get(props.tab)
     if (state?.title) return state.title
     const url = state?.url ?? browserUrlFromTab(props.tab)
     if (!url) return undefined
@@ -49,6 +50,17 @@ export function BrowserVisual(props: { tab: string; active?: boolean; temporary?
       <IconV2 name="monitor" size="small" class="size-4 shrink-0" />
       <span class="text-14-medium truncate" classList={{ italic: props.temporary }}>
         {title()}
+      </span>
+    </div>
+  )
+}
+
+export function MarkdownVisual(props: { path: string; active?: boolean; temporary?: boolean }): JSX.Element {
+  return (
+    <div class="flex items-center gap-x-1.5 min-w-0">
+      <IconV2 name="filetree" size="small" class="size-4 shrink-0" />
+      <span class="text-14-medium truncate" classList={{ italic: props.temporary }}>
+        {getFilename(props.path)}
       </span>
     </div>
   )
@@ -69,6 +81,8 @@ export function SortableTab(props: {
     const value = path()
     if (value) return <FileVisual path={value} temporary={props.temporary} />
     if (browserUrlFromTab(props.tab)) return <BrowserVisual tab={props.tab} temporary={props.temporary} />
+    const markdown = markdownPathFromTab(props.tab)
+    if (markdown) return <MarkdownVisual path={markdown} temporary={props.temporary} />
     return
   })
   return (

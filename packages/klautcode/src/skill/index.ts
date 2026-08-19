@@ -4,6 +4,8 @@ import { Effect, Layer, Context, Schema } from "effect"
 import { NamedError } from "@klautcode/core/util/error"
 import type { Agent } from "@/agent/agent"
 import { EventV2Bridge } from "@/event-v2-bridge"
+import { EventV2 } from "@klautcode/core/event"
+import { Watcher } from "@klautcode/core/filesystem/watcher"
 import { InstanceState } from "@/effect/instance-state"
 import { Global } from "@klautcode/core/global"
 import { SkillPlugin } from "@klautcode/core/plugin/skill"
@@ -23,6 +25,14 @@ const AGENTS_EXTERNAL_DIR = ".agents"
 const EXTERNAL_SKILL_PATTERN = "skills/**/SKILL.md"
 const KLAUTCODE_SKILL_PATTERN = "{skill,skills}/**/SKILL.md"
 const SKILL_PATTERN = "**/SKILL.md"
+
+// Skills shipped with klautcode that users cannot edit during a session. A
+// reserved on-disk directory (Global.Path.data/skills/builtin) is also treated
+// as fixed so the app can ship updatable-by-version but session-stable skills.
+const BUILTIN_SKILL_DIR = "skills/builtin"
+// How long a mutable skill's content stays fresh before being re-read from disk
+// on use. Bounds I/O while still picking up edits quickly.
+const RELOAD_TTL_MS = 2_000
 
 // Built-in skill that ships with klautcode. The model's intuition for what an
 // klautcode.json should look like is often wrong, and klautcode hard-fails on
@@ -82,6 +92,18 @@ export class NotFoundError extends Schema.TaggedErrorClass<NotFoundError>()("Ski
 type State = {
   skills: Record<string, Info>
   dirs: Set<string>
+  // Tracks when a mutable skill was last read from disk, keyed by location, so
+  // per-use reload is bounded by RELOAD_TTL_MS.
+  loadedAt: Record<string, number>
+}
+
+// A skill is "fixed" (immutable during the session) when it ships with the app
+// or lives under the reserved builtin directory. Everything else is mutable and
+// re-read from disk on use so edits take effect immediately.
+function isFixedSkill(global: Global.Interface, location: string) {
+  if (location === "<built-in>") return true
+  const reserved = path.join(global.data, BUILTIN_SKILL_DIR)
+  return path.resolve(location).startsWith(path.resolve(reserved) + path.sep)
 }
 
 type DiscoveryState = {
@@ -100,6 +122,7 @@ export interface Interface {
   readonly all: () => Effect.Effect<Info[]>
   readonly dirs: () => Effect.Effect<string[]>
   readonly available: (agent?: Agent.Info) => Effect.Effect<Info[]>
+  readonly reload: () => Effect.Effect<void>
 }
 
 const add = Effect.fnUntraced(function* (state: State, match: string, events: EventV2Bridge.Service["Service"]) {
@@ -137,6 +160,7 @@ const add = Effect.fnUntraced(function* (state: State, match: string, events: Ev
     location: match,
     content: md.content,
   }
+  state.loadedAt[match] = Date.now()
 })
 
 const scan = Effect.fnUntraced(function* (
@@ -272,7 +296,7 @@ const layer = Layer.effect(
     )
     const state = yield* InstanceState.make(
       Effect.fn("Skill.state")(function* () {
-        const s: State = { skills: {}, dirs: new Set() }
+        const s: State = { skills: {}, dirs: new Set(), loadedAt: {} }
         // Register the built-in skill BEFORE disk discovery so a user-disk
         // skill with the same name can override it.
         s.skills[CUSTOMIZE_KLAUTCODE_SKILL_NAME] = {
@@ -281,25 +305,102 @@ const layer = Layer.effect(
           location: "<built-in>",
           content: CUSTOMIZE_KLAUTCODE_SKILL_BODY,
         }
+        s.loadedAt["<built-in>"] = Date.now()
         yield* loadSkills(s, yield* InstanceState.get(discovered), events)
         return s
       }),
     )
 
+    // Auto-reload skills when a SKILL.md under a discovered skill dir changes
+    // on disk, so edits take effect during a session (self-improving harness).
+    let reloadTimer: ReturnType<typeof setTimeout> | undefined
+    const scheduleReload = () => {
+      if (reloadTimer !== undefined) return
+      reloadTimer = setTimeout(() => {
+        reloadTimer = undefined
+        void Effect.runFork(reload().pipe(Effect.ignore))
+      }, 250)
+    }
+    const watcherUnsub = yield* events.listen((event) => {
+      if (event.type !== Watcher.Event.Updated.type) return Effect.void
+      const data = event.data as EventV2.Data<typeof Watcher.Event.Updated>
+      if (!path.basename(data.file).toLowerCase().startsWith("SKILL.md")) return Effect.void
+      scheduleReload()
+      return Effect.void
+    })
+    yield* Effect.addFinalizer(() =>
+      Effect.gen(function* () {
+        yield* watcherUnsub
+        if (reloadTimer !== undefined) clearTimeout(reloadTimer)
+      }),
+    )
+
+    // Re-read a single mutable skill's SKILL.md from disk if its TTL has
+    // expired. Fixed skills are never re-read so they stay session-stable.
+    const refreshSkill = Effect.fnUntraced(function* (s: State, name: string) {
+      const existing = s.skills[name]
+      if (!existing) return undefined
+      if (isFixedSkill(global, existing.location)) return existing
+      const loaded = s.loadedAt[existing.location] ?? 0
+      if (Date.now() - loaded < RELOAD_TTL_MS) return existing
+
+      yield* add(s, existing.location, events).pipe(Effect.catch(() => Effect.void))
+      s.loadedAt[existing.location] = Date.now()
+      return s.skills[name]
+    })
+
+    // Re-scan all mutable roots and rebuild mutable entries, preserving fixed
+    // skills. Used by the file watcher and after config/skill-path changes.
+    const reload = Effect.fn("Skill.reload")(function* () {
+      const s = yield* InstanceState.get(state)
+      const fresh = yield* discoverSkills(
+        config,
+        discovery,
+        fsys,
+        global,
+        flags.disableExternalSkills,
+        flags.disableClaudeCodeSkills,
+        (yield* InstanceState.context).directory,
+        (yield* InstanceState.context).worktree,
+      )
+      // Drop mutable skills no longer on disk, keep fixed ones.
+      const mutable = Object.values(s.skills).filter((item) => !isFixedSkill(global, item.location))
+      for (const item of mutable) {
+        const stillPresent = fresh.matches.some((match) => match === item.location)
+        if (!stillPresent) {
+          delete s.skills[item.name]
+          delete s.loadedAt[item.location]
+        }
+      }
+      // Re-scan mutable matches (add() re-reads content and refreshes loadedAt).
+      s.dirs.clear()
+      s.loadedAt = {}
+      for (const fixed of Object.values(s.skills).filter((item) => isFixedSkill(global, item.location))) {
+        s.loadedAt[fixed.location] = Date.now()
+      }
+      yield* loadSkills(s, fresh, events)
+      yield* Effect.logInfo("reload", { count: Object.keys(s.skills).length })
+    })
+
     const get = Effect.fn("Skill.get")(function* (name: string) {
       const s = yield* InstanceState.get(state)
-      return s.skills[name]
+      return yield* refreshSkill(s, name)
     })
 
     const require = Effect.fn("Skill.require")(function* (name: string) {
       const s = yield* InstanceState.get(state)
-      const info = s.skills[name]
+      const info = yield* refreshSkill(s, name)
       if (info) return info
       return yield* new NotFoundError({ name, available: Object.keys(s.skills).toSorted() })
     })
 
     const all = Effect.fn("Skill.all")(function* () {
       const s = yield* InstanceState.get(state)
+      // Refresh every mutable skill so the current system prompt reflects edits.
+      yield* Effect.forEach(Object.keys(s.skills), (name) => refreshSkill(s, name), {
+        concurrency: "unbounded",
+        discard: true,
+      })
       return Object.values(s.skills)
     })
 
@@ -309,12 +410,16 @@ const layer = Layer.effect(
 
     const available = Effect.fn("Skill.available")(function* (agent?: Agent.Info) {
       const s = yield* InstanceState.get(state)
+      yield* Effect.forEach(Object.keys(s.skills), (name) => refreshSkill(s, name), {
+        concurrency: "unbounded",
+        discard: true,
+      })
       const list = Object.values(s.skills).toSorted((a, b) => a.name.localeCompare(b.name))
       if (!agent) return list
       return list.filter((skill) => Permission.evaluate("skill", skill.name, agent.permission).action !== "deny")
     })
 
-    return Service.of({ get, require, all, dirs, available })
+    return Service.of({ get, require, all, dirs, available, reload })
   }),
 )
 

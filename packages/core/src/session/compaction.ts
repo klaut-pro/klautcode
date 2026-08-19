@@ -43,6 +43,8 @@ Rules:
 - Keep every section, even when empty.
 - Use terse bullets, not prose paragraphs.
 - Preserve exact file paths, symbols, commands, error strings, URLs, and identifiers when known.
+- When updating an anchored summary, keep every still-true detail from the previous summary verbatim; only drop or reword details the history shows changed.
+- Keep the whole summary concise. If space is tight, prioritize the Objective, Important Details, and Relevant Files over "Work State > Completed" details.
 - Do not mention the summary process or that context was compacted.`
 
 type Entry = {
@@ -161,7 +163,7 @@ const select = (
 export const buildPrompt = (input: { readonly previousSummary?: string; readonly context: readonly string[] }) =>
   [
     input.previousSummary
-      ? `Update the anchored summary below using the conversation history above.\nPreserve still-true details, remove stale details, and merge in the new facts.\n<previous-summary>\n${input.previousSummary}\n</previous-summary>`
+      ? `Update the anchored summary below using the conversation history above.\nPreserve every still-true detail from the previous summary verbatim — do not reword, shorten, or drop it unless the history shows it changed. Merge in the new facts.\n<previous-summary>\n${input.previousSummary}\n</previous-summary>`
       : "Create a new anchored summary from the conversation history.",
     SUMMARY_TEMPLATE,
     ...input.context,

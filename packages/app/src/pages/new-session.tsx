@@ -1,4 +1,5 @@
 import { createPromptProjectController } from "@/components/prompt-project-selector"
+import { ProjectChatsSidebar } from "@/components/project-chats-sidebar"
 import { useTitlebarRightMount } from "@/components/titlebar"
 import { useSettings } from "@/context/settings"
 import { createEffect, createResource } from "solid-js"
@@ -38,11 +39,16 @@ export default function NewSessionPage() {
   )
 
   return (
-    <div class="relative size-full overflow-hidden flex flex-col">
-      {suspendUntilPromptReady()}
-      <NewSessionStatus mount={rightMount} visible={settings.visibility.status} />
-      <div class="flex-1 min-h-0 flex flex-col gap-2 p-2">
-        <NewSessionView input={draft.input} project={project} workspace={workspace} />
+    <div class="flex size-full">
+      <ProjectChatsSidebar />
+      <div class="flex-1 min-w-0">
+        <div class="relative size-full overflow-hidden flex flex-col">
+          {suspendUntilPromptReady()}
+          <NewSessionStatus mount={rightMount} visible={settings.visibility.status} />
+          <div class="flex-1 min-h-0 flex flex-col gap-2 p-2">
+            <NewSessionView input={draft.input} project={project} workspace={workspace} />
+          </div>
+        </div>
       </div>
     </div>
   )

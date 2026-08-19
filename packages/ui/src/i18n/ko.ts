@@ -215,4 +215,7 @@ export const dict = {
   "ui.sessionTurn.diffs.showAll": "모두 표시",
   "ui.sessionTurn.diffs.showLess": "간략히 표시",
   "ui.sessionTurn.diffs.more": "+{{count}}개 더 보기",
+  "ui.messagePart.thinking": "생각 중…",
+  "ui.messagePart.thinkingDone": "생각 과정",
+  "ui.permission.allowAlwaysGlobal": "전역적으로 허용",
 }

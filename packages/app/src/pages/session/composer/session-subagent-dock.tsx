@@ -4,51 +4,15 @@ import { useLanguage } from "@/context/language"
 import { useSync } from "@/context/sync"
 import { useSDK } from "@/context/sdk"
 import { Icon } from "@klautcode/ui/icon"
-import { ThinkingOrbs } from "@klautcode/session-ui/v2/thinking-orbs"
+import { RunningDots } from "@klautcode/session-ui/v2/running-dots"
 import { useLayout } from "@/context/layout"
 import { base64Encode } from "@klautcode/core/util/encode"
 import { getFilename } from "@klautcode/core/util/path"
 import { deferredMemo } from "@/pages/layout/helpers"
-import type { Part as PartType } from "@klautcode/sdk/v2"
+import { collectSubagents, type ActiveSubagent } from "./session-subagents"
 
-// A subagent launched by the current session via the `task` tool. The tool part
-// carries the child session id + description; the child session status tells us
-// whether the subagent is still working, blocked, or done.
-export type ActiveSubagent = {
-  sessionId: string
-  description: string
-  status: "working" | "blocked" | "done"
-}
-
-export function collectSubagents(input: {
-  messages: { id: string }[]
-  parts: (messageID: string) => PartType[]
-  sessionStatus: (sessionID: string) => { type: "busy" | "idle" | "retry" } | undefined
-}): ActiveSubagent[] {
-  const found: ActiveSubagent[] = []
-  const seen = new Set<string>()
-
-  for (const message of input.messages) {
-    for (const part of input.parts(message.id)) {
-      if (part.type !== "tool" || part.tool !== "task") continue
-      const metadata = "metadata" in part.state ? part.state.metadata : undefined
-      const childId = metadata?.sessionId
-      if (typeof childId !== "string" || !childId || seen.has(childId)) continue
-      seen.add(childId)
-
-      const toolInput = part.state.input as { description?: string } | undefined
-      const description =
-        typeof toolInput?.description === "string" && toolInput.description ? toolInput.description : ""
-
-      const status = input.sessionStatus(childId)
-      const active = status === undefined || status.type === "busy" || status.type === "retry" ? "working" : "done"
-
-      found.push({ sessionId: childId, description, status: active })
-    }
-  }
-  return found
-}
-
+// The subagent dock surfaces the session's active subagents as compact text
+// lines with a running indicator, mirroring the queue dock.
 export function SessionSubagentDock() {
   const sync = useSync()
   const language = useLanguage()
@@ -84,33 +48,39 @@ export function SessionSubagentDock() {
 
   return (
     <Show when={active().length > 0}>
-      <div data-component="session-subagent-dock" class="w-full px-3 pb-2 flex flex-col gap-1">
-        <div class="flex items-center gap-2 text-12-regular text-text-weak">
-          <Icon name="brain" size="small" />
+      <div data-component="session-subagent-dock" class="w-full px-3 pb-1 flex flex-col gap-1">
+        <div class="flex items-center gap-1.5 text-12-regular text-text-weak">
+          <RunningDots class="shrink-0 text-icon-info-active" />
           <span>{language.t("session.subagents.active")}</span>
         </div>
-        <div class="flex flex-wrap gap-1.5">
+        <div class="flex flex-col">
           <For each={active()}>
             {(subagent) => (
-              <div
-                class="group flex items-center gap-1.5 rounded-md border border-border-weak-base bg-background-base/50 px-2 py-1 text-13-regular text-text-strong transition-colors hover:bg-surface-raised-base-hover"
-                onClick={() => openSubagent(subagent.sessionId)}
-              >
-                <Show
-                  when={subagent.status === "working"}
-                  fallback={
-                    <span
-                      class="size-1.5 rounded-full shrink-0"
-                      classList={{
-                        "bg-icon-warning-active": subagent.status === "blocked",
-                        "bg-icon-info-active": subagent.status === "done",
-                      }}
-                    />
-                  }
+              <div class="group flex items-center gap-1.5 py-0.5 text-13-regular">
+                <span class="size-1.5 shrink-0 rounded-full" aria-hidden="true">
+                  <Show
+                    when={subagent.status === "working"}
+                    fallback={
+                      <span
+                        class="block size-1.5 rounded-full"
+                        classList={{
+                          "bg-icon-warning-active": subagent.status === "blocked",
+                          "bg-icon-info-active": subagent.status === "done",
+                        }}
+                      />
+                    }
+                  >
+                    <RunningDots class="shrink-0 -mt-0.5 text-icon-info-active" />
+                  </Show>
+                </span>
+                <button
+                  type="button"
+                  class="min-w-0 flex-1 truncate text-left text-13-regular text-text-base transition-colors hover:text-text-strong"
+                  onClick={() => openSubagent(subagent.sessionId)}
+                  title={subagent.description || getFilename(subagent.sessionId)}
                 >
-                  <ThinkingOrbs width={14} height={14} class="shrink-0 text-icon-info-active" />
-                </Show>
-                <span class="truncate max-w-52">{subagent.description || getFilename(subagent.sessionId)}</span>
+                  {subagent.description || getFilename(subagent.sessionId)}
+                </button>
                 <button
                   type="button"
                   data-action="session-subagent-stop"

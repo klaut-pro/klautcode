@@ -1,13 +1,13 @@
-import type { PluginOptions } from "../options.js"
-import type { AgentHooks } from "./agent.js"
-import type { AISDKHooks } from "./aisdk.js"
-import type { CatalogHooks } from "./catalog.js"
-import type { CommandHooks } from "./command.js"
-import type { IntegrationHooks } from "./integration.js"
-import type { PluginDomain } from "./plugin.js"
-import type { ReferenceHooks } from "./reference.js"
-import type { SkillHooks } from "./skill.js"
-import type { Reload } from "./registration.js"
+import type { PluginOptions } from "../options.ts"
+import type { AgentHooks } from "./agent.ts"
+import type { AISDKHooks } from "./aisdk.ts"
+import type { CatalogHooks } from "./catalog.ts"
+import type { CommandHooks } from "./command.ts"
+import type { IntegrationHooks } from "./integration.ts"
+import type { PluginDomain } from "./plugin.ts"
+import type { ReferenceHooks } from "./reference.ts"
+import type { SkillHooks } from "./skill.ts"
+import type { Reload } from "./registration.ts"
 
 export interface PluginContext {
   readonly options: PluginOptions

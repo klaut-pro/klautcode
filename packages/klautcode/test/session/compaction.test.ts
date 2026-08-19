@@ -403,6 +403,19 @@ describe("session.compaction.isOverflow", () => {
   )
 
   it.live(
+    "includes reasoning tokens in the context count",
+    provideTmpdirInstance(() =>
+      Effect.gen(function* () {
+        const compact = yield* SessionCompaction.Service
+        // usable = 100K - 20K = 80K; reasoning alone should push it over
+        const model = createModel({ context: 100_000, output: 32_000 })
+        const tokens = { input: 70_000, output: 2_000, reasoning: 15_000, cache: { read: 0, write: 0 } }
+        expect(yield* compact.isOverflow({ tokens, model })).toBe(true)
+      }),
+    ),
+  )
+
+  it.live(
     "respects input limit for input caps",
     provideTmpdirInstance(() =>
       Effect.gen(function* () {

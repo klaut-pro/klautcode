@@ -1,5 +1,5 @@
-import type { ReferenceDraft } from "../effect/reference.js"
-import type { Hooks } from "./registration.js"
+import type { ReferenceDraft } from "../effect/reference.ts"
+import type { Hooks } from "./registration.ts"
 
 export type { ReferenceDraft }
 

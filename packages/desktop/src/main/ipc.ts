@@ -13,6 +13,7 @@ import { assertAttachmentBudget, createPickedFileAuthorizations } from "./attach
 import { getStore, removeStoreFileIfEmpty } from "./store"
 import {
   getPinchZoomEnabled,
+  getWebviewGuest,
   getWindowID,
   openExternalURL,
   openLocalFileURL,
@@ -103,6 +104,20 @@ export function registerIpcHandlers(deps: Deps) {
   ipcMain.handle("record-fatal-renderer-error", (_event: IpcMainInvokeEvent, error: FatalRendererError) =>
     deps.recordFatalRendererError(error),
   )
+  ipcMain.handle("capture-window", async (event: IpcMainInvokeEvent) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win || win.isDestroyed()) throw new Error("Invalid capture window")
+    const target = getWebviewGuest(win) ?? win.webContents
+    const image = await target.capturePage()
+    const size = image.getSize()
+    return { dataUrl: image.toDataURL(), width: size.width, height: size.height }
+  })
+  ipcMain.handle("design-probe", async (event: IpcMainInvokeEvent, script: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win || win.isDestroyed()) throw new Error("Invalid probe window")
+    const target = getWebviewGuest(win) ?? win.webContents
+    return target.executeJavaScript(script)
+  })
   ipcMain.handle("set-native-translations", (event: IpcMainInvokeEvent, value: unknown) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (!win || win.isDestroyed() || win.webContents !== event.sender || event.senderFrame !== event.sender.mainFrame) {

@@ -97,6 +97,8 @@ export const dict = {
   "ui.sessionTurn.status.gatheringThoughts": "جمع الأفكار",
   "ui.sessionTurn.status.consideringNextSteps": "النظر في الخطوات التالية",
 
+  "ui.messagePart.thinking": "جارٍ التفكير…",
+  "ui.messagePart.thinkingDone": "عملية التفكير",
   "ui.messagePart.questions.dismissed": "تم إهمال الأسئلة",
   "ui.messagePart.compaction": "تم اختصار الجلسة",
   "ui.messagePart.context.read.one": "{{count}} قراءة",
@@ -192,6 +194,7 @@ export const dict = {
   "ui.common.showMore": "عرض المزيد",
 
   "ui.permission.deny": "رفض",
+  "ui.permission.allowAlwaysGlobal": "السماح عالميًا",
   "ui.permission.allowAlways": "السماح دائمًا",
   "ui.permission.allowOnce": "السماح مرة واحدة",
 

@@ -1,4 +1,4 @@
-import type { PluginContext } from "./context.js"
+import type { PluginContext } from "./context.ts"
 
 export interface Plugin {
   readonly id: string

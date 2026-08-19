@@ -51,6 +51,7 @@ import { LayoutProvider } from "@/context/layout"
 import { ModelsProvider } from "@/context/models"
 import { NotificationProvider } from "@/context/notification"
 import { PermissionProvider } from "@/context/permission"
+import { DesignModeProvider } from "@/components/design-mode/controller"
 import { usePlatform } from "@/context/platform"
 import { PromptProvider } from "@/context/prompt"
 import { ServerConnection, ServerProvider, serverName, useServer } from "@/context/server"
@@ -604,8 +605,10 @@ export function AppInterface(props: {
   const ServerShell = (shellProps: ParentProps) => (
     <QueryProvider>
       <SharedProviders>
-        {props.children}
-        {shellProps.children}
+        <DesignModeProvider>
+          {props.children}
+          {shellProps.children}
+        </DesignModeProvider>
       </SharedProviders>
     </QueryProvider>
   )

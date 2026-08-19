@@ -208,11 +208,14 @@ describe("createCompatibleApi", () => {
 
     expect(requests.map((request) => new URL(request.url).pathname)).toEqual([
       "/auth/openrouter",
+      "/api/integration/openrouter/connect/key",
       "/instance/dispose",
       "/instance/dispose",
     ])
-    expect(requests[1]!.headers.get("x-klautcode-directory")).toBe("%2Frepo")
-    expect(requests[2]!.headers.get("x-klautcode-directory")).toBeNull()
+    expect(requests[1]!.headers.get("x-klautcode-directory")).toBeNull()
+    expect(new URL(requests[1]!.url).searchParams.get("location[directory]")).toBe("/repo")
+    expect(requests[2]!.headers.get("x-klautcode-directory")).toBe("%2Frepo")
+    expect(requests[3]!.headers.get("x-klautcode-directory")).toBeNull()
   })
 
   test("disposes the V1 instance after completing provider OAuth", async () => {

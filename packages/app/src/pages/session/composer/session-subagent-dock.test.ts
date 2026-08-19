@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { collectSubagents } from "./session-subagent-dock"
+import { collectSubagents } from "./session-subagents"
 import type { Part as PartType } from "@klautcode/sdk/v2"
 
 const taskPart = (sessionId: string, description?: string): PartType =>
@@ -56,13 +56,13 @@ describe("collectSubagents", () => {
     expect(result).toEqual([])
   })
 
-  test("treats missing status as working", () => {
+  test("treats missing status as done so closed subagents do not linger", () => {
     const result = collectSubagents({
       messages: [{ id: "msg-1" }],
       parts: () => [taskPart("child-1")],
       sessionStatus: () => undefined,
     })
 
-    expect(result[0].status).toBe("working")
+    expect(result[0].status).toBe("done")
   })
 })

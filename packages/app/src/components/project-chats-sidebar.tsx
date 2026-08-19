@@ -6,6 +6,7 @@ import { Icon as IconV2 } from "@klautcode/ui/v2/icon"
 import { IconButtonV2 } from "@klautcode/ui/v2/icon-button-v2"
 import { TooltipV2 } from "@klautcode/ui/v2/tooltip-v2"
 import { ResizeHandle } from "@klautcode/ui/resize-handle"
+import { RunningDots } from "@klautcode/session-ui/v2/running-dots"
 import type { Session } from "@klautcode/sdk/v2/client"
 import { useServerSync } from "@/context/server-sync"
 import { useServerSDK } from "@/context/server-sdk"
@@ -22,29 +23,25 @@ const PROJECT_SIDEBAR_MIN = 200
 const PROJECT_SIDEBAR_MAX = 480
 const PROJECT_CHATS_PREVIEW = 3
 
-/** Three staggered pulsing dots shown next to a chat while its agent is working. */
-function WorkingDots() {
-  return (
-    <span class="flex shrink-0 items-center gap-0.5" aria-hidden="true">
-      {[0, 1, 2].map((index) => (
-        <span
-          data-slot="chats-working-dot"
-          class="size-1 rounded-full"
-          style={{
-            "background-color": "var(--v2-icon-icon-accent)",
-            animation: "chats-working-dot 1.2s ease-in-out infinite",
-            "animation-delay": `${index * 0.2}s`,
-          }}
-        />
-      ))}
-    </span>
-  )
+type DragPayload =
+  | { kind: "project"; worktree: string }
+  | { kind: "chat"; sessionID: string; fromWorktree: string }
+
+function dragPayload(e: DragEvent): DragPayload | undefined {
+  try {
+    const raw = e.dataTransfer?.getData("text/plain")
+    return raw ? (JSON.parse(raw) as DragPayload) : undefined
+  } catch {
+    return undefined
+  }
 }
 
 // Cursor-style persistent left project sidebar. Renders the project chats: one
 // collapsible section per project listing that project's sessions, resizable
 // and collapsible; the state (open + width) persists per server so it stays put
 // across sessions of the same project. The file tree lives on the right side.
+// Projects and chats can be dragged to reorder; a chat can be dragged onto
+// another project group to move it there (persisted per server).
 export function ProjectChatsSidebar() {
   const layout = useLayout()
   const serverSync = useServerSync()
@@ -105,12 +102,52 @@ export function ProjectChatsSidebar() {
     }
   })
 
-  const groups = createMemo(() =>
-    layout.projects
+  const projectByDirectory = (directory: string | undefined) => {
+    if (!directory) return
+    for (const project of layout.projects.list()) {
+      if ([project.worktree, ...(project.sandboxes ?? [])].some((dir) => pathKey(dir) === pathKey(directory)))
+        return project.worktree
+    }
+  }
+
+  const groups = createMemo(() => {
+    const sessionInfo = serverSync().session.data.info
+    return layout.projects
       .list()
-      .map((project) => ({ project, sessions: sessionsForProject(project, serverSync) }))
-      .filter((group) => group.sessions.length > 0),
-  )
+      .map((project) => {
+        const directories = [project.worktree, ...(project.sandboxes ?? [])]
+        const seen = new Set<string>()
+        const sessions: Session[] = []
+        for (const directory of directories) {
+          const [store] = serverSync().child(directory, { bootstrap: false })
+          for (const session of store.session ?? []) {
+            if (session.parentID) continue
+            if (session.time?.archived) continue
+            if (seen.has(session.id)) continue
+            seen.add(session.id)
+            const movedTo = layout.projectChats.project(session.id)
+            if (movedTo && movedTo !== project.worktree) continue
+            sessions.push(session)
+          }
+        }
+        // Include chats that were explicitly moved into this project from elsewhere.
+        for (const session of Object.values(sessionInfo)) {
+          if (!session) continue
+          if (session.parentID) continue
+          if (session.time?.archived) continue
+          if (seen.has(session.id)) continue
+          if (layout.projectChats.project(session.id) === project.worktree) {
+            seen.add(session.id)
+            sessions.push(session)
+          }
+        }
+        return { project, sessions: applyOrder(sessions, layout.projectChats.order(project.worktree)) }
+      })
+      .filter((group) => group.sessions.length > 0)
+  })
+
+  const orderedIds = (worktree: string) =>
+    groups().find((group) => group.project.worktree === worktree)?.sessions.map((session) => session.id) ?? []
 
   const isWorking = (sessionID: string) => serverSync().session.data.session_working(sessionID)
 
@@ -132,6 +169,44 @@ export function ProjectChatsSidebar() {
       layout.projects.list()[0]?.worktree
     if (!directory) return
     void tabs.newDraft({ server: server.key, directory })
+  }
+
+  const moveProject = (worktree: string, toIndex: number) => {
+    layout.projects.move(worktree, toIndex)
+  }
+
+  const dropProjectOn = (dragged: string, targetWorktree: string) => {
+    if (dragged === targetWorktree) return
+    const targetIndex = layout.projects.list().findIndex((project) => project.worktree === targetWorktree)
+    if (targetIndex !== -1) moveProject(dragged, targetIndex)
+  }
+
+  const moveChat = (sessionID: string, fromWorktree: string, targetWorktree: string, beforeID?: string) => {
+    if (sessionID === beforeID && fromWorktree === targetWorktree) return
+    const base = projectByDirectory(serverSync().session.data.info[sessionID]?.directory)
+    const effectiveTarget = base === targetWorktree ? undefined : targetWorktree
+    layout.projectChats.setProject(sessionID, effectiveTarget)
+
+    if (fromWorktree === targetWorktree) {
+      const next = orderedIds(fromWorktree).filter((id) => id !== sessionID)
+      const at = beforeID ? next.indexOf(beforeID) : -1
+      if (at !== -1) next.splice(at, 0, sessionID)
+      else next.push(sessionID)
+      layout.projectChats.setOrder(fromWorktree, next)
+      return
+    }
+
+    if (layout.projectChats.order(fromWorktree).includes(sessionID)) {
+      layout.projectChats.setOrder(
+        fromWorktree,
+        layout.projectChats.order(fromWorktree).filter((id) => id !== sessionID),
+      )
+    }
+    const target = orderedIds(targetWorktree).filter((id) => id !== sessionID)
+    const at = beforeID ? target.indexOf(beforeID) : -1
+    if (at !== -1) target.splice(at, 0, sessionID)
+    else target.push(sessionID)
+    layout.projectChats.setOrder(targetWorktree, target)
   }
 
   return (
@@ -199,6 +274,10 @@ export function ProjectChatsSidebar() {
                     }}
                     onOpen={openChat}
                     onNewChat={() => newChat(group.project)}
+                    onDropProject={(draggedWorktree) => dropProjectOn(draggedWorktree, group.project.worktree)}
+                    onMoveChat={(sessionID, fromWorktree, beforeID) =>
+                      moveChat(sessionID, fromWorktree, group.project.worktree, beforeID)
+                    }
                   />
                 )}
               </For>
@@ -219,24 +298,16 @@ export function ProjectChatsSidebar() {
   )
 }
 
-function sessionsForProject(project: LocalProject, serverSync: ReturnType<typeof useServerSync>) {
-  const directories = [project.worktree, ...(project.sandboxes ?? [])]
-  const seen = new Set<string>()
-  const sessions: Session[] = []
-  for (const directory of directories) {
-    const [store] = serverSync().child(directory, { bootstrap: false })
-    for (const session of store.session ?? []) {
-      if (session.parentID) continue
-      if (session.time?.archived) continue
-      if (seen.has(session.id)) continue
-      seen.add(session.id)
-      sessions.push(session)
-    }
-  }
-  return sessions.sort(
-    (a, b) =>
-      (b.time.updated ?? b.time.created) - (a.time.updated ?? a.time.created) || a.id.localeCompare(b.id),
-  )
+function applyOrder(sessions: Session[], order: string[]) {
+  const byID = new Map(sessions.map((session) => [session.id, session]))
+  const ordered = order.map((id) => byID.get(id)).filter((session): session is Session => !!session)
+  const seen = new Set(ordered.map((session) => session.id))
+  const rest = sessions
+    .filter((session) => !seen.has(session.id))
+    .sort(
+      (a, b) => (b.time.updated ?? b.time.created) - (a.time.updated ?? a.time.created) || a.id.localeCompare(b.id),
+    )
+  return [...ordered, ...rest]
 }
 
 function ProjectChatGroup(props: {
@@ -248,6 +319,8 @@ function ProjectChatGroup(props: {
   onToggle: () => void
   onOpen: (session: Session) => void
   onNewChat: () => void
+  onDropProject: (draggedWorktree: string) => void
+  onMoveChat: (sessionID: string, fromWorktree: string, beforeID?: string) => void
 }) {
   const title = createMemo(() => displayName(props.project))
   const [showAll, setShowAll] = createSignal(false)
@@ -261,11 +334,29 @@ function ProjectChatGroup(props: {
   const hasMore = createMemo(() => props.sessions.length > PROJECT_CHATS_PREVIEW)
   const remaining = createMemo(() => props.sessions.length - PROJECT_CHATS_PREVIEW)
   return (
-    <div>
+    <div
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        const payload = dragPayload(e)
+        if (payload?.kind === "chat") props.onMoveChat(payload.sessionID, payload.fromWorktree)
+      }}
+    >
       <div class="group/project flex items-center">
         <button
           type="button"
-          class="flex min-w-0 flex-1 items-center gap-1.5 px-3 py-1.5 text-left text-12-medium text-v2-text-text-base hover:bg-v2-overlay-simple-overlay-hover"
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer?.setData("text/plain", JSON.stringify({ kind: "project", worktree: props.project.worktree }))
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            const payload = dragPayload(e)
+            if (payload?.kind === "project") props.onDropProject(payload.worktree)
+            else if (payload?.kind === "chat") props.onMoveChat(payload.sessionID, payload.fromWorktree)
+          }}
+          class="flex min-w-0 flex-1 items-center gap-1.5 px-3 py-1.5 text-left text-12-medium text-v2-text-text-base hover:bg-v2-overlay-simple-overlay-hover cursor-grab active:cursor-grabbing"
           onClick={props.onToggle}
           aria-expanded={props.project.expanded}
         >
@@ -294,14 +385,29 @@ function ProjectChatGroup(props: {
           {(session) => (
             <button
               type="button"
-              class="flex w-full items-center gap-1.5 py-1 pl-7 pr-3 text-left text-13-regular text-v2-text-text-muted hover:bg-v2-overlay-simple-overlay-hover"
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer?.setData(
+                  "text/plain",
+                  JSON.stringify({ kind: "chat", sessionID: session.id, fromWorktree: props.project.worktree }),
+                )
+              }}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                const payload = dragPayload(e)
+                if (payload?.kind !== "chat") return
+                props.onMoveChat(payload.sessionID, payload.fromWorktree, session.id)
+              }}
+              class="flex w-full items-center gap-1.5 py-1 pl-7 pr-3 text-left text-13-regular text-v2-text-text-muted hover:bg-v2-overlay-simple-overlay-hover cursor-grab active:cursor-grabbing"
               classList={{
                 "bg-v2-overlay-simple-overlay-hover text-v2-text-text-base": session.id === props.activeSessionID,
               }}
               onClick={() => props.onOpen(session)}
             >
               <Show when={props.isWorking(session.id)}>
-                <WorkingDots />
+                <RunningDots class="shrink-0 text-v2-icon-icon-accent" />
               </Show>
               <span class="min-w-0 flex-1 truncate">{sessionTitle(session.title) || session.id}</span>
             </button>

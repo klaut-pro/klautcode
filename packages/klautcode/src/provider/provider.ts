@@ -1222,6 +1222,25 @@ function cost(c: ModelsDev.Model["cost"]): Model["cost"] {
   return result
 }
 
+// models.dev advertises a 1M-token context window for some Poolside Laguna
+// models, but the deployed model only accepts 256K. Cap the effective limit so
+// overflow detection, compaction, and the client's usage indicator all agree
+// with what the API can actually accept.
+const LAGUNA_MAX_CONTEXT = 262144
+
+function correctModelLimit(providerID: string, model: ModelsDev.Model): { context: number; input?: number; output: number } {
+  const limit = {
+    context: model.limit.context,
+    input: model.limit.input,
+    output: model.limit.output,
+  }
+  if (providerID === "poolside" && model.family === "laguna") {
+    if (limit.context > LAGUNA_MAX_CONTEXT) limit.context = LAGUNA_MAX_CONTEXT
+    if (limit.input && limit.input > LAGUNA_MAX_CONTEXT) limit.input = LAGUNA_MAX_CONTEXT
+  }
+  return limit
+}
+
 function fromModelsDevModel(provider: ModelsDev.Provider, model: ModelsDev.Model): Model {
   const base: Model = {
     id: ModelV2.ID.make(model.id),
@@ -1237,11 +1256,7 @@ function fromModelsDevModel(provider: ModelsDev.Provider, model: ModelsDev.Model
     headers: {},
     options: {},
     cost: cost(model.cost),
-    limit: {
-      context: model.limit.context,
-      input: model.limit.input,
-      output: model.limit.output,
-    },
+    limit: correctModelLimit(provider.id, model),
     capabilities: {
       temperature: model.temperature ?? false,
       reasoning: model.reasoning ?? false,
@@ -1576,7 +1591,7 @@ const layer = Layer.effect(
         // models shown match what the account can really call.
         if (openCodeKey && providers[ProviderV2.ID.make("opencode")]) {
           const live = yield* fetchZenModels("https://opencode.ai/zen/v1", openCodeKey).pipe(
-            Effect.catch(() => Effect.succeed(undefined)),
+            Effect.catchCause(() => Effect.succeed(undefined)),
           )
           if (live && live.size > 0) {
             const openCodeProvider = providers[ProviderV2.ID.make("opencode")]

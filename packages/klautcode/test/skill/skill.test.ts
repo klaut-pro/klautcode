@@ -582,4 +582,111 @@ description: A skill in the .klautcode/skills directory.
       { git: true },
     ),
   )
+
+  it.live("reloads a mutable skill after its SKILL.md changes on disk", () =>
+    provideTmpdirInstance(
+      (dir) =>
+        Effect.gen(function* () {
+          const skillPath = path.join(dir, ".klautcode", "skill", "hot-skill", "SKILL.md")
+          yield* Effect.promise(() =>
+            Bun.write(
+              skillPath,
+              `---
+name: hot-skill
+description: v1 description.
+---
+
+# v1
+`,
+            ),
+          )
+
+          const skill = yield* Skill.Service
+          const before = (yield* skill.all()).find((s) => s.name === "hot-skill")
+          expect(before).toBeDefined()
+          expect(before!.description).toBe("v1 description.")
+
+          // Edit the skill on disk, then reload() — the updated content must win.
+          yield* Effect.promise(() =>
+            Bun.write(
+              skillPath,
+              `---
+name: hot-skill
+description: v2 description after edit.
+---
+
+# v2
+`,
+            ),
+          )
+          yield* skill.reload()
+
+          const after = (yield* skill.all()).find((s) => s.name === "hot-skill")
+          expect(after).toBeDefined()
+          expect(after!.description).toBe("v2 description after edit.")
+          expect(after!.content).toContain("# v2")
+        }),
+      { git: true },
+    ),
+  )
+
+  it.live("re-reads mutable skill content on use after the TTL expires", () =>
+    provideTmpdirInstance(
+      (dir) =>
+        Effect.gen(function* () {
+          const skillPath = path.join(dir, ".klautcode", "skill", "fresh-skill", "SKILL.md")
+          yield* Effect.promise(() =>
+            Bun.write(
+              skillPath,
+              `---
+name: fresh-skill
+description: first.
+---
+
+# First
+`,
+            ),
+          )
+
+          const skill = yield* Skill.Service
+          const before = yield* skill.get("fresh-skill")
+          expect(before!.content).toContain("# First")
+
+          // Bump mtime by editing, then force a re-read past the TTL by waiting.
+          yield* Effect.promise(() =>
+            Bun.write(
+              skillPath,
+              `---
+name: fresh-skill
+description: second.
+---
+
+# Second
+`,
+            ),
+          )
+          yield* Effect.sleep("2100 millis")
+          const after = yield* skill.get("fresh-skill")
+          expect(after!.content).toContain("# Second")
+        }),
+      { git: true },
+    ),
+  )
+
+  it.live("keeps the fixed built-in skill immutable across reloads", () =>
+    provideTmpdirInstance(
+      (dir) =>
+        Effect.gen(function* () {
+          const skill = yield* Skill.Service
+          const before = yield* skill.get("customize-klautcode")
+          expect(before).toBeDefined()
+          yield* skill.reload()
+          const after = yield* skill.get("customize-klautcode")
+          expect(after).toBeDefined()
+          expect(after!.content).toBe(before!.content)
+          expect(after!.location).toBe("<built-in>")
+        }),
+      { git: true },
+    ),
+  )
 })

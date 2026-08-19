@@ -89,6 +89,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "Görev devrediliyor",
   "ui.sessionTurn.status.planning": "Sonraki adımlar planlanıyor",
   "ui.sessionTurn.status.gatheringContext": "Keşfediliyor",
+  "ui.messagePart.thinking": "Düşünüyor…",
+  "ui.messagePart.thinkingDone": "Düşünme süreci",
   "ui.sessionTurn.status.gatheredContext": "Keşif tamamlandı",
   "ui.sessionTurn.status.searchingCodebase": "Kod tabanı aranıyor",
   "ui.sessionTurn.status.searchingWeb": "Web aranıyor",
@@ -182,6 +184,7 @@ export const dict = {
   "ui.common.showMore": "Daha fazla göster",
 
   "ui.permission.deny": "Reddet",
+  "ui.permission.allowAlwaysGlobal": "Genel olarak izin ver",
   "ui.permission.allowAlways": "Her zaman izin ver",
   "ui.permission.allowOnce": "Bir kez izin ver",
 

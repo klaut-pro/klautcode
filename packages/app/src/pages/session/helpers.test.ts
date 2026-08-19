@@ -3,12 +3,17 @@ import { createMemo, createRoot } from "solid-js"
 import { createStore } from "solid-js/store"
 import {
   SESSION_OPEN_FILE_TAB,
+  browserTabForUrl,
+  browserUrlFromTab,
   createOpenReviewFile,
   createOpenSessionFileTab,
   createSessionTabs,
   focusTerminalById,
   getTabReorderIndex,
+  markdownPathFromTab,
+  markdownTabForPath,
   shouldShowFileTree,
+  tabMode,
 } from "./helpers"
 
 describe("shouldShowFileTree", () => {
@@ -210,5 +215,27 @@ describe("createSessionTabs", () => {
       expect(result.activeTab()).toBe("file://src/a.ts")
       dispose()
     })
+  })
+})
+
+describe("browser and markdown tab encoding", () => {
+  test("round-trips browser tab values", () => {
+    const tab = browserTabForUrl("https://example.com/path?q=1")
+    expect(tab).toBe("browser://https://example.com/path?q=1")
+    expect(browserUrlFromTab(tab)).toBe("https://example.com/path?q=1")
+    expect(browserUrlFromTab("file://src/a.ts")).toBeUndefined()
+    expect(tabMode(tab)).toBe("browser")
+  })
+
+  test("round-trips markdown tab values", () => {
+    const tab = markdownTabForPath("/project/README.md")
+    expect(tab).toBe("markdown:///project/README.md")
+    expect(markdownPathFromTab(tab)).toBe("/project/README.md")
+    expect(markdownPathFromTab("file://src/a.ts")).toBeUndefined()
+    expect(tabMode(tab)).toBe("markdown")
+  })
+
+  test("classifies file tabs as file mode", () => {
+    expect(tabMode("file://src/a.ts")).toBe("file")
   })
 })

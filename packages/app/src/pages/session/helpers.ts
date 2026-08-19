@@ -25,13 +25,23 @@ type TabsInput = {
 export const getSessionKey = (dir: string | undefined, id: string | undefined) => `${dir ?? ""}${id ? `/${id}` : ""}`
 
 const BROWSER_TAB_PREFIX = "browser://"
+const MARKDOWN_TAB_PREFIX = "markdown://"
 
-export const tabMode = (tab: string): "file" | "browser" => (browserUrlFromTab(tab) ? "browser" : "file")
+export const tabMode = (tab: string): "file" | "browser" | "markdown" => {
+  if (browserUrlFromTab(tab)) return "browser"
+  if (markdownPathFromTab(tab)) return "markdown"
+  return "file"
+}
 
 export const browserTabForUrl = (url: string) => `${BROWSER_TAB_PREFIX}${url}`
 
 export const browserUrlFromTab = (tab: string) =>
   tab.startsWith(BROWSER_TAB_PREFIX) ? tab.slice(BROWSER_TAB_PREFIX.length) : undefined
+
+export const markdownTabForPath = (path: string) => `${MARKDOWN_TAB_PREFIX}${path}`
+
+export const markdownPathFromTab = (tab: string) =>
+  tab.startsWith(MARKDOWN_TAB_PREFIX) ? tab.slice(MARKDOWN_TAB_PREFIX.length) : undefined
 
 export function shouldShowFileTree(input: { visible: boolean; opened: boolean }) {
   return input.opened && input.visible
@@ -75,6 +85,7 @@ export const createSessionTabs = (input: TabsInput) => {
     if (active === "review" && review()) return active
     if (active && input.pathFromTab(active)) return input.normalizeTab(active)
     if (active && browserUrlFromTab(active)) return active
+    if (active && markdownPathFromTab(active)) return active
 
     const first = openedTabs()[0]
     if (first) return first

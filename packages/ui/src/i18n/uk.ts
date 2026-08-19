@@ -87,6 +87,8 @@ export const dict: Record<string, string> = {
   "ui.sessionTurn.status.delegating": "Делегування роботи",
   "ui.sessionTurn.status.planning": "Планування наступних кроків",
   "ui.sessionTurn.status.gatheringContext": "Дослідження",
+  "ui.messagePart.thinking": "Міркування…",
+  "ui.messagePart.thinkingDone": "Хід міркувань",
   "ui.sessionTurn.status.gatheredContext": "Досліджено",
   "ui.sessionTurn.status.searchingCodebase": "Пошук у кодовій базі",
   "ui.sessionTurn.status.searchingWeb": "Пошук в інтернеті",
@@ -197,6 +199,7 @@ export const dict: Record<string, string> = {
   "ui.common.showMore": "Показати більше",
 
   "ui.permission.deny": "Заборонити",
+  "ui.permission.allowAlwaysGlobal": "Дозволити глобально",
   "ui.permission.allowAlways": "Дозволяти завжди",
   "ui.permission.allowOnce": "Дозволити один раз",
 

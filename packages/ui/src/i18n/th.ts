@@ -83,6 +83,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "กำลังมอบหมายงาน",
   "ui.sessionTurn.status.planning": "กำลังวางแผนขั้นตอนถัดไป",
   "ui.sessionTurn.status.gatheringContext": "กำลังสำรวจ",
+  "ui.messagePart.thinking": "กำลังคิด…",
+  "ui.messagePart.thinkingDone": "กระบวนการคิด",
   "ui.sessionTurn.status.gatheredContext": "สำรวจแล้ว",
   "ui.sessionTurn.status.searchingCodebase": "กำลังค้นหาโค้ดเบส",
   "ui.sessionTurn.status.searchingWeb": "กำลังค้นหาบนเว็บ",
@@ -176,6 +178,7 @@ export const dict = {
   "ui.common.showMore": "แสดงเพิ่มเติม",
 
   "ui.permission.deny": "ปฏิเสธ",
+  "ui.permission.allowAlwaysGlobal": "อนุญาตทั่วโลก",
   "ui.permission.allowAlways": "อนุญาตเสมอ",
   "ui.permission.allowOnce": "อนุญาตครั้งเดียว",
 

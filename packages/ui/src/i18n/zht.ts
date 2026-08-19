@@ -85,6 +85,8 @@ export const dict = {
   "ui.sessionTurn.status.delegating": "正在委派工作",
   "ui.sessionTurn.status.planning": "正在規劃下一步",
   "ui.sessionTurn.status.gatheringContext": "正在探索",
+  "ui.messagePart.thinking": "思考中…",
+  "ui.messagePart.thinkingDone": "思考過程",
   "ui.sessionTurn.status.gatheredContext": "已探索",
   "ui.sessionTurn.status.searchingCodebase": "正在搜尋程式碼庫",
   "ui.sessionTurn.status.searchingWeb": "正在搜尋網頁",
@@ -178,6 +180,7 @@ export const dict = {
   "ui.common.showMore": "顯示更多",
 
   "ui.permission.deny": "拒絕",
+  "ui.permission.allowAlwaysGlobal": "全域允許",
   "ui.permission.allowAlways": "永遠允許",
   "ui.permission.allowOnce": "允許一次",
 

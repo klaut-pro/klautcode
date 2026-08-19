@@ -21,6 +21,7 @@ import { createSessionKeyReader, ensureSessionKey, pruneSessionKeys } from "./la
 import { requireServerKey } from "@/utils/session-route"
 import { type DraftTab, useTabs } from "./tabs"
 import { closeSessionTab, openSessionTab, previewSessionTab, type SessionTabs } from "./layout-tabs"
+import { BROWSER_HISTORY_LIMIT, type BrowserTabState } from "@/pages/session/browser/browser-state"
 
 export { createSessionKeyReader, ensureSessionKey, pruneSessionKeys }
 
@@ -295,6 +296,10 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
           opened: true,
           width: DEFAULT_PROJECT_SIDEBAR_WIDTH,
         },
+        projectChats: {
+          order: {} as Record<string, string[]>,
+          project: {} as Record<string, string>,
+        },
         session: {
           width: DEFAULT_SESSION_WIDTH,
         },
@@ -303,6 +308,7 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
         },
         sessionTabs: {} as Record<string, SessionTabs>,
         sessionView: {} as Record<string, SessionView>,
+        browser: {} as Record<string, BrowserTabState>,
         handoff: {
           tabs: undefined as TabHandoff | undefined,
         },
@@ -635,6 +641,34 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
           setStore("handoff", "tabs", undefined)
         },
       },
+      browser: {
+        get(tab: string) {
+          return store.browser[tab]
+        },
+        set(tab: string, patch: Partial<BrowserTabState>) {
+          setStore("browser", tab, (previous) => ({
+            ...(previous ?? { url: "" }),
+            ...patch,
+            url: patch.url ?? previous?.url ?? "",
+          }))
+        },
+        clear(tab: string) {
+          setStore(
+            "browser",
+            produce((draft) => {
+              delete draft[tab]
+            }),
+          )
+        },
+        pushHistory(tab: string, url: string) {
+          setStore("browser", tab, (previous) => {
+            const current = previous ?? { url }
+            const next = current.history ? [...current.history] : []
+            if (next[next.length - 1] !== url) next.push(url)
+            return { ...current, history: next.slice(-BROWSER_HISTORY_LIMIT) }
+          })
+        },
+      },
       projects: {
         list,
         recentlyClosed: createMemo(() => {
@@ -662,6 +696,26 @@ export const { use: useLayout, provider: LayoutProvider } = createSimpleContext(
         },
         move(directory: string, toIndex: number) {
           server.projects.move(directory, toIndex)
+        },
+      },
+      projectChats: {
+        order: (worktree: string) => store.projectChats.order[worktree] ?? [],
+        setOrder(worktree: string, ids: string[]) {
+          setStore("projectChats", "order", worktree, ids)
+        },
+        project: (sessionID: string) => store.projectChats.project[sessionID],
+        setProject(sessionID: string, worktree?: string) {
+          if (!worktree) {
+            setStore(
+              "projectChats",
+              "project",
+              produce((draft) => {
+                delete draft[sessionID]
+              }),
+            )
+            return
+          }
+          setStore("projectChats", "project", sessionID, worktree)
         },
       },
       sidebar: {

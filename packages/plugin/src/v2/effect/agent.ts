@@ -1,5 +1,5 @@
 import type { AgentV2Info } from "@klautcode/sdk/v2/types"
-import type { Hooks } from "./registration.js"
+import type { Hooks } from "./registration.ts"
 
 export interface AgentDraft {
   list(): readonly AgentV2Info[]
