@@ -6,6 +6,8 @@ import type { DesignCapture, DesignProbeResult } from "./types"
 import { DesignModeOverlay } from "./overlay"
 
 export type DesignModeAttach = (file: File) => Promise<void> | void
+export type DesignModeFlush = () => Promise<boolean>
+export type DesignModeSubmit = () => void | Promise<void>
 
 type DesignModeStore = {
   active: boolean
@@ -16,6 +18,8 @@ type DesignModeStore = {
   attach?: DesignModeAttach
   vision?: boolean
   pendingMetadata?: string
+  flush?: DesignModeFlush
+  submit?: DesignModeSubmit
 }
 
 export type DesignModeContextValue = {
@@ -29,9 +33,13 @@ export type DesignModeContextValue = {
   enter: () => Promise<void>
   exit: () => void
   setAttachHandler: (attach: DesignModeAttach) => void
+  setFlushHandler: (flush?: DesignModeFlush) => void
+  setSubmitHandler: (submit?: DesignModeSubmit) => void
   setVision: (vision: boolean) => void
   setPendingMetadata: (metadata: string) => void
   consumeMetadata: () => string | undefined
+  flush: () => Promise<boolean>
+  submit: () => Promise<void>
 }
 
 const DesignModeContext = createContext<DesignModeContextValue>()
@@ -60,14 +68,24 @@ export function DesignModeProvider(props: ParentProps) {
       }
     },
     exit: () =>
-      setStore({ active: false, capturing: false, error: undefined, capture: undefined, probe: undefined, pendingMetadata: undefined }),
-    setAttachHandler: (attach) => setStore("attach", attach),
+      setStore({ active: false, capturing: false, error: undefined, capture: undefined, probe: undefined }),
+    setAttachHandler: (attach) => setStore("attach", () => attach),
+    setFlushHandler: (flush) => setStore("flush", () => flush),
+    setSubmitHandler: (submit) => setStore("submit", () => submit),
     setVision: (vision) => setStore("vision", vision),
     setPendingMetadata: (metadata) => setStore("pendingMetadata", metadata),
     consumeMetadata: () => {
       const metadata = store.pendingMetadata
       setStore("pendingMetadata", undefined)
       return metadata
+    },
+    flush: async () => {
+      if (!store.active) return Boolean(store.pendingMetadata)
+      return (await store.flush?.()) ?? false
+    },
+    submit: async () => {
+      if (store.active) await store.flush?.()
+      await store.submit?.()
     },
   }
 

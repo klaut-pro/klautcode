@@ -3,6 +3,8 @@ import { createStore } from "solid-js/store"
 import { DebugBar } from "@/components/debug-bar"
 import { TabsInfoPopup } from "@/components/help-button"
 import { Titlebar, type TitlebarUpdate } from "@/components/titlebar"
+import { readyUpdateVersion } from "@/components/update-available"
+import { UpdateAvailableToast } from "@/components/update-available-toast"
 import { usePlatform } from "@/context/platform"
 import { setV2Toast, ToastRegion } from "@/utils/toast"
 
@@ -13,11 +15,7 @@ export default function NewLayout(props: ParentProps) {
   createEffect(() => setV2Toast(true))
 
   const update: TitlebarUpdate = {
-    version: () => {
-      const state = platform.updater?.state()
-      if (state?.status !== "ready") return
-      return state.version
-    },
+    version: () => readyUpdateVersion(platform.updater?.state()),
     installing: () => platform.updater?.state().status === "installing",
     install: () => void platform.updater?.install(),
   }
@@ -38,6 +36,7 @@ export default function NewLayout(props: ParentProps) {
             : undefined
         }
       />
+      <UpdateAvailableToast />
       <main class="flex-1 min-h-0 min-w-0 overflow-x-hidden flex flex-col items-start contain-strict">
         <Suspense>{props.children}</Suspense>
       </main>

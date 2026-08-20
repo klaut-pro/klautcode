@@ -32,7 +32,7 @@ async function signWindows(configuration: { path: string }) {
 const channel = (() => {
   const raw = process.env.KLAUTCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
-  return "dev"
+  return "prod"
 })()
 
 const APP_IDS = {
@@ -84,6 +84,12 @@ const getBase = (appId: string): Configuration => ({
   },
   dmg: {
     sign: true,
+    contents: [
+      { x: 130, y: 220 },
+      { x: 410, y: 220, type: "link", path: "/Applications" },
+    ],
+    window: { width: 540, height: 380 },
+    iconSize: 128,
   },
   protocols: {
     name: "Klautcode",

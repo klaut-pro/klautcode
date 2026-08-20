@@ -80,15 +80,4 @@ export async function showUpdaterDialog(controller: ReturnType<typeof setupAutoU
     })
     return
   }
-  if (state.status !== "ready") return
-
-  const response = await dialog.showMessageBox({
-    type: "info",
-    message: nativeT("desktop.updater.dialog.ready.message", { version: state.version }),
-    title: nativeT("desktop.updater.dialog.ready.title"),
-    buttons: [nativeT("desktop.updater.dialog.restart"), nativeT("desktop.updater.dialog.later")],
-    defaultId: 0,
-    cancelId: 1,
-  })
-  if (response.response === 0) await controller.install()
 }

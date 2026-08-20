@@ -1,4 +1,4 @@
-import { For, Match, Show, Switch, createEffect, createMemo, onCleanup, type JSX } from "solid-js"
+import { For, Match, Show, Switch, createEffect, createMemo, on, onCleanup, type JSX } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createMediaQuery } from "@solid-primitives/media"
 import { DragDropProvider as DndKitProvider, PointerSensor } from "@dnd-kit/solid"
@@ -56,6 +56,8 @@ import {
   type Sizing,
   browserTabForUrl,
   browserUrlFromTab,
+  firstBrowserTab,
+  isDefaultSidePanelPlaceholder,
   markdownPathFromTab,
   markdownTabForPath,
 } from "@/pages/session/helpers"
@@ -263,6 +265,35 @@ export function SessionSidePanel(props: {
     tabs().open(tab)
     tabs().setActive(tab)
   }
+  const openDefaultBrowserTab = () => {
+    const existing = firstBrowserTab(openedTabs())
+    if (existing) {
+      tabs().setActive(existing)
+      return
+    }
+    openBrowserTab(BROWSER_HOME_URL)
+  }
+  createEffect(
+    on(
+      reviewOpen,
+      (open) => {
+        if (!open) return
+        const selected = tabs().active()
+        if (selected === "review" || selected === "context") return
+        if (!isDefaultSidePanelPlaceholder(activeTab())) return
+        openDefaultBrowserTab()
+      },
+      { defer: true },
+    ),
+  )
+  createEffect(() => {
+    if (!reviewOpen()) return
+    const selected = tabs().active()
+    if (selected === "review" || selected === "context") return
+    if (openedTabs().length > 0) return
+    if (!isDefaultSidePanelPlaceholder(activeTab())) return
+    openDefaultBrowserTab()
+  })
   const openMarkdownTab = (path: string) => {
     const tab = markdownTabForPath(path)
     tabs().open(tab)

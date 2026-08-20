@@ -1,15 +1,23 @@
 [data-component="running-dots"] {
-  display: inline-grid;
-  grid-template-columns: repeat(3, 3px);
-  grid-template-rows: repeat(3, 3px);
-  gap: 1.5px;
+  /* 3×4px squares + 2×2px gaps = 16px, matching the size-4 icon slot. */
+  display: grid;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  grid-template-columns: repeat(3, 4px);
+  grid-template-rows: repeat(3, 4px);
+  gap: 2px;
+  place-content: center;
+  place-items: center;
+  line-height: 0;
   flex-shrink: 0;
   color: currentColor;
 }
 
 [data-component="running-dots"] [data-dot] {
-  width: 3px;
-  height: 3px;
+  display: block;
+  width: 4px;
+  height: 4px;
   background: currentColor;
   opacity: 0.25;
   animation: running-dots-pulse 1.2s ease-in-out infinite;

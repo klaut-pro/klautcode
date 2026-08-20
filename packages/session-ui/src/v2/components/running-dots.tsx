@@ -4,8 +4,10 @@ import "./running-dots.css"
 const DOTS = Array.from({ length: 9 }, (_, index) => index)
 
 // A compact 3x3 matrix of pulsing square dots used to indicate running agents.
-// DOM/CSS based so it always renders with the current text color, unlike a
-// canvas. Reused in the top tab, the project sidebar, and the subagent dock.
+// Sized to the 16px icon slot (4px squares, 2px gaps) so the grid stays even
+// when placed next to avatars and text. DOM/CSS based so it always renders
+// with the current text color, unlike a canvas. Reused in the top tab, the
+// project sidebar, and the subagent dock.
 export function RunningDots(props: ComponentProps<"span">) {
   const [local, rest] = splitProps(props, ["class", "classList"])
   return (

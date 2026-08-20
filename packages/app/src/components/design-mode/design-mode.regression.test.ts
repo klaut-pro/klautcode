@@ -3,6 +3,9 @@ import { computeContainLayout, mapRect } from "./types"
 
 const css = await Bun.file(new URL("./design-mode.css", import.meta.url)).text()
 const overlay = await Bun.file(new URL("./overlay.tsx", import.meta.url)).text()
+const controller = await Bun.file(new URL("./controller.tsx", import.meta.url)).text()
+const prompt = await Bun.file(new URL("../prompt-input-v2.tsx", import.meta.url)).text()
+const submit = await Bun.file(new URL("../prompt-input/submit.ts", import.meta.url)).text()
 const button = await Bun.file(new URL("./button.tsx", import.meta.url)).text()
 const panel = await Bun.file(new URL("../../pages/session/session-side-panel.tsx", import.meta.url)).text()
 
@@ -52,6 +55,28 @@ describe("design-mode chrome", () => {
 
   test("Escape exits design mode", () => {
     expect(overlay).toMatch(/event\.key === "Escape"[\s\S]*design\.exit\(\)/)
+  })
+
+  test("Enter attaches annotations and submits the prompt", () => {
+    expect(overlay).toContain("design.setFlushHandler(() => addToChat())")
+    expect(overlay).toMatch(/event\.key === "Enter"[\s\S]*design\.submit\(\)/)
+    expect(overlay).toMatch(/commitNote\(info\.index\)[\s\S]*design\.submit\(\)/)
+    expect(overlay).toContain("design.setPendingMetadata(result.metadata)")
+    expect(overlay).toContain("await attach(result.file)")
+    expect(controller).toContain("if (store.active) await store.flush?.()")
+    expect(controller).not.toMatch(/exit: \(\) =>\s*setStore\(\{[^}]*pendingMetadata: undefined/)
+    expect(prompt).toContain("if (design.active()) await design.flush()")
+    expect(prompt).toContain("design.setSubmitHandler(() => submission.handleSubmit(new Event(\"submit\")))")
+    expect(submit.indexOf("if (input.working()) void abort()")).toBeLessThan(submit.indexOf("const designMetadata = input.designMetadata?.()"))
+  })
+
+  test("handler functions are stored as values, never invoked by setStore", () => {
+    expect(controller).toContain('setStore("attach", () => attach)')
+    expect(controller).toContain('setStore("flush", () => flush)')
+    expect(controller).toContain('setStore("submit", () => submit)')
+    expect(controller).not.toMatch(/setAttachHandler: \(attach\) => setStore\("attach", attach\)/)
+    expect(controller).not.toMatch(/setFlushHandler: \(flush\) => setStore\("flush", flush\)/)
+    expect(controller).not.toMatch(/setSubmitHandler: \(submit\) => setStore\("submit", submit\)/)
   })
 
   test("the pencil button toggles design mode and uses the theme accent when on", () => {
