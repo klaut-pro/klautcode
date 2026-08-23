@@ -431,6 +431,8 @@ export const dict = {
   "mcp.status.needs_auth": "perlu autentikasi",
   "mcp.status.disabled": "nonaktif",
   "mcp.auth.clickToAuthenticate": "Klik untuk mengautentikasi",
+  "mcp.auth.needsAuthentication": "Server MCP {{name}} memerlukan autentikasi",
+  "mcp.auth.authenticate": "Autentikasi",
 
   "dialog.fork.empty": "Tidak ada pesan yang dapat dicabangkan",
 

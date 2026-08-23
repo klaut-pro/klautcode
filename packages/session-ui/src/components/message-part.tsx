@@ -203,6 +203,8 @@ export interface MessagePartProps {
   showAssistantCopyPartID?: string | null
   turnDurationMs?: number
   useV2Actions?: boolean
+  showReasoningSummaries?: boolean
+  onFetchToolOutput?: (path: string) => Promise<string>
 }
 
 function MessageActionButton(
@@ -708,14 +710,14 @@ function index<T extends { id: string }>(items: readonly T[]) {
   return new Map(items.map((item) => [item.id, item] as const))
 }
 
-export function renderable(part: PartType, showReasoningSummaries = true) {
+export function renderable(part: PartType) {
   if (part.type === "tool") {
     if (HIDDEN_TOOLS.has(part.tool)) return false
     if (part.tool === "question") return part.state.status !== "pending" && part.state.status !== "running"
     return true
   }
   if (part.type === "text") return !!part.text?.trim()
-  if (part.type === "reasoning") return showReasoningSummaries && !!part.text?.trim()
+  if (part.type === "reasoning") return !!part.text?.trim()
   return !!PART_MAPPING[part.type]
 }
 
@@ -747,7 +749,7 @@ export function AssistantParts(props: {
       groupParts(
         props.messages.flatMap((message) =>
           list(data.store.part?.[message.id], emptyParts)
-            .filter((part) => renderable(part, props.showReasoningSummaries ?? true))
+            .filter((part) => renderable(part))
             .map((part) => ({
               messageID: message.id,
               part,
@@ -811,6 +813,7 @@ export function AssistantParts(props: {
                         showAssistantCopyPartID={props.showAssistantCopyPartID}
                         turnDurationMs={props.turnDurationMs}
                         useV2Actions={props.useV2Actions}
+                        showReasoningSummaries={props.showReasoningSummaries}
                         defaultOpen={partDefaultOpen(item()!, props.shellToolDefaultOpen, props.editToolDefaultOpen)}
                       />
                     </Show>
@@ -975,7 +978,7 @@ export function AssistantMessageDisplay(props: {
     () =>
       groupParts(
         props.parts
-          .filter((part) => renderable(part, props.showReasoningSummaries ?? true))
+          .filter((part) => renderable(part))
           .map((part) => ({
             messageID: props.message.id,
             part,
@@ -1028,6 +1031,7 @@ export function AssistantMessageDisplay(props: {
                       message={props.message}
                       showAssistantCopyPartID={props.showAssistantCopyPartID}
                       useV2Actions={props.useV2Actions}
+                      showReasoningSummaries={props.showReasoningSummaries}
                     />
                   </Show>
                 )
@@ -1448,6 +1452,8 @@ export function Part(props: MessagePartProps) {
         showAssistantCopyPartID={props.showAssistantCopyPartID}
         turnDurationMs={props.turnDurationMs}
         useV2Actions={props.useV2Actions}
+        showReasoningSummaries={props.showReasoningSummaries}
+        onFetchToolOutput={props.onFetchToolOutput}
       />
     </Show>
   )
@@ -1469,6 +1475,7 @@ export interface ToolProps {
   onContentRendered?: () => void
   forceOpen?: boolean
   locked?: boolean
+  onFetchToolOutput?: (path: string) => Promise<string>
 }
 
 export type ToolComponent = Component<ToolProps>
@@ -1624,6 +1631,7 @@ PART_MAPPING["tool"] = function ToolPartDisplay(props) {
               deferContent={props.deferToolContent}
               virtualizeDiff={props.virtualizeDiff}
               onContentRendered={props.onContentRendered}
+              onFetchToolOutput={props.onFetchToolOutput}
             />
           </Match>
         </Switch>
@@ -1764,12 +1772,14 @@ PART_MAPPING["reasoning"] = function ReasoningPartDisplay(props) {
     () => props.message.role === "assistant" && typeof (props.message as AssistantMessage).time.completed !== "number",
   )
   const text = () => readPartText(data.store.part_text_accum_delta, part())
-  const [open, setOpen] = createSignal(true)
+  const summaries = () => props.showReasoningSummaries ?? true
+  const [open, setOpen] = createSignal(summaries())
 
-  // Auto-expand while streaming; stay expanded on completion so the user can
-  // collapse it with the toggle once the reasoning step is done.
+  // Auto-expand while streaming when summaries are on; stay expanded on completion so the
+  // user can collapse it with the toggle once the reasoning step is done. With summaries
+  // off the part stays collapsed until the user expands it.
   createEffect(() => {
-    if (streaming()) setOpen(true)
+    if (streaming() && summaries()) setOpen(true)
   })
 
   const handleOpenChange = (next: boolean) => setOpen(next)
@@ -2121,15 +2131,31 @@ ToolRegistry.register({
       const out = stripAnsi(props.output || props.metadata.output || "").replace(/\r\n?/g, "\n")
       return `$ ${cmd}${out ? "\n\n" + out : ""}`
     })
+    const truncated = () => props.metadata.truncated === true
+    const outputPath = () => (typeof props.metadata.outputPath === "string" ? props.metadata.outputPath : undefined)
+    const showFullOutput = () => truncated() && !!outputPath() && !!props.onFetchToolOutput
+    const [full, setFull] = createStore({ status: "idle" as "idle" | "loading" | "loaded" | "error", content: "" })
+    const displayed = createMemo(() => (full.status === "loaded" ? full.content : text()))
     const [copied, setCopied] = createSignal(false)
 
     const handleCopy = async () => {
-      const content = text()
+      const content = displayed()
       if (!content) return
       if (await writeClipboard(content)) {
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
       }
+    }
+
+    const handleViewFullOutput = () => {
+      const target = outputPath()
+      const fetcher = props.onFetchToolOutput
+      if (!target || !fetcher || full.status === "loading") return
+      setFull({ status: "loading", content: "" })
+      void fetcher(target).then(
+        (content) => setFull({ status: "loaded", content }),
+        () => setFull({ status: "error", content: "" }),
+      )
     }
 
     return (
@@ -2171,9 +2197,26 @@ ToolRegistry.register({
             aria-label={i18n.t("ui.scrollView.ariaLabel")}
           >
             <pre data-slot="bash-pre">
-              <code>{text()}</code>
+              <code>{displayed()}</code>
             </pre>
           </div>
+          <Show when={showFullOutput()}>
+            <div data-slot="bash-full-output">
+              <button
+                type="button"
+                data-slot="bash-full-output-toggle"
+                disabled={full.status === "loading"}
+                onClick={handleViewFullOutput}
+              >
+                {full.status === "loaded"
+                  ? i18n.t("ui.tool.shell.hideFullOutput")
+                  : i18n.t("ui.tool.shell.viewFullOutput")}
+              </button>
+              <Show when={full.status === "error"}>
+                <span data-slot="bash-full-output-error">{i18n.t("ui.tool.shell.fullOutputUnavailable")}</span>
+              </Show>
+            </div>
+          </Show>
         </div>
       </BasicTool>
     )

@@ -399,6 +399,8 @@ export const dict = {
   "mcp.status.needs_auth": "ត្រូវការសិទ្ធិ",
   "mcp.status.disabled": "បានបិទ",
   "mcp.auth.clickToAuthenticate": "ចុចដើម្បីផ្ទៀងផ្ទាត់",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} ត្រូវការការផ្ទៀងផ្ទាត់",
+  "mcp.auth.authenticate": "ផ្ទៀងផ្ទាត់",
   "dialog.fork.empty": "គ្មានសារដែលត្រូវបំបែកពី",
   "dialog.directory.search.placeholder": "ស្វែងរកថត",
   "dialog.directory.empty": "រកមិនឃើញថតឯកសារទេ។",

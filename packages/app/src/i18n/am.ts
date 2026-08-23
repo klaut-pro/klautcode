@@ -396,6 +396,8 @@ export const dict = {
   "mcp.status.needs_auth": "auth ያስፈልገዋል",
   "mcp.status.disabled": "የተሰናከለ",
   "mcp.auth.clickToAuthenticate": "ለማረጋገጥ ጠቅ ያድርጉ",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} ማረጋገጫ ያስፈልገዋል",
+  "mcp.auth.authenticate": "አረጋግጥ",
   "dialog.fork.empty": "አዲስ ቅርንጫፍ ለመፍጠር መልዕክት የለም",
   "dialog.directory.search.placeholder": "የአቃፊዎችን ፍለጋ",
   "dialog.directory.empty": "ምንም አቃፊዎች አልተገኙም",

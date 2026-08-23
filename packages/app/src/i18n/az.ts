@@ -403,6 +403,8 @@ export const dict = {
   "mcp.status.needs_auth": "avtorizasiya lazımdır",
   "mcp.status.disabled": "deaktiv",
   "mcp.auth.clickToAuthenticate": "Autentifikasiya üçün klikləyin",
+  "mcp.auth.needsAuthentication": "MCP serveri {{name}} üçün avtorizasiya lazımdır",
+  "mcp.auth.authenticate": "Avtorizasiya",
   "dialog.fork.empty": "Yeni sessiyaya ayırmaq üçün mesaj yoxdur",
   "dialog.directory.search.placeholder": "Qovluqları axtar",
   "dialog.directory.empty": "Qovluq tapılmadı",

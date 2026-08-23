@@ -404,6 +404,8 @@ export const dict = {
   "mcp.status.needs_auth": "þarf heimild",
   "mcp.status.disabled": "fatlaður",
   "mcp.auth.clickToAuthenticate": "Smelltu til að auðkenna",
+  "mcp.auth.needsAuthentication": "MCP-þjónninn {{name}} þarf auðkenningu",
+  "mcp.auth.authenticate": "Auðkenna",
   "dialog.fork.empty": "Engin skilaboð til að punga frá",
   "dialog.directory.search.placeholder": "Leita í möppum",
   "dialog.directory.empty": "Engar möppur fundust",

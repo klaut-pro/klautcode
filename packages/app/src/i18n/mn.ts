@@ -403,6 +403,8 @@ export const dict = {
   "mcp.status.needs_auth": "auth хэрэгтэй",
   "mcp.status.disabled": "тахир дутуу болсон",
   "mcp.auth.clickToAuthenticate": "Баталгаажуулахын тулд товшино уу",
+  "mcp.auth.needsAuthentication": "MCP сервер {{name}}-д auth хэрэгтэй",
+  "mcp.auth.authenticate": "Баталгаажуулах",
   "dialog.fork.empty": "Салаалах зурвас алга",
   "dialog.directory.search.placeholder": "Фолдер хайх",
   "dialog.directory.empty": "Ямар ч фолдер олдсонгүй",

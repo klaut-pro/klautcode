@@ -406,6 +406,8 @@ export const dict = {
   "mcp.status.failed": "błąd",
   "mcp.status.needs_auth": "wymaga autoryzacji",
   "mcp.auth.clickToAuthenticate": "Kliknij, aby się uwierzytelnić",
+  "mcp.auth.needsAuthentication": "Serwer MCP {{name}} wymaga autoryzacji",
+  "mcp.auth.authenticate": "Autoryzuj",
   "mcp.status.disabled": "wyłączone",
   "dialog.fork.empty": "Brak wiadomości do rozwidlenia",
   "dialog.directory.search.placeholder": "Szukaj folderów",

@@ -407,6 +407,8 @@ export const dict = {
   "mcp.status.needs_auth": "प्रमाणीकरण की आवश्यकता है",
   "mcp.status.disabled": "अक्षम",
   "mcp.auth.clickToAuthenticate": "प्रमाणित करने के लिए क्लिक करें",
+  "mcp.auth.needsAuthentication": "MCP सर्वर {{name}} को प्रमाणीकरण की आवश्यकता है",
+  "mcp.auth.authenticate": "प्रमाणीकरण",
   "dialog.fork.empty": "फ़ोर्क करने के लिए कोई संदेश नहीं",
   "dialog.directory.search.placeholder": "फ़ोल्डर खोजें",
   "dialog.directory.empty": "कोई फ़ोल्डर नहीं मिला",

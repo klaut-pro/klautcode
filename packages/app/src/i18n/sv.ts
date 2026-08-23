@@ -401,6 +401,8 @@ export const dict = {
   "mcp.status.needs_auth": "behöver autentisering",
   "mcp.status.disabled": "inaktiverad",
   "mcp.auth.clickToAuthenticate": "Klicka för att autentisera",
+  "mcp.auth.needsAuthentication": "MCP-servern {{name}} behöver autentisering",
+  "mcp.auth.authenticate": "Autentisera",
   "dialog.fork.empty": "Inga meddelanden att förgrena från",
   "dialog.directory.search.placeholder": "Sök i mappar",
   "dialog.directory.empty": "Inga mappar hittades",

@@ -404,6 +404,8 @@ export const dict = {
   "mcp.status.failed": "فشل",
   "mcp.status.needs_auth": "يحتاج إلى مصادقة",
   "mcp.auth.clickToAuthenticate": "انقر للمصادقة",
+  "mcp.auth.needsAuthentication": "يحتاج خادم MCP {{name}} إلى مصادقة",
+  "mcp.auth.authenticate": "مصادقة",
   "mcp.status.disabled": "معطل",
   "dialog.fork.empty": "لا توجد رسائل للتفرع منها",
   "dialog.directory.search.placeholder": "البحث في المجلدات",

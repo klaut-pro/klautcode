@@ -403,6 +403,8 @@ export const dict = {
   "mcp.status.needs_auth": "се нуждае от авт",
   "mcp.status.disabled": "деактивиран",
   "mcp.auth.clickToAuthenticate": "Щракнете за удостоверяване",
+  "mcp.auth.needsAuthentication": "MCP сървърът {{name}} се нуждае от удостоверяване",
+  "mcp.auth.authenticate": "Удостоверяване",
   "dialog.fork.empty": "Няма съобщения за разклонение",
   "dialog.directory.search.placeholder": "Папки за търсене",
   "dialog.directory.empty": "Няма намерени папки",

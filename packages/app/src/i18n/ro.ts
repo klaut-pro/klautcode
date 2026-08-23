@@ -399,6 +399,8 @@ export const dict = {
   "mcp.status.needs_auth": "necesită autentificare",
   "mcp.status.disabled": "dezactivat",
   "mcp.auth.clickToAuthenticate": "Autentifică-te",
+  "mcp.auth.needsAuthentication": "Serverul MCP {{name}} necesită autentificare",
+  "mcp.auth.authenticate": "Autentificare",
   "dialog.fork.empty": "Niciun mesaj de bifurcat",
   "dialog.directory.search.placeholder": "Caută foldere",
   "dialog.directory.empty": "Nu s-au găsit foldere",

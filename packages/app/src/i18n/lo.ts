@@ -399,6 +399,8 @@ export const dict = {
   "mcp.status.needs_auth": "ຕ້ອງການການຮັບຮອງ",
   "mcp.status.disabled": "ປິດໃຊ້ງານ",
   "mcp.auth.clickToAuthenticate": "ຄລິກເພື່ອພິສູດຢືນຢັນ",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} ຕ້ອງການການພິສູດຢືນຢັນ",
+  "mcp.auth.authenticate": "ພິສູດຢືນຢັນ",
   "dialog.fork.empty": "ບໍ່ມີຂໍ້ຄວາມທີ່ຈະແຍກອອກຈາກ",
   "dialog.directory.search.placeholder": "ຄົ້ນຫາໂຟນເດີ",
   "dialog.directory.empty": "ບໍ່ພົບໂຟນເດີ",

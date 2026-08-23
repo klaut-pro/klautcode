@@ -402,6 +402,8 @@ export const dict = {
   "mcp.status.needs_auth": "аутент лозим аст",
   "mcp.status.disabled": "маъюб",
   "mcp.auth.clickToAuthenticate": "Барои тасдиқ кардан клик кунед",
+  "mcp.auth.needsAuthentication": "MCP сервери {{name}} барои тасдиқ лозим аст",
+  "mcp.auth.authenticate": "Тасдиқ кардан",
   "dialog.fork.empty": "Паёме барои сохтани шоха нест",
   "dialog.directory.search.placeholder": "Ҷустуҷӯи ҷузвдонҳо",
   "dialog.directory.empty": "Ягон папка ёфт нашуд",

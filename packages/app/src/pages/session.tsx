@@ -81,7 +81,7 @@ import {
   SESSION_PANEL_WIDTH_MIN,
   sessionPanelWidthMax,
 } from "@/pages/session/session-panel-width"
-import { SessionSidePanel } from "@/pages/session/session-side-panel"
+import { SessionSidePanel, SessionSidePanelSkeleton } from "@/pages/session/session-side-panel"
 import { ProjectChatsSidebar } from "@/components/project-chats-sidebar"
 import { sessionPanelLayout } from "@/pages/session/session-panel-layout"
 import { SessionReviewEmptyChangesV2 } from "@klautcode/session-ui/v2/session-review-empty-changes-v2"
@@ -503,6 +503,9 @@ export default function Page() {
     }),
   )
   const sessionPanelWidth = createMemo(() => {
+    // While the layout store hydrates, hold the chat at its normal width so the
+    // side-panel column has room to show its skeleton instead of collapsing.
+    if (isDesktop() && !layout.ready()) return `${sessionPanelResizedWidth()}px`
     if (!desktopSidePanelOpen()) return "100%"
     if (desktopSessionResizeOpen()) return `${sessionPanelResizedWidth()}px`
     return `calc(100% - ${layout.fileTree.width()}px)`
@@ -2337,9 +2340,14 @@ export default function Page() {
           </Suspense>
         </Show>
         <Show when={newSessionDesign()}>
-          <Show when={isDesktop() ? desktopV2PanelLayout().visible : terminalOpen()}>
+          <Show when={isDesktop() ? desktopV2PanelLayout().visible || !layout.ready() : terminalOpen()}>
             <div class="min-w-0 h-full flex flex-1 flex-col">
-              <Show when={isDesktop() && (desktopV2ReviewOpen() || desktopFileTreeOpen())}>
+              <Show when={!layout.ready()}>
+                <div class="min-h-0 flex-1">
+                  <SessionSidePanelSkeleton />
+                </div>
+              </Show>
+              <Show when={layout.ready() && isDesktop() && (desktopV2ReviewOpen() || desktopFileTreeOpen())}>
                 <div class="min-h-0 flex-1">
                   <Suspense>
                     <SessionSidePanel

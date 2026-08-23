@@ -2,7 +2,7 @@
 import { SessionProgressIndicatorV2 } from "./session-progress-indicator-v2"
 
 const docs = `### Overview
-Animated 5×5 dot grid loader for in-progress session state.
+Animated 4×4 dot grid loader for in-progress session state — Li mirrored into correct order, using the full width/height. Backup of the previous 5×5 is kept at *.backup-5x5.
 
 Derived from Figma \`_sessionProgressIndicator\` with 8-frame rotation.
 

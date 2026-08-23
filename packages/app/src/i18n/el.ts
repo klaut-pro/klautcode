@@ -402,6 +402,8 @@ export const dict = {
   "mcp.status.needs_auth": "χρειάζεται εξουσιοδότηση",
   "mcp.status.disabled": "απενεργοποιημένο",
   "mcp.auth.clickToAuthenticate": "Κάντε κλικ για έλεγχο ταυτότητας",
+  "mcp.auth.needsAuthentication": "Ο MCP server {{name}} χρειάζεται εξουσιοδότηση",
+  "mcp.auth.authenticate": "Εξουσιοδότηση",
   "dialog.fork.empty": "Δεν υπάρχουν μηνύματα για διακλάδωση",
   "dialog.directory.search.placeholder": "Αναζήτηση φακέλων",
   "dialog.directory.empty": "Δεν βρέθηκαν φάκελοι",

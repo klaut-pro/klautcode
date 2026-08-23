@@ -38,7 +38,9 @@ function normalizeUrl(input: string): string | undefined {
 }
 
 function logBrowser(event: string, data?: Record<string, unknown>) {
-  console.info("[browser-tab]", event, data ?? {})
+  // Serialize to a single JSON string: electron-log's renderer console spy
+  // stringifies object args to "[object Object]", losing the size data.
+  console.info(`[browser-tab] ${event} ${JSON.stringify(data ?? {})}`)
 }
 
 function webviewSnapshot(host?: HTMLElement, webview?: WebviewTag) {
@@ -102,6 +104,11 @@ export function BrowserTab(props: { tab: string }) {
     }
     pendingUrl = url
     if (!guestReady) {
+      if (loadedUrl === undefined) {
+        loadedUrl = url
+        openWebviewUrl(webview, url, props.tab)
+        return
+      }
       logBrowser("defer load until dom-ready", { tab: props.tab, url, ...webviewSnapshot(ref, webview) })
       return
     }
@@ -140,6 +147,7 @@ export function BrowserTab(props: { tab: string }) {
     ref.appendChild(el)
     webview = el
     syncBox()
+    requestAnimationFrame(() => syncBox())
     const observer = new ResizeObserver(syncBox)
     observer.observe(ref)
 
@@ -186,7 +194,7 @@ export function BrowserTab(props: { tab: string }) {
       guestReady = true
       const size = syncBox()
       logBrowser("dom-ready", { tab, pendingUrl, ...size, ...webviewSnapshot(ref, el) })
-      if (pendingUrl) load(pendingUrl)
+      if (pendingUrl && pendingUrl !== loadedUrl) load(pendingUrl)
     }
     const onFinish = () => {
       logBrowser("finish-load", { tab, url: el.getURL?.() ?? el.src, ...webviewSnapshot(ref, el) })
@@ -364,7 +372,16 @@ export function BrowserTab(props: { tab: string }) {
           ref={ref}
           class={BROWSER_WEBVIEW_HOST_CLASS}
           data-component="browser-webview"
-        />
+        >
+          <Show when={store.loading}>
+            <div
+              class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background-base"
+              data-component="browser-webview-loading"
+            >
+              <div class="h-40 max-h-full w-4/5 max-w-md animate-pulse rounded-lg bg-surface-raised-base opacity-60" />
+            </div>
+          </Show>
+        </div>
       </Show>
     </div>
   )

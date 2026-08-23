@@ -400,6 +400,8 @@ export const dict = {
   "mcp.status.needs_auth": "potřebuje autentizaci",
   "mcp.status.disabled": "zakázáno",
   "mcp.auth.clickToAuthenticate": "Klikněte pro ověření",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} vyžaduje autentizaci",
+  "mcp.auth.authenticate": "Autentizovat",
   "dialog.fork.empty": "Žádné zprávy k rozvětvení",
   "dialog.directory.search.placeholder": "Hledat složky",
   "dialog.directory.empty": "Nebyly nalezeny žádné složky",

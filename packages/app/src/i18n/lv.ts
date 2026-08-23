@@ -400,6 +400,8 @@ export const dict = {
   "mcp.status.needs_auth": "nepieciešama autorizācija",
   "mcp.status.disabled": "atspējots",
   "mcp.auth.clickToAuthenticate": "Autentificējieties",
+  "mcp.auth.needsAuthentication": "MCP serverim {{name}} ir nepieciešama autorizācija",
+  "mcp.auth.authenticate": "Autentificējieties",
   "dialog.fork.empty": "Nav ziņu, no kurām atzarot",
   "dialog.directory.search.placeholder": "Meklēt mapes",
   "dialog.directory.empty": "Mapes nav atrastas",

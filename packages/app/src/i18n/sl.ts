@@ -399,6 +399,8 @@ export const dict = {
   "mcp.status.needs_auth": "potrebuje avt",
   "mcp.status.disabled": "onemogočen",
   "mcp.auth.clickToAuthenticate": "Kliknite za preverjanje pristnosti",
+  "mcp.auth.needsAuthentication": "MCP strežnik {{name}} potrebuje avtentikacijo",
+  "mcp.auth.authenticate": "Avtentikacija",
   "dialog.fork.empty": "Ni sporočil za odcepitev",
   "dialog.directory.search.placeholder": "Iskanje map",
   "dialog.directory.empty": "Ni najdenih map",

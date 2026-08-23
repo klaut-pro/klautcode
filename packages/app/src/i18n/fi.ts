@@ -307,6 +307,8 @@ export const dict = {
   "mcp.status.needs_auth": "tarvitsee todennusta",
   "mcp.status.disabled": "pois käytöstä",
   "mcp.auth.clickToAuthenticate": "Todenna napsauttamalla",
+  "mcp.auth.needsAuthentication": "MCP-palvelin {{name}} tarvitsee todennuksen",
+  "mcp.auth.authenticate": "Todenna",
   "dialog.fork.empty": "Ei viestejä, joista voisi haarauttaa",
   "dialog.directory.search.placeholder": "Hae kansioita",
   "dialog.directory.empty": "Kansioita ei löytynyt",

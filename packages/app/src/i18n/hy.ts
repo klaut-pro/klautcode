@@ -402,6 +402,8 @@ export const dict = {
   "mcp.status.needs_auth": "անհրաժեշտ է վավերացում",
   "mcp.status.disabled": "անջատված",
   "mcp.auth.clickToAuthenticate": "Սեղմեք՝ նույնականացնելու համար",
+  "mcp.auth.needsAuthentication": "MCP {{name}} սերվերը վավերացում է պահանջում",
+  "mcp.auth.authenticate": "Վավերացնել",
   "dialog.fork.empty": "Չկան պատառաքաղված հաղորդագրություններ",
   "dialog.directory.search.placeholder": "Որոնել թղթապանակներ",
   "dialog.directory.empty": "Պանակներ չեն գտնվել",

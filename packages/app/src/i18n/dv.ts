@@ -406,6 +406,8 @@ export const dict = {
   "mcp.status.needs_auth": "ބޭނުންވަނީ އޮތޯއެވެ",
   "mcp.status.disabled": "ނުކުޅެދޭ",
   "mcp.auth.clickToAuthenticate": "ސައްހަ ކުރުމަށް ކްލިކް ކުރާށެވެ",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} ބޭނުނަނީ އޮތޯއެވިކޭޝަން",
+  "mcp.auth.authenticate": "ސައްހަ ކުރާށެވެ",
   "dialog.fork.empty": "ފޯކް ކުރާނެ މެސެޖެއް ނެތެވެ",
   "dialog.directory.search.placeholder": "ފޯލްޑަރުތައް ހޯދުން",
   "dialog.directory.empty": "ފޯލްޑަރެއް ނުފެނެއެވެ",

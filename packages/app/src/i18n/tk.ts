@@ -400,6 +400,8 @@ export const dict = {
   "mcp.status.needs_auth": "auth gerek",
   "mcp.status.disabled": "maýyp",
   "mcp.auth.clickToAuthenticate": "Hakyky tassyklamak üçin basyň",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} üçin tassyklama gerek",
+  "mcp.auth.authenticate": "Tassykla",
   "dialog.fork.empty": "Şahalandyrmaly habar ýok",
   "dialog.directory.search.placeholder": "Papkalary gözläň",
   "dialog.directory.empty": "Papka tapylmady",

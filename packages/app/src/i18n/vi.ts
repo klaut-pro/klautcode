@@ -407,6 +407,8 @@ export const dict = {
   "mcp.status.needs_auth": "cần xác thực",
   "mcp.status.disabled": "đã tắt",
   "mcp.auth.clickToAuthenticate": "Bấm để xác thực",
+  "mcp.auth.needsAuthentication": "Máy chủ MCP {{name}} cần xác thực",
+  "mcp.auth.authenticate": "Xác thực",
   "dialog.fork.empty": "Không có tin nhắn nào để phân nhánh",
   "dialog.directory.search.placeholder": "Tìm kiếm thư mục",
   "dialog.directory.empty": "Không tìm thấy thư mục nào",

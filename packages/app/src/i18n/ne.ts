@@ -401,6 +401,8 @@ export const dict: Record<string, string> = {
   "mcp.status.needs_auth": "प्रमाणीकरण चाहिन्छ",
   "mcp.status.disabled": "असक्षम",
   "mcp.auth.clickToAuthenticate": "प्रमाणीकरण गर्न क्लिक गर्नुहोस्",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} प्रमाणीकरण चाहिन्छ",
+  "mcp.auth.authenticate": "प्रमाणीकरण",
   "dialog.fork.empty": "बाट फोर्क गर्न कुनै सन्देश छैन",
   "dialog.directory.search.placeholder": "फोल्डरहरू खोज्नुहोस्",
   "dialog.directory.empty": "कुनै फोल्डरहरू फेला परेनन्",

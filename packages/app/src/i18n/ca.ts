@@ -402,6 +402,8 @@ export const dict = {
   "mcp.status.needs_auth": "necessita autenticació",
   "mcp.status.disabled": "discapacitat",
   "mcp.auth.clickToAuthenticate": "Feu clic per autenticar-vos",
+  "mcp.auth.needsAuthentication": "El servidor MCP {{name}} necessita autenticació",
+  "mcp.auth.authenticate": "Autenticar",
   "dialog.fork.empty": "No hi ha missatges per bifurcar",
   "dialog.directory.search.placeholder": "Cerca carpetes",
   "dialog.directory.empty": "No s'han trobat carpetes",

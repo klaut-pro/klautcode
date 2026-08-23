@@ -399,6 +399,8 @@ export const dict = {
   "mcp.status.needs_auth": "vajab autentimist",
   "mcp.status.disabled": "puudega",
   "mcp.auth.clickToAuthenticate": "Klõpsake autentimiseks",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} vajab autentimist",
+  "mcp.auth.authenticate": "Autentige",
   "dialog.fork.empty": "Ühtegi sõnumit pole",
   "dialog.directory.search.placeholder": "Otsi kaustadest",
   "dialog.directory.empty": "Ühtegi kausta ei leitud",

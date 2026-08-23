@@ -399,6 +399,8 @@ export const dict: Record<string, string> = {
   "mcp.status.needs_auth": "auth අවශ්‍යයි",
   "mcp.status.disabled": "ආබාධිතයි",
   "mcp.auth.clickToAuthenticate": "සත්‍යාපනය කිරීමට ක්ලික් කරන්න",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} සඳහා සත්‍යාපනය අවශ්‍යයි",
+  "mcp.auth.authenticate": "සත්‍යාපනය",
   "dialog.fork.empty": "ෆෝක් කිරීමට පණිවිඩ නැත",
   "dialog.directory.search.placeholder": "ෆෝල්ඩර සොයන්න",
   "dialog.directory.empty": "ෆෝල්ඩර හමු නොවීය",

@@ -400,6 +400,8 @@ export const dict = {
   "mcp.status.needs_auth": "نیاز به احراز هویت",
   "mcp.status.disabled": "از کار افتاده است",
   "mcp.auth.clickToAuthenticate": "برای احراز هویت کلیک کنید",
+  "mcp.auth.needsAuthentication": "سرور MCP {{name}} به احراز هویت نیاز دارد",
+  "mcp.auth.authenticate": "احراز هویت",
   "dialog.fork.empty": "هیچ پیامی برای فورک وجود ندارد",
   "dialog.directory.search.placeholder": "جستجو در پوشه ها",
   "dialog.directory.empty": "پوشه ای پیدا نشد",

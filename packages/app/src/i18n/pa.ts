@@ -407,6 +407,8 @@ export const dict = {
   "mcp.status.needs_auth": "تصدیق دی لوڑ اے",
   "mcp.status.disabled": "بند",
   "mcp.auth.clickToAuthenticate": "تصدیق کرن لئی کلک کرو",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} دا تصدیق دی لوڑ اے",
+  "mcp.auth.authenticate": "تصدیق",
   "dialog.fork.empty": "فورک کرن لئی کوئی پیغام نئیں",
   "dialog.directory.search.placeholder": "فولڈراں نوں لبھو",
   "dialog.directory.empty": "کوئی فولڈر نئیں لبیا",
