@@ -1,4 +1,5 @@
 import path from "node:path"
+import { isDeepStrictEqual } from "node:util"
 import { pathToFileURL } from "node:url"
 import { LayerNode } from "@klautcode/core/effect/layer-node"
 import { ConfigV1 } from "@klautcode/core/v1/config/config"
@@ -16,11 +17,14 @@ import {
   ToolListChangedNotificationSchema,
 } from "@modelcontextprotocol/sdk/types.js"
 import { Config } from "@/config/config"
+import { ConfigParse } from "@/config/parse"
+import { ConfigPaths } from "@/config/paths"
 import { ConfigMCPV1 } from "@klautcode/core/v1/config/mcp"
 import { NamedError } from "@klautcode/core/util/error"
 import { InstallationVersion } from "@klautcode/core/installation/version"
 import { withTimeout } from "@/util/timeout"
 import { FSUtil } from "@klautcode/core/fs-util"
+import { Ignore } from "@klautcode/core/filesystem/ignore"
 import { McpOAuthPendingProvider, McpOAuthProvider, OAUTH_CALLBACK_PATH } from "./oauth-provider"
 import { McpOAuthCallback } from "./oauth-callback"
 import { McpAuth } from "./auth"
@@ -29,6 +33,7 @@ import { TuiEvent } from "@/server/tui-event"
 import { Cause, Effect, Exit, Layer, Context, Schema, Stream } from "effect"
 import { EffectBridge } from "@/effect/bridge"
 import { InstanceState } from "@/effect/instance-state"
+import { type InstanceContext } from "@/project/instance-context"
 import { ChildProcess, ChildProcessSpawner } from "effect/unstable/process"
 import { CrossSpawnSpawner } from "@klautcode/core/cross-spawn-spawner"
 import { McpCatalog } from "./catalog"
@@ -59,6 +64,8 @@ export const Resource = Schema.Struct({
 export type Resource = Schema.Schema.Type<typeof Resource>
 
 export const ToolsChanged = McpEvent.ToolsChanged
+
+export const StatusChanged = McpEvent.StatusChanged
 
 export const BrowserOpenFailed = McpEvent.BrowserOpenFailed
 
@@ -145,6 +152,8 @@ interface State {
   clients: Record<string, MCPClient>
   defs: Record<string, MCPToolDef[]>
   instructions: Record<string, string>
+  /** Servers added at runtime via `add()` (not present in any config file). Preserved across config reloads. */
+  added: Set<string>
 }
 
 export interface ServerInstructions {
@@ -208,6 +217,8 @@ const layer = Layer.effect(
     const auth = yield* McpAuth.Service
     const events = yield* EventV2Bridge.Service
     const browser = yield* McpBrowser.Service
+
+    const publishStatusChanged = (name: string) => events.publish(StatusChanged, { server: name }).pipe(Effect.ignore)
 
     type Transport = StdioClientTransport | StreamableHTTPClientTransport | SSEClientTransport
 
@@ -449,6 +460,7 @@ const layer = Layer.effect(
         bridge.fork(
           Effect.logWarning("MCP connection closed", { server: name }).pipe(
             Effect.andThen(events.publish(ToolsChanged, { server: name })),
+            Effect.andThen(publishStatusChanged(name)),
             Effect.ignore,
           ),
         )
@@ -495,11 +507,14 @@ const layer = Layer.effect(
         const bridge = yield* EffectBridge.make()
         const config = cfg.mcp ?? {}
         const s: State = {
-          config: {},
+          config: Object.fromEntries(
+            Object.entries(config).flatMap(([key, mcp]) => (isMcpConfigured(mcp) ? [[key, mcp] as const] : [])),
+          ),
           status: {},
           clients: {},
           defs: {},
           instructions: {},
+          added: new Set(),
         }
 
         yield* Effect.forEach(
@@ -527,6 +542,58 @@ const layer = Layer.effect(
             }),
           { concurrency: "unbounded" },
         )
+
+        // Watch the project config file(s) for mcp field changes and reconcile the catalog,
+        // so adding/changing/removing a server in the config takes effect without a restart.
+        const directory = yield* InstanceState.directory
+        const watcherModule = yield* Effect.tryPromise({
+          try: () => import("@parcel/watcher"),
+          catch: (e) => (e instanceof Error ? e : new Error(String(e))),
+        }).pipe(
+          Effect.catch((error) =>
+            Effect.logWarning("MCP config watcher unavailable", { error: String(error) }).pipe(Effect.as(undefined)),
+          ),
+        )
+        if (watcherModule) {
+          const parcel = watcherModule as unknown as {
+            subscribe: (
+              dir: string,
+              fn: (err: Error | null, events: Array<{ path: string }>) => void,
+              opts?: { ignore?: string[] },
+            ) => Promise<{ unsubscribe: () => Promise<void> }>,
+          }
+          let timer: ReturnType<typeof setTimeout> | undefined
+          const onConfigChange = (_err: Error | null, events: Array<{ path: string }>) => {
+            const isConfigFile = events.some((event) => {
+              const base = path.basename(event.path)
+              return base === "klautcode.json" || base === "klautcode.jsonc"
+            })
+            if (!isConfigFile) return
+            if (timer !== undefined) return
+            timer = setTimeout(() => {
+              timer = undefined
+              bridge.fork(reconcile().pipe(Effect.ignore))
+            }, 250)
+          }
+          const subscription = yield* Effect.tryPromise({
+            try: () => parcel.subscribe(directory, onConfigChange, { ignore: Ignore.PATTERNS }),
+            catch: (e) => (e instanceof Error ? e : new Error(String(e))),
+          }).pipe(
+            Effect.catch((error) =>
+              Effect.logWarning("failed to watch MCP config", { directory, error: String(error) }).pipe(
+                Effect.as(undefined),
+              ),
+            ),
+          )
+          if (subscription) {
+            yield* Effect.addFinalizer(() =>
+              Effect.gen(function* () {
+                if (timer !== undefined) clearTimeout(timer)
+                yield* Effect.tryPromise(() => subscription.unsubscribe()).pipe(Effect.ignore)
+              }),
+            )
+          }
+        }
 
         yield* Effect.addFinalizer(() =>
           Effect.gen(function* () {
@@ -579,6 +646,7 @@ const layer = Layer.effect(
       const bridge = yield* EffectBridge.make()
       const previous = s.clients[name]
       s.status[name] = { status: "connected" }
+      yield* publishStatusChanged(name)
       s.clients[name] = client
       s.defs[name] = listed
       if (instructions) s.instructions[name] = instructions
@@ -590,20 +658,10 @@ const layer = Layer.effect(
 
     const status = Effect.fn("MCP.status")(function* () {
       const s = yield* InstanceState.get(state)
-
-      const cfg = yield* cfgSvc.get()
-      const config = cfg.mcp ?? {}
       const result: Record<string, Status> = {}
-
-      for (const [key, mcp] of Object.entries(config)) {
-        if (!isMcpConfigured(mcp)) continue
-        result[key] = s.status[key] ?? { status: "disabled" }
-      }
-
       for (const key of Object.keys(s.config)) {
         result[key] = s.status[key] ?? { status: "disabled" }
       }
-
       return result
     })
 
@@ -632,6 +690,7 @@ const layer = Layer.effect(
       if (!result.mcpClient) {
         yield* closeClient(s, name)
         delete s.clients[name]
+        yield* publishStatusChanged(name)
         return result.status
       }
 
@@ -641,6 +700,7 @@ const layer = Layer.effect(
     const add = Effect.fn("MCP.add")(function* (name: string, mcp: ConfigMCPV1.Info) {
       const s = yield* InstanceState.get(state)
       s.config[name] = mcp
+      s.added.add(name)
       yield* createAndStore(name, mcp)
       return { status: s.status }
     })
@@ -656,6 +716,91 @@ const layer = Layer.effect(
       yield* closeClient(s, name)
       delete s.clients[name]
       s.status[name] = { status: "disabled" }
+      yield* publishStatusChanged(name)
+    })
+
+    function isMidAuth(name: string) {
+      return pendingOAuthTransports.has(name)
+    }
+
+    // Re-read the `mcp` field from the project config file(s). Returns `undefined` when the
+    // file has a parse error so the caller can keep the last-good config.
+    const readProjectMcp = Effect.fnUntraced(function* (ctx: InstanceContext) {
+      const files = yield* ConfigPaths.files("klautcode", ctx.directory, ctx.worktree)
+      let result: Record<string, McpEntry> | undefined
+      for (const file of files) {
+        const text = yield* Effect.tryPromise({
+          try: () => Bun.file(file).text(),
+          catch: (e) => (e instanceof Error ? e : new Error(String(e))),
+        }).pipe(Effect.catch(() => Effect.succeed(undefined)))
+        if (!text) continue
+        const parsed = yield* Effect.try({
+          try: () => ConfigParse.jsonc(text, file),
+          catch: (e) => (e instanceof Error ? e : new Error(String(e))),
+        }).pipe(Effect.exit)
+        if (Exit.isFailure(parsed)) return undefined
+        const entry = (parsed.value as Record<string, unknown> | null | undefined)?.mcp
+        if (entry && typeof entry === "object") {
+          result = { ...result, ...(entry as Record<string, McpEntry>) }
+        }
+      }
+      return result ?? {}
+    })
+
+    // The merged `mcp` field (global + project). Returns `undefined` on a project parse error.
+    const readMcpConfig = Effect.fnUntraced(function* (ctx: InstanceContext) {
+      const globalMcp = (yield* cfgSvc.getGlobal()).mcp ?? {}
+      const projectMcp = yield* readProjectMcp(ctx)
+      if (projectMcp === undefined) return undefined
+      return { ...globalMcp, ...projectMcp }
+    })
+
+    // Reconcile the MCP catalog against the config: connect newly-added servers, disconnect
+    // removed ones, and reconnect changed ones. Servers mid-authentication are left alone.
+    const reconcile = Effect.fn("MCP.reconcile")(function* () {
+      const s = yield* InstanceState.get(state)
+      const ctx = yield* InstanceState.context
+      const newMcp = yield* readMcpConfig(ctx)
+      if (newMcp === undefined) {
+        yield* Effect.logWarning("MCP config reload skipped: config file has a parse error, keeping last-good config")
+        return
+      }
+      const configuredMcp: Record<string, ConfigMCPV1.Info> = Object.fromEntries(
+        Object.entries(newMcp).flatMap(([key, mcp]) => (isMcpConfigured(mcp) ? [[key, mcp] as const] : [])),
+      )
+      // Preserve runtime additions (from `add()`) that are not present in the config file.
+      const inMemory: Record<string, ConfigMCPV1.Info> = {}
+      for (const name of s.added) {
+        if (!(name in configuredMcp) && s.config[name]) inMemory[name] = s.config[name]
+      }
+      const target: Record<string, ConfigMCPV1.Info> = { ...configuredMcp, ...inMemory }
+      const oldNames = new Set(Object.keys(s.config))
+      const newNames = new Set(Object.keys(target))
+
+      yield* Effect.forEach(
+        Array.from(newNames).filter((name) => !oldNames.has(name)),
+        (name) => createAndStore(name, target[name]),
+        { concurrency: "unbounded" },
+      )
+      yield* Effect.forEach(
+        Array.from(oldNames).filter((name) => !newNames.has(name) && !isMidAuth(name)),
+        (name) =>
+          Effect.gen(function* () {
+            yield* closeClient(s, name)
+            delete s.clients[name]
+            s.status[name] = { status: "disabled" }
+            yield* publishStatusChanged(name)
+          }),
+        { concurrency: "unbounded" },
+      )
+      yield* Effect.forEach(
+        Array.from(newNames).filter(
+          (name) => oldNames.has(name) && !isDeepStrictEqual(s.config[name], target[name]) && !isMidAuth(name),
+        ),
+        (name) => createAndStore(name, target[name]),
+        { concurrency: "unbounded" },
+      )
+      s.config = target
     })
 
     function requestTimeout(s: State, name: string, configured: McpEntry | undefined, fallback?: number) {
@@ -998,7 +1143,7 @@ export type AuthStatus = "authenticated" | "expired" | "not_authenticated"
 export const node = LayerNode.make({
   service: Service,
   layer: layer,
-  deps: [CrossSpawnSpawner.node, McpAuth.node, EventV2Bridge.node, Config.node, McpBrowser.node],
+  deps: [CrossSpawnSpawner.node, McpAuth.node, EventV2Bridge.node, Config.node, McpBrowser.node, FSUtil.node],
 })
 
 export * as MCP from "."
