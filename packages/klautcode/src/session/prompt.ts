@@ -47,6 +47,7 @@ import { Cause, Effect, Exit, Latch, Layer, Option, Scope, Context, Schema, Type
 import { InstanceState } from "@/effect/instance-state"
 import { TaskTool, type TaskPromptOps } from "@/tool/task"
 import { SessionRunState } from "./run-state"
+import { BackgroundJob } from "@/background/job"
 import { RuntimeFlags } from "@/effect/runtime-flags"
 import { EventV2Bridge } from "@/event-v2-bridge"
 import { Database } from "@klautcode/core/database/database"
@@ -184,6 +185,7 @@ const layer = Layer.effect(
     const database = yield* Database.Service
     const { db } = database
     const knowledge = yield* KnowledgeService.Service
+    const background = yield* BackgroundJob.Service
     const ops = Effect.fn("SessionPrompt.ops")(function* () {
       return {
         cancel: (sessionID: SessionID) => cancel(sessionID),
@@ -195,6 +197,26 @@ const layer = Layer.effect(
     const cancel = Effect.fn("SessionPrompt.cancel")(function* (sessionID: SessionID) {
       yield* Effect.logInfo("cancel", { "session.id": sessionID })
       yield* state.cancel(sessionID)
+    })
+
+    // Multitask: when a new prompt is admitted, detach any foreground subagents
+    // so the delegator stops blocking on them and picks the prompt up as soon as
+    // it is no longer delegating. Promoting wins the task tool's
+    // waitForPromotion race, so the blocked tool call returns immediately.
+    const detachForegroundTasks = Effect.fn("SessionPrompt.detachForegroundTasks")(function* (sessionID: SessionID) {
+      const jobs = yield* background.list()
+      const foreground = jobs.filter(
+        (job) =>
+          job.type === "task" &&
+          job.status === "running" &&
+          job.metadata?.parentSessionId === sessionID &&
+          job.metadata.background !== true,
+      )
+      yield* Effect.forEach(
+        foreground,
+        (job) => background.promote(job.id),
+        { concurrency: "unbounded", discard: true },
+      )
     })
 
     const resolvePromptParts = Effect.fn("SessionPrompt.resolvePromptParts")(function* (template: string) {
@@ -1211,6 +1233,7 @@ const layer = Layer.effect(
       yield* revert.cleanup(session)
       const message = yield* createUserMessage(input)
       yield* sessions.touch(input.sessionID)
+      yield* detachForegroundTasks(input.sessionID)
 
       const permissions: PermissionV1.Rule[] = []
       for (const [t, enabled] of Object.entries(input.tools ?? {})) {
@@ -1810,6 +1833,7 @@ export const node = LayerNode.make({
     CrossSpawnSpawner.node,
     Instruction.node,
     SessionRunState.node,
+    BackgroundJob.node,
     SessionRevert.node,
     SessionSummary.node,
     Todo.node,
