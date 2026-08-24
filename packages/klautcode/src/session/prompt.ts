@@ -77,6 +77,10 @@ const TITLE_REFRESH_EVERY = 10
 const TITLE_REFRESH_CONTEXT = 8
 const TODO_RECONCILE_CONTEXT = 12
 const TODO_RECONCILE_MIN_MS = 30_000
+// Providers occasionally return a response with no parts, no finish reason,
+// and no error. Without a bound the loop retries forever, re-sending the full
+// context on every attempt. Allow one retry, then surface an error.
+const MAX_CONSECUTIVE_EMPTY_RESPONSES = 2
 const VALID_TODO_STATUS = new Set(["pending", "in_progress", "completed", "cancelled"])
 
 function validTodoStatus(value: string): Todo.Info["status"] | undefined {
@@ -1293,6 +1297,7 @@ const layer = Layer.effect(
         const ctx = yield* InstanceState.context
         let structured: unknown
         let step = 0
+        let consecutiveEmptyResponses = 0
         const session = yield* sessions.get(sessionID).pipe(Effect.orDie)
 
         while (true) {
@@ -1504,6 +1509,43 @@ const layer = Layer.effect(
               yield* sessions.updateMessage(handle.message)
               return "break" as const
             }
+
+            if (result === "continue" && !handle.message.error && handle.message.finish !== "content-filter") {
+              const match = yield* sessions.findMessage(sessionID, (msg) => msg.info.id === handle.message.id).pipe(
+                Effect.orDie,
+              )
+              const hasContent =
+                Option.isSome(match) &&
+                match.value.parts.some(
+                  (part) =>
+                    (part.type === "text" && !!part.text?.trim()) ||
+                    part.type === "tool" ||
+                    (part.type === "reasoning" && !!part.text?.trim()),
+                )
+              if (!hasContent) {
+                consecutiveEmptyResponses += 1
+                // A response with a finish reason but no visible content would end
+                // the turn silently; a response without a finish reason would make
+                // the loop retry forever. Either way, bound the retries and surface
+                // an error instead.
+                if (consecutiveEmptyResponses >= MAX_CONSECUTIVE_EMPTY_RESPONSES || handle.message.finish) {
+                  yield* Effect.logWarning("loop exit after empty response", {
+                    "session.id": sessionID,
+                    messageID: handle.message.id,
+                    finish: handle.message.finish,
+                    emptyResponses: consecutiveEmptyResponses,
+                  })
+                  handle.message.error = new NamedError.Unknown({
+                    message: "Model returned an empty response",
+                  }).toObject()
+                  yield* sessions.updateMessage(handle.message)
+                  yield* events.publish(Session.Event.Error, { sessionID, error: handle.message.error })
+                  return "break" as const
+                }
+                return "continue" as const
+              }
+            }
+            consecutiveEmptyResponses = 0
 
             const finished = handle.message.finish && !["tool-calls", "unknown"].includes(handle.message.finish)
             if (finished && !handle.message.error) {

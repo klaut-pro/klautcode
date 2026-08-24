@@ -674,6 +674,38 @@ it.instance("loop surfaces content-filter finishes as session errors", () =>
   }),
 )
 
+it.instance("loop breaks with an error after consecutive empty responses", () =>
+  Effect.gen(function* () {
+    const { llm } = yield* useServerConfig(providerCfg)
+    const prompt = yield* SessionPrompt.Service
+    const sessions = yield* Session.Service
+    const chat = yield* sessions.create({ title: "Pinned" })
+
+    yield* prompt.prompt({
+      sessionID: chat.id,
+      agent: "build",
+      noReply: true,
+      parts: [{ type: "text", text: "hello" }],
+    })
+    // Two consecutive responses with no text, no tool calls, and no finish reason.
+    yield* llm.push(reply(), reply())
+
+    const result = yield* prompt.loop({ sessionID: chat.id })
+
+    // The loop must stop after the bounded number of empty responses instead of
+    // retrying forever (2 loop calls + the forked title request, with margin).
+    expect((yield* llm.hits).length).toBeLessThanOrEqual(4)
+    expect(result.info.role).toBe("assistant")
+    if (result.info.role === "assistant") {
+      expect(result.info.error).toEqual({
+        name: "UnknownError",
+        data: { message: "Model returned an empty response" },
+      })
+      expect(result.parts.filter((part) => part.type === "text" || part.type === "tool" || part.type === "reasoning")).toEqual([])
+    }
+  }),
+)
+
 it.instance("loop stops provider overflow instead of auto-compacting when disabled", () =>
   Effect.gen(function* () {
     const { llm } = yield* useServerConfig((url) => ({
