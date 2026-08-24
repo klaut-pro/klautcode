@@ -412,31 +412,34 @@ function unsupportedParts(msgs: ModelMessage[], model: Provider.Model): ModelMes
     const filtered = msg.content.map((part) => {
       if (part.type !== "file" && part.type !== "image") return part
 
-      // Check for empty base64 image data
-      if (part.type === "image") {
-        const imageStr = String(part.image)
-        if (imageStr.startsWith("data:")) {
-          const match = imageStr.match(/^data:([^;]+);base64,(.*)$/)
-          if (match && (!match[2] || match[2].length === 0)) {
-            return {
-              type: "text" as const,
-              text: "ERROR: Image file is empty or corrupted. Please provide a valid image.",
+        // Check for empty base64 image data
+        if (part.type === "image") {
+          const imageStr = String(part.image)
+          if (imageStr.startsWith("data:")) {
+            const match = imageStr.match(/^data:([^;]+);base64,(.*)$/)
+            if (match && (!match[2] || match[2].length === 0)) {
+              return {
+                type: "text" as const,
+                text: "This image was not included: the image data is empty or corrupted. Please provide a valid image.",
+              }
             }
           }
         }
-      }
 
-      const mime = part.type === "image" ? String(part.image).split(";")[0].replace("data:", "") : part.mediaType
-      const filename = part.type === "file" ? part.filename : undefined
-      const modality = mimeToModality(mime)
-      if (!modality) return part
-      if (model.capabilities.input[modality]) return part
+        const mime = part.type === "image" ? String(part.image).split(";")[0].replace("data:", "") : part.mediaType
+        const filename = part.type === "file" ? part.filename : undefined
+        const modality = mimeToModality(mime)
+        if (!modality) return part
+        if (model.capabilities.input[modality]) return part
 
-      const name = filename ? `"${filename}"` : modality
-      return {
-        type: "text" as const,
-        text: `ERROR: Cannot read ${name} (this model does not support ${modality} input). Inform the user.`,
-      }
+        // Surface a clean, user-facing note (no raw ERROR text) when a modality the
+        // model can't accept is attached. This is rendered into the transcript so the
+        // user is informed directly rather than seeing an internal error string.
+        const label = filename ? `File "${filename}"` : `This ${modality}`
+        return {
+          type: "text" as const,
+          text: `${label} was not included: the current model does not support ${modality} input.`,
+        }
     })
 
     return { ...msg, content: filtered }
