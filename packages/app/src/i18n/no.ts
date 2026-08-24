@@ -420,6 +420,8 @@ export const dict = {
   "mcp.status.failed": "mislyktes",
   "mcp.status.needs_auth": "trenger autentisering",
   "mcp.auth.clickToAuthenticate": "Klikk for å autentisere",
+  "mcp.auth.needsAuthentication": "MCP-serveren {{name}} trenger autentisering",
+  "mcp.auth.authenticate": "Autentisér",
   "mcp.status.disabled": "deaktivert",
 
   "dialog.fork.empty": "Ingen meldinger å forgrene fra",

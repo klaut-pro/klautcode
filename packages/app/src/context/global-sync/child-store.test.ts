@@ -60,7 +60,7 @@ beforeAll(async () => {
         },
         get data() {
           if (options().queryKey?.[1] === "path") throw new Error("pending path data read")
-          if (options().queryKey?.[1] === "mcp") return options().enabled ? { demo: { status: "disabled" } } : undefined
+          if (options().queryKey?.[1] === "mcp") return options().enabled ? { demo: { status: "disabled", scope: "project" } } : undefined
           if (options().queryKey?.[1] === "lsp") return []
           if (options().queryKey?.[1] === "providers") return provider
           return undefined
@@ -211,7 +211,7 @@ describe("createChildStoreManager", () => {
       manager.child("/project", { bootstrap: false, mcp: true })
       expect(query().enabled).toBe(true)
       expect(resourceQuery().enabled).toBe(true)
-      expect(store.mcp).toEqual({ demo: { status: "disabled" } })
+      expect(store.mcp).toEqual({ demo: { status: "disabled", scope: "project" } })
       expect(mcpLoads).toEqual(["/project"])
 
       manager.disableMcp("/project")

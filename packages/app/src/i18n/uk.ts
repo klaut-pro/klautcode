@@ -432,6 +432,8 @@ export const dict = {
   "mcp.status.needs_auth": "потрібна авторизація",
   "mcp.status.disabled": "вимкнено",
   "mcp.auth.clickToAuthenticate": "Натисніть для автентифікації",
+  "mcp.auth.needsAuthentication": "Серверу MCP {{name}} потрібна автентифікація",
+  "mcp.auth.authenticate": "Автентифікуватися",
 
   "dialog.fork.empty": "Немає повідомлень для відгалуження",
 

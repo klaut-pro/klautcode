@@ -327,6 +327,8 @@ export const dict = {
   "mcp.status.failed": "mislykkedes",
   "mcp.status.needs_auth": "kræver godkendelse",
   "mcp.auth.clickToAuthenticate": "Klik for at godkende",
+  "mcp.auth.needsAuthentication": "MCP-serveren {{name}} kræver godkendelse",
+  "mcp.auth.authenticate": "Godkend",
   "mcp.status.disabled": "deaktiveret",
 
   "dialog.fork.empty": "Ingen beskeder at forgrene fra",

@@ -35,6 +35,11 @@ export const tabMode = (tab: string): "file" | "browser" | "markdown" => {
 
 export const browserTabForUrl = (url: string) => `${BROWSER_TAB_PREFIX}${url}`
 
+export const firstBrowserTab = (tabs: readonly string[]) => tabs.find((tab) => !!browserUrlFromTab(tab))
+
+export const isDefaultSidePanelPlaceholder = (tab: string | undefined) =>
+  !tab || tab === "review" || tab === "empty"
+
 export const browserUrlFromTab = (tab: string) =>
   tab.startsWith(BROWSER_TAB_PREFIX) ? tab.slice(BROWSER_TAB_PREFIX.length) : undefined
 
@@ -90,7 +95,6 @@ export const createSessionTabs = (input: TabsInput) => {
     const first = openedTabs()[0]
     if (first) return first
     if (contextOpen()) return "context"
-    if (review() && hasReview()) return "review"
     return "empty"
   })
   const activeFileTab = createMemo(() => {

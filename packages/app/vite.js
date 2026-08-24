@@ -9,7 +9,7 @@ const channel = (() => {
   const raw = process.env.KLAUTCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
   if (process.env.KLAUTCODE_CHANNEL === "latest") return "prod"
-  return "dev"
+  return "prod"
 })()
 
 /**

@@ -1,4 +1,4 @@
-import { For, Match, Show, Switch, createEffect, createMemo, onCleanup, type JSX } from "solid-js"
+import { For, Match, Show, Switch, createEffect, createMemo, on, onCleanup, type JSX } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createMediaQuery } from "@solid-primitives/media"
 import { DragDropProvider as DndKitProvider, PointerSensor } from "@dnd-kit/solid"
@@ -56,6 +56,8 @@ import {
   type Sizing,
   browserTabForUrl,
   browserUrlFromTab,
+  firstBrowserTab,
+  isDefaultSidePanelPlaceholder,
   markdownPathFromTab,
   markdownTabForPath,
 } from "@/pages/session/helpers"
@@ -263,6 +265,35 @@ export function SessionSidePanel(props: {
     tabs().open(tab)
     tabs().setActive(tab)
   }
+  const openDefaultBrowserTab = () => {
+    const existing = firstBrowserTab(openedTabs())
+    if (existing) {
+      tabs().setActive(existing)
+      return
+    }
+    openBrowserTab(BROWSER_HOME_URL)
+  }
+  createEffect(
+    on(
+      reviewOpen,
+      (open) => {
+        if (!open) return
+        const selected = tabs().active()
+        if (selected === "review" || selected === "context") return
+        if (!isDefaultSidePanelPlaceholder(activeTab())) return
+        openDefaultBrowserTab()
+      },
+      { defer: true },
+    ),
+  )
+  createEffect(() => {
+    if (!reviewOpen()) return
+    const selected = tabs().active()
+    if (selected === "review" || selected === "context") return
+    if (openedTabs().length > 0) return
+    if (!isDefaultSidePanelPlaceholder(activeTab())) return
+    openDefaultBrowserTab()
+  })
   const openMarkdownTab = (path: string) => {
     const tab = markdownTabForPath(path)
     tabs().open(tab)
@@ -979,5 +1010,32 @@ export function SessionSidePanel(props: {
         </Show>
       </aside>
     </Show>
+  )
+}
+
+// Mirrors the V2 side-panel layout (52px tab bar + content region) while the
+// persisted layout store is still hydrating, so the panel area reads as
+// "loading" instead of collapsing to 0px and popping in.
+export function SessionSidePanelSkeleton(): JSX.Element {
+  return (
+    <div
+      class="relative h-full w-full overflow-hidden rounded-[10px] bg-v2-background-bg-base shadow-[var(--v2-elevation-raised)]"
+      data-component="session-side-panel-skeleton"
+      aria-hidden="true"
+    >
+      <div class="flex h-full min-h-0 flex-col">
+        <div class="flex h-[52px] shrink-0 items-center gap-2 border-b border-border-weaker-base px-3">
+          <div class="size-7 shrink-0 animate-pulse rounded-md bg-v2-background-bg-deep opacity-70" />
+          <div class="h-7 w-24 shrink-0 animate-pulse rounded-md bg-v2-background-bg-deep opacity-70" />
+          <div class="h-7 w-20 shrink-0 animate-pulse rounded-md bg-v2-background-bg-deep opacity-70" />
+          <div class="ml-auto size-7 shrink-0 animate-pulse rounded-md bg-v2-background-bg-deep opacity-70" />
+        </div>
+        <div class="flex min-h-0 flex-1 flex-col gap-2 p-3">
+          <For each={[0, 1, 2, 3, 4, 5, 6]}>
+            {() => <div class="h-9 w-full animate-pulse rounded-md bg-v2-background-bg-deep opacity-70" />}
+          </For>
+        </div>
+      </div>
+    </div>
   )
 }

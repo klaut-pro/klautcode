@@ -404,6 +404,8 @@ export const dict = {
   "mcp.status.needs_auth": "hitelesítést igényel",
   "mcp.status.disabled": "letiltva",
   "mcp.auth.clickToAuthenticate": "Kattintson a hitelesítéshez",
+  "mcp.auth.needsAuthentication": "Az {{name}} MCP-szerver hitelesítést igényel",
+  "mcp.auth.authenticate": "Hitelesítés",
   "dialog.fork.empty": "Nincsenek üzenetek, ahonnan elágazhatna",
   "dialog.directory.search.placeholder": "Mappák keresése",
   "dialog.directory.empty": "Nem találhatók mappák",

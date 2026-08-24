@@ -400,6 +400,8 @@ export const dict = {
   "mcp.status.needs_auth": "perlu pengesahan",
   "mcp.status.disabled": "dilumpuhkan",
   "mcp.auth.clickToAuthenticate": "Klik untuk pengesahan",
+  "mcp.auth.needsAuthentication": "Pelayan MCP {{name}} memerlukan pengesahan",
+  "mcp.auth.authenticate": "Pengesahan",
   "dialog.fork.empty": "Tiada mesej untuk dicabang",
   "dialog.directory.search.placeholder": "Cari folder",
   "dialog.directory.empty": "Tiada folder ditemui",

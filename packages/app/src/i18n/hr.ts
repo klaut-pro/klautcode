@@ -404,6 +404,8 @@ export const dict = {
   "mcp.status.needs_auth": "treba autorizaciju",
   "mcp.status.disabled": "onemogućeno",
   "mcp.auth.clickToAuthenticate": "Kliknite za autentifikaciju",
+  "mcp.auth.needsAuthentication": "MCP poslužitelj {{name}} zahtijeva autorizaciju",
+  "mcp.auth.authenticate": "Autoriziraj",
   "dialog.fork.empty": "Nema poruka za račvanje",
   "dialog.directory.search.placeholder": "Traži mape",
   "dialog.directory.empty": "Nema pronađenih mapa",

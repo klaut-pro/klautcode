@@ -1,7 +1,9 @@
-import { Show, type JSX } from "solid-js"
+import { For, Show, createMemo, type JSX } from "solid-js"
 import { useLanguage } from "@/context/language"
 import { useSettings } from "@/context/settings"
+import { useSync } from "@/context/sync"
 import { SessionPermissionDock } from "@/pages/session/composer/session-permission-dock"
+import { SessionMcpAuthDock } from "@/pages/session/composer/session-mcp-auth-dock"
 import { SessionQuestionDock } from "@/pages/session/composer/session-question-dock"
 import { SessionFollowupDock } from "@/pages/session/composer/session-followup-dock"
 import { SessionRevertDock } from "@/pages/session/composer/session-revert-dock"
@@ -16,6 +18,14 @@ export function SessionComposerRegion(props: {
   const language = useLanguage()
   const controller = props.controller
   const settings = useSettings()
+  const sync = useSync()
+  const mcpAuthNames = createMemo(
+    () =>
+      Object.entries(sync().data.mcp ?? {})
+        .filter(([, server]) => server.status === "needs_auth" && server.scope === "project")
+        .map(([name]) => name)
+        .sort((a, b) => a.localeCompare(b)),
+  )
   const rolled = () => {
     const revert = controller.revert()
     return revert?.items.length ? revert : undefined
@@ -60,7 +70,18 @@ export function SessionComposerRegion(props: {
           )}
         </Show>
 
+        <Show when={mcpAuthNames().length > 0}>
+          <For each={mcpAuthNames()}>
+            {(name) => (
+              <div>
+                <SessionMcpAuthDock name={name} />
+              </div>
+            )}
+          </For>
+        </Show>
+
         <Show when={controller.showComposer()}>
+          <SessionSubagentDock />
           <Show when={controller.dock()}>
             <div
               classList={{
@@ -141,7 +162,6 @@ export function SessionComposerRegion(props: {
                   onDelete={controller.followup()!.onDelete}
                 />
               </Show>
-              <SessionSubagentDock />
               <Show
                 when={controller.child()}
                 fallback={<Show when={!controller.state.blocked()}>{props.promptInput}</Show>}

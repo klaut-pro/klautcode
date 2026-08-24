@@ -399,6 +399,8 @@ export const dict = {
   "mcp.status.needs_auth": "hevur brúk fyri auth",
   "mcp.status.disabled": "óarbeiðsførur",
   "mcp.auth.clickToAuthenticate": "Trýst fyri at vátta",
+  "mcp.auth.needsAuthentication": "MCP-tjenerin {{name}} hevur brúk fyri auðkenningu",
+  "mcp.auth.authenticate": "Vátta",
   "dialog.fork.empty": "Eingi boð at greina frá",
   "dialog.directory.search.placeholder": "Leita eftir mappum",
   "dialog.directory.empty": "Ongar mappur eru funnar",

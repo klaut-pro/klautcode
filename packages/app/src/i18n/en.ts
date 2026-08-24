@@ -340,6 +340,8 @@ export const dict = {
   "mcp.status.disabled": "disabled",
   "mcp.status.disconnected": "disconnected",
   "mcp.auth.clickToAuthenticate": "Click to authenticate",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} needs authentication",
+  "mcp.auth.authenticate": "Authenticate",
 
   "dialog.fork.empty": "No messages to fork from",
 

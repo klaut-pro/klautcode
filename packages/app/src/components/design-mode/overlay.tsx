@@ -91,6 +91,14 @@ export function DesignModeOverlay() {
     setHost(el ?? undefined)
     if (!el) {
       setHostBox({ width: 0, height: 0 })
+      const watch = new MutationObserver(() => {
+        if (!document.querySelector("[data-component=browser-webview]")) {
+          console.info("[browser-tab]", "design-mode host gone, exiting")
+          design.exit()
+        }
+      })
+      watch.observe(document.body, { childList: true, subtree: true })
+      onCleanup(() => watch.disconnect())
       return
     }
     const update = () => {
@@ -101,8 +109,16 @@ export function DesignModeOverlay() {
     const observer = new ResizeObserver(update)
     observer.observe(el)
     window.addEventListener("resize", update)
+    const watch = new MutationObserver(() => {
+      if (!document.contains(el)) {
+        console.info("[browser-tab]", "design-mode host unmounted, exiting")
+        design.exit()
+      }
+    })
+    watch.observe(document.body, { childList: true, subtree: true })
     onCleanup(() => {
       observer.disconnect()
+      watch.disconnect()
       window.removeEventListener("resize", update)
     })
   })
@@ -281,11 +297,15 @@ export function DesignModeOverlay() {
   }
 
   const addToChat = async () => {
-    if (busy()) return
+    if (busy()) return false
     const currentCapture = capture()
     const currentProbe = probe()
     const attach = design.attach()
-    if (!currentCapture || !currentProbe || !attach) return
+    if (!currentCapture || !currentProbe || !attach) return false
+    if (selection().length === 0 && shapes().length === 0) {
+      design.exit()
+      return false
+    }
     setBusy(true)
     try {
       const result = await compositeDesignCapture({
@@ -298,18 +318,21 @@ export function DesignModeOverlay() {
       await attach(result.file)
       design.setPendingMetadata(result.metadata)
       design.exit()
+      return true
     } catch (error) {
       setBusy(false)
       showToast({
         title: language.t("designMode.toast.error"),
         description: error instanceof Error ? error.message : String(error),
       })
+      return false
     }
   }
 
   const hasContent = () => selection().length > 0 || shapes().length > 0
 
   onMount(() => {
+    design.setFlushHandler(() => addToChat())
     const onKeyDown = (event: KeyboardEvent) => {
       if (busy()) return
       const target = event.target as HTMLElement | null
@@ -347,7 +370,7 @@ export function DesignModeOverlay() {
       }
       if (event.key === "Enter") {
         event.preventDefault()
-        void addToChat()
+        void design.submit()
         return
       }
       if (event.key.toLowerCase() === "d") {
@@ -367,6 +390,7 @@ export function DesignModeOverlay() {
     window.addEventListener("keydown", onKeyDown)
     window.addEventListener("contextmenu", prevent)
     onCleanup(() => {
+      design.setFlushHandler(undefined)
       window.removeEventListener("keydown", onKeyDown)
       window.removeEventListener("contextmenu", prevent)
     })
@@ -455,7 +479,9 @@ export function DesignModeOverlay() {
                       onKeyDown={(event) => {
                         if (event.key === "Enter" && !event.shiftKey) {
                           event.preventDefault()
-                          ;(event.currentTarget as HTMLTextAreaElement).blur()
+                          event.stopPropagation()
+                          commitNote(info.index)
+                          void design.submit()
                         } else if (event.key === "Escape") {
                           event.preventDefault()
                           setEditingNote(undefined)

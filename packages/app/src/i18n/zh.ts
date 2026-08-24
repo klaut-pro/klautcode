@@ -447,6 +447,8 @@ export const dict = {
   "mcp.status.failed": "失败",
   "mcp.status.needs_auth": "需要授权",
   "mcp.auth.clickToAuthenticate": "点击进行授权",
+  "mcp.auth.needsAuthentication": "MCP 服务器 {{name}} 需要授权",
+  "mcp.auth.authenticate": "授权",
   "mcp.status.disabled": "已禁用",
 
   "dialog.fork.empty": "没有可用于创建新会话的消息",

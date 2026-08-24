@@ -401,6 +401,8 @@ export const dict = {
   "mcp.status.needs_auth": "nevojiten auth",
   "mcp.status.disabled": "me aftësi të kufizuara",
   "mcp.auth.clickToAuthenticate": "Kliko për të vërtetuar",
+  "mcp.auth.needsAuthentication": "Serveri MCP {{name}} kër autentifikim",
+  "mcp.auth.authenticate": "Autentifikohu",
   "dialog.fork.empty": "Nuk ka mesazhe për të marrë nga",
   "dialog.directory.search.placeholder": "Kërko dosjet",
   "dialog.directory.empty": "Nuk u gjet asnjë dosje",

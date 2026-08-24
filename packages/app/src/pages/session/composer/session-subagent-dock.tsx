@@ -57,7 +57,7 @@ export function SessionSubagentDock() {
           <For each={active()}>
             {(subagent) => (
               <div class="group flex items-center gap-1.5 py-0.5 text-13-regular">
-                <span class="size-1.5 shrink-0 rounded-full" aria-hidden="true">
+                <span class="flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
                   <Show
                     when={subagent.status === "working"}
                     fallback={
@@ -70,7 +70,7 @@ export function SessionSubagentDock() {
                       />
                     }
                   >
-                    <RunningDots class="shrink-0 -mt-0.5 text-icon-info-active" />
+                    <RunningDots class="text-icon-info-active" />
                   </Show>
                 </span>
                 <button

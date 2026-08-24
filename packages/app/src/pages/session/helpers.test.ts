@@ -5,6 +5,8 @@ import {
   SESSION_OPEN_FILE_TAB,
   browserTabForUrl,
   browserUrlFromTab,
+  firstBrowserTab,
+  isDefaultSidePanelPlaceholder,
   createOpenReviewFile,
   createOpenSessionFileTab,
   createSessionTabs,
@@ -131,7 +133,7 @@ describe("createSessionTabs", () => {
     })
   })
 
-  test("prefers context and review fallbacks when no file tab is active", () => {
+  test("prefers context, then an empty panel, instead of auto-selecting review", () => {
     createRoot((dispose) => {
       const [state] = createStore({
         active: undefined as string | undefined,
@@ -165,7 +167,7 @@ describe("createSessionTabs", () => {
         hasReview: () => true,
       })
 
-      expect(result.activeTab()).toBe("review")
+      expect(result.activeTab()).toBe("empty")
       expect(result.activeFileTab()).toBeUndefined()
       expect(result.closableTab()).toBeUndefined()
       dispose()
@@ -237,5 +239,14 @@ describe("browser and markdown tab encoding", () => {
 
   test("classifies file tabs as file mode", () => {
     expect(tabMode("file://src/a.ts")).toBe("file")
+  })
+
+  test("picks the first browser tab and treats review/empty as placeholders", () => {
+    expect(firstBrowserTab(["file://a.ts", "browser://https://example.com"])).toBe("browser://https://example.com")
+    expect(firstBrowserTab(["file://a.ts"])).toBeUndefined()
+    expect(isDefaultSidePanelPlaceholder(undefined)).toBe(true)
+    expect(isDefaultSidePanelPlaceholder("review")).toBe(true)
+    expect(isDefaultSidePanelPlaceholder("empty")).toBe(true)
+    expect(isDefaultSidePanelPlaceholder("browser://https://example.com")).toBe(false)
   })
 })

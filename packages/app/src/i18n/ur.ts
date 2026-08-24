@@ -409,6 +409,8 @@ export const dict = {
   "mcp.status.needs_auth": "توثیق درکار ہے",
   "mcp.status.disabled": "غیر فعال",
   "mcp.auth.clickToAuthenticate": "تصدیق کرنے کے لیے کلک کریں۔",
+  "mcp.auth.needsAuthentication": "MCP سرور {{name}} کو تصدیق درکار ہے",
+  "mcp.auth.authenticate": "تصدیق کریں",
   "dialog.fork.empty": "کوئی پیغامات نہیں ہیں جن سے فورک کیا جائے۔",
   "dialog.directory.search.placeholder": "فولڈرز تلاش کریں۔",
   "dialog.directory.empty": "کوئی فولڈر نہیں ملا",

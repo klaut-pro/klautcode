@@ -403,6 +403,8 @@ export const dict = {
   "mcp.status.failed": "失敗",
   "mcp.status.needs_auth": "認証が必要",
   "mcp.auth.clickToAuthenticate": "クリックして認証",
+  "mcp.auth.needsAuthentication": "MCPサーバー {{name}} には認証が必要です",
+  "mcp.auth.authenticate": "認証",
   "mcp.status.disabled": "無効",
   "dialog.fork.empty": "フォーク元のメッセージがありません",
   "dialog.directory.search.placeholder": "フォルダを検索",

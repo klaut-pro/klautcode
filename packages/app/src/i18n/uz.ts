@@ -402,6 +402,8 @@ export const dict = {
   "mcp.status.needs_auth": "avtorizatsiya kerak",
   "mcp.status.disabled": "nogiron",
   "mcp.auth.clickToAuthenticate": "Haqiqiylikni tekshirish uchun bosing",
+  "mcp.auth.needsAuthentication": "MCP serveri {{name}} uchun avtorizatsiya kerak",
+  "mcp.auth.authenticate": "Avtorizatsiya",
   "dialog.fork.empty": "Hech qanday xabar yo'q",
   "dialog.directory.search.placeholder": "Jildlarni qidirish",
   "dialog.directory.empty": "Hech qanday jild topilmadi",

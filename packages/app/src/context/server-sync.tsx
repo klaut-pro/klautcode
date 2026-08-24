@@ -1,6 +1,7 @@
 import type {
   Config,
   KlautcodeClient,
+  McpPublicStatus,
   Path,
   Project,
   ProviderAuthResponse,
@@ -49,12 +50,9 @@ import { createHomeSessionIndexCache } from "./global-sync/home-session-index"
 import { persisted } from "@/utils/persist"
 import type { ServerApi } from "@/utils/server"
 import type {
-  McpListInput,
-  McpListOutput,
   McpResource,
   McpResourceCatalogInput,
   McpResourceCatalogOutput,
-  McpServer,
   SessionActiveOutput,
 } from "@klautcode/client/promise"
 import { toggleMcp } from "./global-sync/mcp"
@@ -69,10 +67,6 @@ type GlobalStore = {
   provider_auth: ProviderAuthResponse
   config: Config
   reload: undefined | "pending" | "complete"
-}
-
-type McpListApi = {
-  readonly list: (input?: McpListInput) => Promise<McpListOutput>
 }
 
 type McpResourceApi = {
@@ -93,23 +87,16 @@ type SessionActiveApi = {
 export const loadMcpQuery = (
   scope: ServerScope,
   directory: string,
-  api: McpListApi,
-  legacy?: KlautcodeClient,
-  protocol?: Promise<"v1" | "v2">,
-): ApiQueryOptions<Record<string, McpServer["status"]>, readonly [ServerScope, string, "mcp"]> =>
+  sdk: KlautcodeClient,
+): ApiQueryOptions<Record<string, McpPublicStatus>, readonly [ServerScope, string, "mcp"]> =>
   queryOptions<
-    Record<string, McpServer["status"]>,
+    Record<string, McpPublicStatus>,
     Error,
-    Record<string, McpServer["status"]>,
+    Record<string, McpPublicStatus>,
     readonly [ServerScope, string, "mcp"]
   >({
     queryKey: [scope, directory, "mcp"] as const,
-    queryFn: async () => {
-      if ((await protocol) === "v1" && legacy) return (await legacy.mcp.status()).data ?? {}
-      return api
-        .list({ location: { directory } })
-        .then((result) => Object.fromEntries(result.data.map((server) => [server.name, server.status])))
-    },
+    queryFn: async () => (await sdk.mcp.status()).data ?? {},
   })
 
 export const loadMcpResourcesQuery = (
@@ -193,7 +180,7 @@ function makeQueryOptionsApi(
     agents: (directory: PathKey) => loadAgentsQuery(scope, directory, serverAPI.agent, sdkFor(directory), protocol),
     references: (directory: PathKey) =>
       loadReferencesQuery(scope, directory, serverAPI.reference, sdkFor(directory), protocol),
-    mcp: (directory: PathKey) => loadMcpQuery(scope, directory, serverAPI.mcp, sdkFor(directory), protocol),
+    mcp: (directory: PathKey) => loadMcpQuery(scope, directory, sdkFor(directory)),
     mcpResources: (directory: PathKey) =>
       loadMcpResourcesQuery(scope, directory, serverAPI.mcp, sdkFor(directory), protocol),
     lsp: (directory: PathKey) => loadLspQuery(scope, directory, sdkFor(directory)),

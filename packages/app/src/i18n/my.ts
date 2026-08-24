@@ -404,6 +404,8 @@ export const dict = {
   "mcp.status.needs_auth": "အထောက်အထား လိုအပ်သည်။",
   "mcp.status.disabled": "ပိတ်ထားသည်။",
   "mcp.auth.clickToAuthenticate": "စစ်မှန်ကြောင်းသက်သေပြရန် နှိပ်ပါ။",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} အထောက်အထား လိုအပ်သည်",
+  "mcp.auth.authenticate": "အထောက်အထား",
   "dialog.fork.empty": "လမ်းခွဲရန် မက်ဆေ့ချ်များ မရှိပါ။",
   "dialog.directory.search.placeholder": "ဖိုင်တွဲများကို ရှာပါ။",
   "dialog.directory.empty": "ဖိုင်တွဲများကို ရှာမတွေ့ပါ။",

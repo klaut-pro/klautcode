@@ -434,6 +434,8 @@ export const dict = {
   "mcp.status.failed": "başarısız",
   "mcp.status.needs_auth": "kimlik doğrulama gerekli",
   "mcp.auth.clickToAuthenticate": "Kimlik doğrulamak için tıklayın",
+  "mcp.auth.needsAuthentication": "MCP sunucusu {{name}} kimlik doğrulama gerektirir",
+  "mcp.auth.authenticate": "Doğrula",
   "mcp.status.disabled": "devre dışı",
 
   "dialog.fork.empty": "Dallandırılacak mesaj yok",

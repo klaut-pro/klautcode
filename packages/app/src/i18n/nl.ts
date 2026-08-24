@@ -401,6 +401,8 @@ export const dict = {
   "mcp.status.needs_auth": "heeft autorisatie nodig",
   "mcp.status.disabled": "uitgeschakeld",
   "mcp.auth.clickToAuthenticate": "Klik om te authenticeren",
+  "mcp.auth.needsAuthentication": "MCP-server {{name}} heeft authenticatie nodig",
+  "mcp.auth.authenticate": "Authenticeren",
   "dialog.fork.empty": "Geen berichten om van af te splitsen",
   "dialog.directory.search.placeholder": "Zoek in mappen",
   "dialog.directory.empty": "Geen mappen gevonden",

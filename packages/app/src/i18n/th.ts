@@ -427,6 +427,8 @@ export const dict = {
   "mcp.status.failed": "ล้มเหลว",
   "mcp.status.needs_auth": "ต้องยืนยันตัวตน",
   "mcp.auth.clickToAuthenticate": "คลิกเพื่อยืนยันตัวตน",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} ตือ ยืนยันทัวตน",
+  "mcp.auth.authenticate": "ยืนยันทัวตน",
   "mcp.status.disabled": "ปิดใช้งาน",
 
   "dialog.fork.empty": "ไม่มีข้อความให้แตกแขนง",

@@ -43,7 +43,6 @@ import { SessionRetry } from "@klautcode/session-ui/session-retry"
 import { isScrollKeyTarget, scrollKey, scrollKeyOwner, ScrollView } from "@klautcode/ui/scroll-view"
 import { StickyAccordionHeader } from "@klautcode/ui/sticky-accordion-header"
 import { TextField } from "@klautcode/ui/text-field"
-import { TextReveal } from "@klautcode/ui/text-reveal"
 import { TextShimmer } from "@klautcode/ui/text-shimmer"
 import type {
   AssistantMessage,
@@ -68,6 +67,7 @@ import { usePlatform } from "@/context/platform"
 import { useSettings } from "@/context/settings"
 import { useTabs } from "@/context/tabs"
 import { legacySessionHref, requireServerKey, sessionHref } from "@/utils/session-route"
+import { authTokenFromCredentials } from "@/utils/server"
 import { useSDK } from "@/context/sdk"
 import { useSync } from "@/context/sync"
 import { notifySessionTabsRemoved } from "@/components/titlebar-session-events"
@@ -129,15 +129,12 @@ const markBoundaryGesture = (input: {
   }
 }
 
-function TimelineThinkingRow(props: { reasoningHeading?: string; showReasoningSummaries: boolean }) {
+function TimelineThinkingRow() {
   const language = useLanguage()
 
   return (
     <div data-slot="session-turn-thinking">
       <TextShimmer text={language.t("ui.sessionTurn.status.thinking")} />
-      <Show when={!props.showReasoningSummaries}>
-        <TextReveal text={props.reasoningHeading} class="session-turn-thinking-heading" travel={25} duration={700} />
-      </Show>
     </div>
   )
 }
@@ -273,6 +270,22 @@ export function MessageTimeline(props: {
   const coldBottomMount = !initialMeasurements?.length && props.shouldAnchorBottom()
   const platform = usePlatform()
 
+  const fetchToolOutput = (path: string) => {
+    const http = serverSDK().server.http
+    const headers = http.password
+      ? {
+          Authorization: `Basic ${authTokenFromCredentials({ username: http.username, password: http.password })}`,
+        }
+      : undefined
+    return fetch(new URL(`/tool-output/content?path=${encodeURIComponent(path)}`, serverSDK().url), { headers }).then(
+      async (response) => {
+        if (!response.ok) throw new Error("Failed to load full tool output")
+        const body = (await response.json()) as { content: string }
+        return body.content
+      },
+    )
+  }
+
   const [listRoot, setListRoot] = createSignal<HTMLDivElement>()
   const sessionID = createMemo(() => params.id)
   const sessionStatus = createMemo(() => {
@@ -336,7 +349,6 @@ export function MessageTimeline(props: {
     sessionMessages: projectedMessages,
     parts: getMsgParts,
     status: sessionStatus,
-    showReasoningSummaries: settings.general.showReasoningSummaries,
     inlineComments: settings.general.newLayoutDesigns,
   })
   const activeMessageID = projection.activeMessageID
@@ -1106,6 +1118,8 @@ export function MessageTimeline(props: {
                 showAssistantCopyPartID={assistantCopyPartID(row().userMessageID)}
                 turnDurationMs={turnDurationMs(row().userMessageID)}
                 useV2Actions={settings.general.newLayoutDesigns()}
+                showReasoningSummaries={settings.general.showReasoningSummaries()}
+                onFetchToolOutput={fetchToolOutput}
                 defaultOpen={defaultOpen()}
                 toolOpen={toolOpen[part().id] ?? defaultOpen()}
                 onToolOpenChange={(open) => setToolOpen(part().id, open)}
@@ -1263,10 +1277,7 @@ export function MessageTimeline(props: {
         return (
           <TimelineRowFrame row={thinkingRow}>
             <div data-slot="session-turn-message-container" class="w-full px-4 md:px-5">
-              <TimelineThinkingRow
-                reasoningHeading={thinkingRow().reasoningHeading}
-                showReasoningSummaries={settings.general.showReasoningSummaries()}
-              />
+              <TimelineThinkingRow />
             </div>
           </TimelineRowFrame>
         )

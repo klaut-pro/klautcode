@@ -2,7 +2,7 @@ import { LayerNode } from "@klautcode/core/effect/layer-node"
 import { PermissionV1 } from "@klautcode/core/v1/permission"
 import { Image } from "@/image/image"
 import { SessionV1 } from "@klautcode/core/v1/session"
-import { Cause, Deferred, Effect, Exit, Layer, Context, Scope, Schema } from "effect"
+import { Cause, Deferred, Duration, Effect, Exit, Layer, Context, Scope, Schema } from "effect"
 import * as Stream from "effect/Stream"
 import { Agent } from "@/agent/agent"
 import { Config } from "@/config/config"
@@ -27,6 +27,11 @@ import { Database } from "@klautcode/core/database/database"
 import { Usage, type LLMEvent } from "@klautcode/llm"
 
 const DOOM_LOOP_THRESHOLD = 3
+// Idle (not total) timeout for the LLM stream. If no chunk arrives within this
+// window the stream is considered stalled and is failed with a retryable error
+// so the existing Effect.retry auto-retries it. 120s absorbs slow providers and
+// long "thinking" pauses while still recovering a hung connection promptly.
+const LLM_STREAM_IDLE_TIMEOUT = Duration.seconds(120)
 export type Result = "compact" | "stop" | "continue"
 
 export interface Handle {
@@ -639,7 +644,23 @@ const layer = Layer.effect(
             yield* status.set(ctx.sessionID, { type: "busy" })
             const stream = llm.stream(streamInput)
 
-            yield* stream.pipe(
+            // Stall detection: race each pull against a timer that fails the
+            // stream if it stays silent for LLM_STREAM_IDLE_TIMEOUT. The timer
+            // restarts on every chunk, so this is an idle timeout, not a total
+            // timeout. While a tool is in flight the AI SDK stream is
+            // legitimately silent (it runs the tool before emitting
+            // tool-result), so the check is suspended until the tool settles.
+            const stall = Effect.fnUntraced(function* () {
+              while (true) {
+                yield* Effect.sleep(LLM_STREAM_IDLE_TIMEOUT)
+                if (Object.keys(ctx.toolcalls).length > 0) continue
+                return yield* Effect.fail(new Error("LLM stream timed out: no chunks received"))
+              }
+            })
+
+            yield* Stream.transformPull(stream, (pull, _scope) =>
+              Effect.succeed(Effect.raceFirst(pull, stall())),
+            ).pipe(
               Stream.tap((event) => handleEvent(event)),
               Stream.takeUntil(() => ctx.needsCompaction),
               Stream.runDrain,

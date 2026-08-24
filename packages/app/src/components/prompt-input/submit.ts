@@ -342,12 +342,12 @@ export function createPromptSubmit(input: PromptSubmitInput) {
     const text = currentPrompt.map((part) => ("content" in part ? part.content : "")).join("")
     const images = input.imageAttachments().slice()
     const mode = input.mode()
-    const designMetadata = input.designMetadata?.()
 
     if (text.trim().length === 0 && images.length === 0 && input.commentCount() === 0) {
       if (input.working()) void abort()
       return
     }
+    const designMetadata = input.designMetadata?.()
 
     const modelSelection = input.model ?? local.model
     const currentModel = modelSelection.current()

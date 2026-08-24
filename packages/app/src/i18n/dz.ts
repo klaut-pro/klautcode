@@ -405,6 +405,8 @@ export const dict: Record<string, string> = {
   "mcp.status.needs_auth": "auth དགོཔ་ཨིན།",
   "mcp.status.disabled": "དབང༌པོ༌སྐྱོན༌ཅན༌",
   "mcp.auth.clickToAuthenticate": "བདེན་བཤད་འབད་ནི་ལུ་ཨེབ་གཏང་།",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} auth དགོཔ་ཨིན།",
+  "mcp.auth.authenticate": "བདེན་བཤད་འབད།",
   "dialog.fork.empty": "ལས་ཕོརཀ་འབད་ནི་ལུ་འཕྲིན་དོན་མེད།",
   "dialog.directory.search.placeholder": "སྣོད་འཛིན་ཚུ་འཚོལ།",
   "dialog.directory.empty": "སྣོད་འཛིན་འཚོལ་མ་ཐོབ།",

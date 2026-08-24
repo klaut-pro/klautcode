@@ -76,6 +76,7 @@ export type Event =
   | EventTuiToastShow2
   | EventTuiSessionSelect2
   | EventMcpToolsChanged
+  | EventMcpStatusChanged
   | EventMcpBrowserOpenFailed
   | EventCommandExecuted
   | EventProjectUpdated
@@ -1460,6 +1461,13 @@ export type GlobalEvent = {
       }
     | {
         id: string
+        type: "mcp.status.changed"
+        properties: {
+          server: string
+        }
+      }
+    | {
+        id: string
         type: "mcp.browser.open.failed"
         properties: {
           mcpName: string
@@ -2386,6 +2394,32 @@ export type FormatterStatus = {
   enabled: boolean
 }
 
+export type McpScope = "project" | "global"
+
+export type McpPublicStatus =
+  | {
+      status: "connected"
+      scope: McpScope
+    }
+  | {
+      status: "disabled"
+      scope: McpScope
+    }
+  | {
+      status: "failed"
+      error: string
+      scope: McpScope
+    }
+  | {
+      status: "needs_auth"
+      scope: McpScope
+    }
+  | {
+      status: "needs_client_registration"
+      error: string
+      scope: McpScope
+    }
+
 export type McpStatusConnected = {
   status: "connected"
 }
@@ -2928,6 +2962,7 @@ export type V2Event =
   | TuiToastShow
   | TuiSessionSelect
   | McpToolsChanged
+  | McpStatusChanged
   | McpBrowserOpenFailed
   | CommandExecuted
   | ProjectUpdated
@@ -5852,6 +5887,23 @@ export type McpToolsChanged = {
   }
 }
 
+export type McpStatusChanged = {
+  id: string
+  metadata?: {
+    [key: string]: unknown
+  }
+  type: "mcp.status.changed"
+  durable?: {
+    aggregateID: string
+    seq: number
+    version: number
+  }
+  location?: LocationRef
+  data: {
+    server: string
+  }
+}
+
 export type McpBrowserOpenFailed = {
   id: string
   metadata?: {
@@ -6892,6 +6944,14 @@ export type EventPermissionReplied = {
 export type EventMcpToolsChanged = {
   id: string
   type: "mcp.tools.changed"
+  properties: {
+    server: string
+  }
+}
+
+export type EventMcpStatusChanged = {
+  id: string
+  type: "mcp.status.changed"
   properties: {
     server: string
   }
@@ -8456,7 +8516,7 @@ export type McpStatusResponses = {
    * MCP server status
    */
   200: {
-    [key: string]: McpStatus
+    [key: string]: McpPublicStatus
   }
 }
 
@@ -10652,6 +10712,39 @@ export type SyncHistoryListResponses = {
 }
 
 export type SyncHistoryListResponse = SyncHistoryListResponses[keyof SyncHistoryListResponses]
+
+export type ToolOutputReadData = {
+  body?: never
+  path?: never
+  query: {
+    path: string
+  }
+  url: "/tool-output/content"
+}
+
+export type ToolOutputReadErrors = {
+  /**
+   * BadRequest | InvalidRequestError
+   */
+  400: EffectHttpApiErrorBadRequest | InvalidRequestError
+  /**
+   * Not found
+   */
+  404: NotFoundError
+}
+
+export type ToolOutputReadError = ToolOutputReadErrors[keyof ToolOutputReadErrors]
+
+export type ToolOutputReadResponses = {
+  /**
+   * Full tool output
+   */
+  200: {
+    content: string
+  }
+}
+
+export type ToolOutputReadResponse = ToolOutputReadResponses[keyof ToolOutputReadResponses]
 
 export type TuiAppendPromptData = {
   body?: {

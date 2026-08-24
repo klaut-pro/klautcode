@@ -430,6 +430,8 @@ export const dict = {
   "mcp.status.failed": "neuspjelo",
   "mcp.status.needs_auth": "potrebna autentifikacija",
   "mcp.auth.clickToAuthenticate": "Klikni za autentifikaciju",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} zahtijeva autentifikaciju",
+  "mcp.auth.authenticate": "Autentifikacija",
   "mcp.status.disabled": "onemogućeno",
 
   "dialog.fork.empty": "Nema poruka za fork",

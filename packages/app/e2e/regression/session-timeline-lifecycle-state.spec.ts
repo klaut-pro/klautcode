@@ -49,8 +49,8 @@ test("shows and expands a running shell command without shimmering it", async ({
   await expect(tool.locator('[data-slot="bash-pre"]')).toContainText("still running")
 })
 
-test("transitions thinking and hidden reasoning through busy to idle", async ({ page }) => {
-  const reasoningID = "prt_reasoning_hidden"
+test("transitions thinking and collapsed reasoning through busy to idle", async ({ page }) => {
+  const reasoningID = "prt_reasoning_collapsed"
   const assistant = assistantMessage([reasoningPart(reasoningID, "## Inspecting stability")], { completed: false })
   const timeline = await setupTimeline(page, {
     messages: [userMessage(), assistant],
@@ -59,16 +59,20 @@ test("transitions thinking and hidden reasoning through busy to idle", async ({ 
   })
   await timeline.send(status("busy"), 150)
 
-  await expect(page.locator('[data-timeline-row="Thinking"]')).toBeVisible()
-  await expect(page.getByText("Inspecting stability", { exact: true })).toBeVisible()
-  await expect(page.locator(`[data-timeline-part-id="${reasoningID}"]`)).toHaveCount(0)
+  const trigger = page.locator(`[data-timeline-part-id="${reasoningID}"] [data-slot="collapsible-trigger"]`)
+  await expect(page.locator('[data-timeline-row="Thinking"]')).toHaveCount(0)
+  await expect(trigger).toHaveAttribute("aria-expanded", "false")
+  await expect(page.getByText("Inspecting stability", { exact: true })).toHaveCount(0)
   await timeline.send(partUpdated(shell("prt_reasoning_shell", "running")), 160)
-  await expect(page.locator('[data-timeline-row="Thinking"]')).toBeVisible()
+  await expect(page.locator('[data-timeline-row="Thinking"]')).toHaveCount(0)
   await timeline.send(partUpdated(shell("prt_reasoning_shell", "completed", "done")), 180)
   await timeline.send(messageUpdated(completedAssistantInfo(assistant.info)), 100)
   await timeline.send(status("idle"), 300)
   await expect(page.locator('[data-timeline-row="Thinking"]')).toHaveCount(0)
-  await expect(page.locator(`[data-timeline-part-id="${reasoningID}"]`)).toHaveCount(0)
+  await expect(trigger).toHaveAttribute("aria-expanded", "false")
+  await trigger.click()
+  await expect(trigger).toHaveAttribute("aria-expanded", "true")
+  await expect(page.getByText("Inspecting stability", { exact: true })).toBeVisible()
 })
 
 test("moves busy through retry and recovery to final idle content", async ({ page }) => {

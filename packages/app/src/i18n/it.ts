@@ -309,6 +309,8 @@ export const dict = {
   "mcp.status.needs_auth": "richiede l'autenticazione",
   "mcp.status.disabled": "disabilitato",
   "mcp.auth.clickToAuthenticate": "Fai clic per autenticarti",
+  "mcp.auth.needsAuthentication": "Il server MCP {{name}} richiede l'autenticazione",
+  "mcp.auth.authenticate": "Autenticati",
   "dialog.fork.empty": "Nessun messaggio da cui effettuare il fork",
   "dialog.directory.search.placeholder": "Cerca cartelle",
   "dialog.directory.empty": "Nessuna cartella trovata",

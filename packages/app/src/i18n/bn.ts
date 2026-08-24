@@ -400,6 +400,8 @@ export const dict: Record<string, string> = {
   "mcp.status.needs_auth": "প্রমাণ প্রয়োজন",
   "mcp.status.disabled": "অক্ষম",
   "mcp.auth.clickToAuthenticate": "প্রমাণীকরণ করতে ক্লিক করুন",
+  "mcp.auth.needsAuthentication": "MCP সার্ভার {{name}}-এর জন্য প্রমাণীকরণ প্রয়োজন",
+  "mcp.auth.authenticate": "প্রমাণীকরণ",
   "dialog.fork.empty": "থেকে কাঁটাচামচ কোন বার্তা",
   "dialog.directory.search.placeholder": "ফোল্ডার অনুসন্ধান করুন",
   "dialog.directory.empty": "কোনো ফোল্ডার পাওয়া যায়নি",

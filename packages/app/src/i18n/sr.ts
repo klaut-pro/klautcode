@@ -400,6 +400,8 @@ export const dict = {
   "mcp.status.needs_auth": "потребан је аутх",
   "mcp.status.disabled": "онемогућен",
   "mcp.auth.clickToAuthenticate": "Кликните да бисте потврдили аутентичност",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} zahteva autentifikaciju",
+  "mcp.auth.authenticate": "Autentifikuj",
   "dialog.fork.empty": "Нема порука од којих треба да се рачвате",
   "dialog.directory.search.placeholder": "Претражите фасцикле",
   "dialog.directory.empty": "Нису пронађене фасцикле",

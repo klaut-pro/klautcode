@@ -37,11 +37,40 @@ function normalizeUrl(input: string): string | undefined {
   return `https://${trimmed}`
 }
 
-function openWebviewUrl(webview: WebviewTag, url: string) {
+function logBrowser(event: string, data?: Record<string, unknown>) {
+  // Serialize to a single JSON string: electron-log's renderer console spy
+  // stringifies object args to "[object Object]", losing the size data.
+  console.info(`[browser-tab] ${event} ${JSON.stringify(data ?? {})}`)
+}
+
+function webviewSnapshot(host?: HTMLElement, webview?: WebviewTag) {
+  const box = host?.getBoundingClientRect()
+  const style = webview ? getComputedStyle(webview) : undefined
+  return {
+    host: box ? { width: Math.round(box.width), height: Math.round(box.height) } : undefined,
+    webview: webview
+      ? {
+          width: webview.style.width,
+          height: webview.style.height,
+          display: style?.display,
+          visibility: style?.visibility,
+          src: webview.src,
+        }
+      : undefined,
+    designMode: typeof document !== "undefined" && document.documentElement.hasAttribute("data-design-mode"),
+  }
+}
+
+function openWebviewUrl(webview: WebviewTag, url: string, tab: string) {
   if (!webview || !url) return
+  logBrowser("load", { tab, url, src: webview.src })
   try {
-    void webview.loadURL(url).catch(() => {})
-  } catch {
+    void webview.loadURL(url).catch((error) => {
+      logBrowser("loadURL failed, falling back to src", { tab, url, error: String(error) })
+      webview.src = url
+    })
+  } catch (error) {
+    logBrowser("loadURL threw, falling back to src", { tab, url, error: String(error) })
     webview.src = url
   }
 }
@@ -64,11 +93,27 @@ export function BrowserTab(props: { tab: string }) {
   let ref: HTMLDivElement | undefined
   let webview: WebviewTag | undefined
   let loadedUrl: string | undefined
+  let guestReady = false
+  let pendingUrl: string | undefined
 
   const load = (url: string) => {
-    if (!webview) return
+    if (!webview) {
+      logBrowser("load skipped, webview missing", { tab: props.tab, url })
+      pendingUrl = url
+      return
+    }
+    pendingUrl = url
+    if (!guestReady) {
+      if (loadedUrl === undefined) {
+        loadedUrl = url
+        openWebviewUrl(webview, url, props.tab)
+        return
+      }
+      logBrowser("defer load until dom-ready", { tab: props.tab, url, ...webviewSnapshot(ref, webview) })
+      return
+    }
     loadedUrl = url
-    openWebviewUrl(webview, url)
+    openWebviewUrl(webview, url, props.tab)
   }
 
   const recordVisit = (url: string) => {
@@ -85,24 +130,33 @@ export function BrowserTab(props: { tab: string }) {
 
   onMount(() => {
     if (!ref || platform.platform !== "desktop") return
+    const tab = props.tab
+    logBrowser("mount", { tab, url: initialUrl(), ...webviewSnapshot(ref) })
     const el = document.createElement("webview") as WebviewTag
     el.setAttribute("partition", "persist:klautcode-browser")
     el.setAttribute("allowpopups", "false")
-    el.style.display = "flex"
+    // Native guest views collapse under `display:flex` + overflow-hidden ancestors.
+    el.style.display = "block"
     el.style.position = "absolute"
-    el.style.left = "0"
-    el.style.top = "0"
-    el.style.right = "0"
-    el.style.bottom = "0"
-    const syncBox = () => sizeWebviewToHost(ref, el)
+    el.style.inset = "0"
+    const syncBox = () => {
+      const size = sizeWebviewToHost(ref, el)
+      logBrowser("resize", { tab, ...size, ...webviewSnapshot(ref, el) })
+      return size
+    }
     ref.appendChild(el)
     webview = el
     syncBox()
+    requestAnimationFrame(() => syncBox())
     const observer = new ResizeObserver(syncBox)
     observer.observe(ref)
 
+    guestReady = false
+    pendingUrl = initialUrl()
+
     const onNavigate = () => {
       const url = webview?.getURL() ?? ""
+      logBrowser("navigate", { tab, url, ...webviewSnapshot(ref, el) })
       if (url) {
         loadedUrl = url
         setStore("input", url)
@@ -110,17 +164,44 @@ export function BrowserTab(props: { tab: string }) {
       }
       syncTitle()
     }
-    const onLoadingStart = () => setStore("loading", true)
+    const onLoadingStart = () => {
+      logBrowser("loading-start", { tab, src: el.src })
+      setStore("loading", true)
+    }
     const onLoadingStop = () => {
+      logBrowser("loading-stop", { tab, url: el.getURL?.() ?? el.src, ...webviewSnapshot(ref, el) })
       setStore("loading", false)
       syncTitle()
     }
     const onTitle = () => syncTitle()
     const onFail = (event: Event) => {
-      const detail = event as Event & { errorCode?: number; errorDescription?: string; validatedURL?: string }
-      console.error("webview did-fail-load", detail.errorCode, detail.errorDescription, detail.validatedURL)
+      const detail = event as Event & {
+        errorCode?: number
+        errorDescription?: string
+        validatedURL?: string
+        isMainFrame?: boolean
+      }
+      console.error("[browser-tab] did-fail-load", {
+        tab,
+        errorCode: detail.errorCode,
+        errorDescription: detail.errorDescription,
+        validatedURL: detail.validatedURL,
+        isMainFrame: detail.isMainFrame,
+        ...webviewSnapshot(ref, el),
+      })
+    }
+    const onDomReady = () => {
+      guestReady = true
+      const size = syncBox()
+      logBrowser("dom-ready", { tab, pendingUrl, ...size, ...webviewSnapshot(ref, el) })
+      if (pendingUrl && pendingUrl !== loadedUrl) load(pendingUrl)
+    }
+    const onFinish = () => {
+      logBrowser("finish-load", { tab, url: el.getURL?.() ?? el.src, ...webviewSnapshot(ref, el) })
     }
 
+    el.addEventListener("dom-ready", onDomReady)
+    el.addEventListener("did-finish-load", onFinish)
     el.addEventListener("did-navigate", onNavigate)
     el.addEventListener("did-navigate-in-page", onNavigate)
     el.addEventListener("did-start-loading", onLoadingStart)
@@ -131,6 +212,9 @@ export function BrowserTab(props: { tab: string }) {
 
     load(initialUrl())
     onCleanup(() => {
+      logBrowser("unmount", { tab, loadedUrl, ...webviewSnapshot(ref, el) })
+      el.removeEventListener("dom-ready", onDomReady)
+      el.removeEventListener("did-finish-load", onFinish)
       el.removeEventListener("did-navigate", onNavigate)
       el.removeEventListener("did-navigate-in-page", onNavigate)
       el.removeEventListener("did-start-loading", onLoadingStart)
@@ -141,13 +225,19 @@ export function BrowserTab(props: { tab: string }) {
       observer.disconnect()
       el.remove()
       webview = undefined
+      if (!document.querySelector("[data-component=browser-webview]")) {
+        document.documentElement.removeAttribute("data-design-mode")
+      }
     })
   })
 
   createEffect(() => {
     if (!webview || platform.platform !== "desktop") return
     const url = layout.browser.get(props.tab)?.url
-    if (url && url !== loadedUrl) load(url)
+    if (url && url !== loadedUrl) {
+      logBrowser("store url changed", { tab: props.tab, url, loadedUrl })
+      load(url)
+    }
   })
 
   const submit = (event: SubmitEvent) => {
@@ -282,7 +372,16 @@ export function BrowserTab(props: { tab: string }) {
           ref={ref}
           class={BROWSER_WEBVIEW_HOST_CLASS}
           data-component="browser-webview"
-        />
+        >
+          <Show when={store.loading}>
+            <div
+              class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background-base"
+              data-component="browser-webview-loading"
+            >
+              <div class="h-40 max-h-full w-4/5 max-w-md animate-pulse rounded-lg bg-surface-raised-base opacity-60" />
+            </div>
+          </Show>
+        </div>
       </Show>
     </div>
   )

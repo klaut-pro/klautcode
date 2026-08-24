@@ -399,6 +399,8 @@ export const dict = {
   "mcp.status.needs_auth": "vyžaduje overenie",
   "mcp.status.disabled": "vypnuté",
   "mcp.auth.clickToAuthenticate": "Kliknite na overenie",
+  "mcp.auth.needsAuthentication": "MCP server {{name}} vyžaduje overenie",
+  "mcp.auth.authenticate": "Overiť",
   "dialog.fork.empty": "Žiadne správy na vytvorenie vetvy",
   "dialog.directory.search.placeholder": "Hľadať priečinky",
   "dialog.directory.empty": "Nenašli sa žiadne priečinky",

@@ -311,6 +311,8 @@ export const dict = {
   "mcp.status.failed": "fehlgeschlagen",
   "mcp.status.needs_auth": "Authentifizierung erforderlich",
   "mcp.auth.clickToAuthenticate": "Zum Authentifizieren klicken",
+  "mcp.auth.needsAuthentication": "MCP-Server {{name}} muss authentifiziert werden",
+  "mcp.auth.authenticate": "Authentifizieren",
   "mcp.status.disabled": "deaktiviert",
   "dialog.fork.empty": "Keine Nachrichten zum Abzweigen vorhanden",
   "dialog.directory.search.placeholder": "Ordner durchsuchen",

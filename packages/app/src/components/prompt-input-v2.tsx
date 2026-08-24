@@ -7,7 +7,7 @@ import { KeybindV2 } from "@klautcode/ui/v2/keybind-v2"
 import { Switch } from "@klautcode/ui/v2/switch-v2"
 import { TooltipV2 } from "@klautcode/ui/v2/tooltip-v2"
 import type { ReferenceInfo } from "@klautcode/sdk/v2/client"
-import { createEffect, createMemo, on, Show } from "solid-js"
+import { createEffect, createMemo, on, onCleanup, Show } from "solid-js"
 import { DesignModeButton } from "@/components/design-mode/button"
 import { useDesignMode } from "@/components/design-mode/controller"
 import { ModelSelectorPopoverV2 } from "@/components/dialog-select-model"
@@ -431,7 +431,12 @@ export function usePromptInputV2Controller(props: PromptInputV2ControllerProps):
       submit: {
         stopping,
         working,
-        onSubmit: () => void submission.handleSubmit(new Event("submit")),
+        onSubmit: () => {
+          void (async () => {
+            if (design.active()) await design.flush()
+            void submission.handleSubmit(new Event("submit"))
+          })()
+        },
         onStop: () => void submission.abort(),
       },
     },
@@ -439,9 +444,13 @@ export function usePromptInputV2Controller(props: PromptInputV2ControllerProps):
   Object.defineProperty(controller, "model", { get: () => props.controls.model })
 
   createEffect(() => {
-    design.setAttachHandler((file) => controller.addAttachments([file]))
+    design.setAttachHandler(async (file) => {
+      await controller.addAttachments([file])
+    })
+    design.setSubmitHandler(() => submission.handleSubmit(new Event("submit")))
     const model = props.controls.model.selection.current()
     design.setVision(model?.capabilities?.input?.image ?? false)
+    onCleanup(() => design.setSubmitHandler(undefined))
   })
 
   command.register("prompt-input", () => [

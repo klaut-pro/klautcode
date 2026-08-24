@@ -98,6 +98,7 @@ import { ptyConnectHandlers, ptyHandlers } from "./handlers/pty"
 import { questionHandlers } from "./handlers/question"
 import { sessionHandlers } from "./handlers/session"
 import { syncHandlers } from "./handlers/sync"
+import { toolOutputHandlers } from "./handlers/tool-output"
 import { tuiHandlers } from "./handlers/tui"
 import { handlers } from "@klautcode/server/handlers"
 import { buildLocationServiceMap, LocationServiceMap } from "@klautcode/core/location-services"
@@ -166,6 +167,7 @@ const instanceApiRoutes = HttpApiBuilder.layer(InstanceHttpApi).pipe(
     providerHandlers,
     sessionHandlers,
     syncHandlers,
+    toolOutputHandlers,
     tuiHandlers,
     workspaceHandlers,
   ]),

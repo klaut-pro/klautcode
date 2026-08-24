@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import type { KlautcodeClient } from "@klautcode/sdk/v2/client"
 import type {
-  McpListInput,
   McpResourceCatalogInput,
   SessionApi,
   SessionInfo,
@@ -19,25 +18,21 @@ type McpApi = ServerApi["mcp"]
 
 describe("MCP queries", () => {
   test("loads current servers for the requested location", async () => {
-    const calls: unknown[] = []
     const queryClient = new QueryClient()
     const result = await queryClient.fetchQuery(
       loadMcpQuery(ServerScope.local, "/project", {
-        list: async (input: McpListInput = {}) => {
-          calls.push(input)
-          return {
-            location: { directory: "/project", project: { id: "project", directory: "/project" } },
-            data: [
-              { name: "docs", status: { status: "connected" } },
-              { name: "search", status: { status: "pending" } },
-            ],
-          }
+        mcp: {
+          status: async () => ({
+            data: {
+              docs: { status: "connected", scope: "project" },
+              search: { status: "disabled", scope: "project" },
+            },
+          }),
         },
-      } as unknown as McpApi),
+      } as unknown as KlautcodeClient),
     )
 
-    expect(calls).toEqual([{ location: { directory: "/project" } }])
-    expect(result).toEqual({ docs: { status: "connected" }, search: { status: "pending" } })
+    expect(result).toEqual({ docs: { status: "connected", scope: "project" }, search: { status: "disabled", scope: "project" } })
   })
 
   test("loads and keys the current resource catalog", async () => {

@@ -400,6 +400,8 @@ export const dict = {
   "mcp.status.needs_auth": "საჭიროა ავტორიზაცია",
   "mcp.status.disabled": "გამორთულია",
   "mcp.auth.clickToAuthenticate": "დააწკაპუნეთ ავთენტიფიკაციისთვის",
+  "mcp.auth.needsAuthentication": "MCP სერვერი {{name}} საჭიროებს ავტორიზაციას",
+  "mcp.auth.authenticate": "ავტორიზაცია",
   "dialog.fork.empty": "განშტოებისთვის შეტყობინებები არ არის",
   "dialog.directory.search.placeholder": "საქაღალდეების ძიება",
   "dialog.directory.empty": "საქაღალდეები არ მოიძებნა",
