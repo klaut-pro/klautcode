@@ -890,49 +890,34 @@
   }
 }
 
-[data-component="dock-prompt"][data-kind="mcp"] {
-  position: relative;
+[data-component="mcp-auth-card"] {
+  background-color: var(--surface-raised-stronger-non-alpha);
+  box-shadow: var(--shadow-xs-border);
+  border-radius: 12px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  min-height: 0;
-  max-height: 100dvh;
+  gap: 12px;
 
-  [data-slot="mcp-body"] {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    flex: 1;
-    min-height: 0;
-    padding: 12px 12px 0;
-  }
-
-  [data-slot="mcp-header"] {
-    padding: 0;
-  }
-
-  [data-slot="mcp-row"] {
+  [data-slot="mcp-auth-row"] {
     display: grid;
     grid-template-columns: 20px 1fr;
     column-gap: 8px;
-    align-items: start;
-  }
-
-  [data-slot="mcp-row"][data-variant="header"] {
     align-items: center;
+    min-width: 0;
   }
 
-  [data-slot="mcp-icon"] {
+  [data-slot="mcp-auth-icon"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
+    [data-component="icon"] {
+      color: var(--icon-warning-base);
+    }
   }
 
-  [data-slot="mcp-icon"] [data-component="icon"] {
-    color: var(--icon-warning-base);
-  }
-
-  [data-slot="mcp-header-title"] {
+  [data-slot="mcp-auth-title"] {
     font-family: var(--font-family-sans);
     font-size: 14px;
     font-weight: var(--font-weight-medium);
@@ -941,18 +926,9 @@
     min-width: 0;
   }
 
-  [data-slot="mcp-footer"] {
+  [data-slot="mcp-auth-actions"] {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-    padding: 12px 8px 8px;
-  }
-
-  [data-slot="mcp-footer-actions"] {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    justify-content: flex-end;
 
     [data-component="button"] {
       padding-left: 12px;
@@ -1674,8 +1650,8 @@ body:not([data-new-layout]) {
     }
   }
 
-  [data-component="dock-prompt"][data-kind="mcp"] {
-    [data-slot="mcp-header-title"] {
+  [data-component="mcp-auth-card"] {
+    [data-slot="mcp-auth-title"] {
       color: var(--text-strong);
     }
   }

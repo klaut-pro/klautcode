@@ -1,16 +1,15 @@
-import type { LspStatus } from "@klautcode/sdk/v2/client"
-import type { McpServer } from "@klautcode/client/promise"
+import type { LspStatus, McpPublicStatus } from "@klautcode/sdk/v2/client"
 
-export function hasServiceNeedingAttention(input: { mcp: Array<McpServer["status"]["status"]> }) {
+export function hasServiceNeedingAttention(input: { mcp: Array<McpPublicStatus["status"]> }) {
   return input.mcp.some((status) => status === "needs_auth" || status === "needs_client_registration")
 }
 
 export function hasNonBlockingServiceIssue(input: {
-  mcp: Array<McpServer["status"]["status"]>
+  mcp: Array<McpPublicStatus["status"]>
   lsp: Array<LspStatus["status"]>
 }) {
   return (
-    input.mcp.some((status) => status !== "connected" && status !== "pending" && status !== "disabled") ||
+    input.mcp.some((status) => status !== "connected" && status !== "disabled") ||
     input.lsp.some((status) => status === "error")
   )
 }

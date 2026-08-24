@@ -22,7 +22,7 @@ export function SessionComposerRegion(props: {
   const mcpAuthNames = createMemo(
     () =>
       Object.entries(sync().data.mcp ?? {})
-        .filter(([, server]) => server.status === "needs_auth")
+        .filter(([, server]) => server.status === "needs_auth" && server.scope === "project")
         .map(([name]) => name)
         .sort((a, b) => a.localeCompare(b)),
   )

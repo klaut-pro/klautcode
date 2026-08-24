@@ -113,6 +113,22 @@ export const Status = Schema.Union([
 ]).annotate({ identifier: "MCPStatus", discriminator: "status" })
 export type Status = Schema.Schema.Type<typeof Status>
 
+/** Where a server's config comes from: the project's own config file, or the global config. */
+export const McpScope = Schema.Union([Schema.Literal("project"), Schema.Literal("global")]).annotate({
+  identifier: "McpScope",
+})
+export type McpScope = Schema.Schema.Type<typeof McpScope>
+
+/** Status as exposed over the API: the internal status plus which config scope the server comes from. */
+export const PublicStatus = Schema.Union([
+  Schema.Struct({ status: Schema.Literal("connected"), scope: McpScope }),
+  Schema.Struct({ status: Schema.Literal("disabled"), scope: McpScope }),
+  Schema.Struct({ status: Schema.Literal("failed"), error: Schema.String, scope: McpScope }),
+  Schema.Struct({ status: Schema.Literal("needs_auth"), scope: McpScope }),
+  Schema.Struct({ status: Schema.Literal("needs_client_registration"), error: Schema.String, scope: McpScope }),
+]).annotate({ identifier: "MCPPublicStatus", discriminator: "status" })
+export type PublicStatus = Schema.Schema.Type<typeof PublicStatus>
+
 // Store transports for OAuth servers to allow finishing auth
 type TransportWithAuth = StreamableHTTPClientTransport | SSEClientTransport
 const pendingOAuthTransports = new Map<string, { transport: TransportWithAuth; provider?: McpOAuthPendingProvider }>()
@@ -171,7 +187,7 @@ export interface McpTool {
 }
 
 export interface Interface {
-  readonly status: () => Effect.Effect<Record<string, Status>>
+  readonly status: () => Effect.Effect<Record<string, PublicStatus>>
   readonly clients: () => Effect.Effect<Record<string, MCPClient>>
   readonly instructions: () => Effect.Effect<ServerInstructions[]>
   readonly tools: () => Effect.Effect<Record<string, McpTool>>
@@ -180,7 +196,7 @@ export interface Interface {
   readonly resourceTemplates: (
     clientName?: string,
   ) => Effect.Effect<Record<string, ResourceTemplateInfo & { client: string }>>
-  readonly add: (name: string, mcp: ConfigMCPV1.Info) => Effect.Effect<{ status: Record<string, Status> | Status }>
+  readonly add: (name: string, mcp: ConfigMCPV1.Info) => Effect.Effect<{ status: Record<string, Status> }>
   readonly connect: (name: string) => Effect.Effect<void, NotFoundError>
   readonly disconnect: (name: string) => Effect.Effect<void, NotFoundError>
   readonly getPrompt: (
@@ -658,9 +674,12 @@ const layer = Layer.effect(
 
     const status = Effect.fn("MCP.status")(function* () {
       const s = yield* InstanceState.get(state)
-      const result: Record<string, Status> = {}
+      const globalMcp = (yield* cfgSvc.getGlobal()).mcp ?? {}
+      const result: Record<string, PublicStatus> = {}
       for (const key of Object.keys(s.config)) {
-        result[key] = s.status[key] ?? { status: "disabled" }
+        const base = s.status[key] ?? { status: "disabled" }
+        const scope: McpScope = (!(key in globalMcp) || s.added.has(key)) ? "project" : "global"
+        result[key] = { ...base, scope }
       }
       return result
     })
@@ -1009,7 +1028,12 @@ const layer = Layer.effect(
             pendingOAuthTransports.set(mcpName, { transport, provider: authProvider })
             return Effect.succeed({ authorizationUrl: capturedUrl.toString(), oauthState } satisfies AuthResult)
           }
-          return Effect.die(error)
+          return Effect.logError(`MCP startAuth failed for ${mcpName}`, {
+            errorName: error instanceof Error ? error.name : typeof error,
+            error: error instanceof Error ? error.message : String(error),
+            isUnauthorized: error instanceof UnauthorizedError,
+            capturedUrl: capturedUrl?.toString(),
+          }).pipe(Effect.andThen(Effect.die(error)))
         }),
       )
     })

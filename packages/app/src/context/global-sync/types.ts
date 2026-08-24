@@ -2,6 +2,7 @@ import type {
   Agent,
   Config,
   LspStatus,
+  McpPublicStatus,
   Message,
   Part,
   Path,
@@ -15,7 +16,7 @@ import type {
 } from "@klautcode/sdk/v2/client"
 import type { FileDiffInfo } from "@klautcode/client/promise"
 import { NormalizedProviderListResponse } from "@klautcode/session-ui/context"
-import type { CommandInfo, McpResource, McpServer, SessionMessageInfo } from "@klautcode/client/promise"
+import type { CommandInfo, McpResource, SessionMessageInfo } from "@klautcode/client/promise"
 import type { Accessor } from "solid-js"
 import type { SetStoreFunction, Store } from "solid-js/store"
 
@@ -62,7 +63,7 @@ export type State = {
   }
   mcp_ready: boolean
   mcp: {
-    [name: string]: McpServer["status"]
+    [name: string]: McpPublicStatus
   }
   mcp_resource: {
     [key: string]: McpResource

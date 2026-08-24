@@ -239,6 +239,8 @@ import type {
   ToolIdsResponses,
   ToolListErrors,
   ToolListResponses,
+  ToolOutputReadErrors,
+  ToolOutputReadResponses,
   TuiAppendPromptErrors,
   TuiAppendPromptResponses,
   TuiClearPromptErrors,
@@ -4612,6 +4614,27 @@ export class Sync extends HeyApiClient {
   }
 }
 
+export class ToolOutput extends HeyApiClient {
+  /**
+   * Read full tool output
+   *
+   * Read the full output of a truncated tool result saved in the tool output directory.
+   */
+  public read<ThrowOnError extends boolean = false>(
+    parameters: {
+      path: string
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "path" }] }])
+    return (options?.client ?? this.client).get<ToolOutputReadResponses, ToolOutputReadErrors, ThrowOnError>({
+      url: "/tool-output/content",
+      ...options,
+      ...params,
+    })
+  }
+}
+
 export class Control extends HeyApiClient {
   /**
    * Get next TUI request
@@ -7243,6 +7266,11 @@ export class KlautcodeClient extends HeyApiClient {
   private _sync?: Sync
   get sync(): Sync {
     return (this._sync ??= new Sync({ client: this.client }))
+  }
+
+  private _toolOutput?: ToolOutput
+  get toolOutput(): ToolOutput {
+    return (this._toolOutput ??= new ToolOutput({ client: this.client }))
   }
 
   private _tui?: Tui
