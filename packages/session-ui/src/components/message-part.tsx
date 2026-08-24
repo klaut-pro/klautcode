@@ -565,6 +565,18 @@ export function getToolInfo(
         icon: "brain",
         title: input.name || i18n.t("ui.tool.skill"),
       }
+    case "memory_store":
+      return {
+        icon: "brain",
+        title: i18n.t("ui.tool.memoryStore"),
+        subtitle: typeof input.title === "string" && input.title ? input.title : undefined,
+      }
+    case "memory_recall":
+      return {
+        icon: "brain",
+        title: i18n.t("ui.tool.memoryRecall"),
+        subtitle: typeof input.query === "string" && input.query ? input.query : undefined,
+      }
     default:
       return {
         icon: "mcp",
@@ -2709,5 +2721,64 @@ ToolRegistry.register({
     )
 
     return <BasicTool icon="brain" status={props.status} trigger={trigger()} hideDetails />
+  },
+})
+
+ToolRegistry.register({
+  name: "memory_store",
+  render(props) {
+    const i18n = useI18n()
+    return (
+      <BasicTool
+        {...props}
+        icon="brain"
+        trigger={{
+          title: i18n.t("ui.tool.memoryStore"),
+          subtitle: typeof props.input.title === "string" && props.input.title ? props.input.title : undefined,
+        }}
+      >
+        <Show when={props.output}>
+          <div
+            data-component="tool-output"
+            data-scrollable
+            tabIndex={0}
+            role="region"
+            aria-label={i18n.t("ui.scrollView.ariaLabel")}
+          >
+            <Markdown text={props.output!} />
+          </div>
+        </Show>
+      </BasicTool>
+    )
+  },
+})
+
+ToolRegistry.register({
+  name: "memory_recall",
+  render(props) {
+    const i18n = useI18n()
+    return (
+      <BasicTool
+        {...props}
+        icon="brain"
+        trigger={{
+          title: i18n.t("ui.tool.memoryRecall"),
+          subtitle:
+            typeof props.input.query === "string" && props.input.query ? props.input.query : undefined,
+        }}
+      >
+        <Show when={props.output}>
+          <div
+            data-component="tool-output"
+            data-scrollable
+            tabIndex={0}
+            role="region"
+            aria-label={i18n.t("ui.scrollView.ariaLabel")}
+          >
+            <Markdown text={props.output!} />
+          </div>
+        </Show>
+      </BasicTool>
+    )
   },
 })
