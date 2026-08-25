@@ -1,7 +1,14 @@
-import { createEffect, createMemo, onCleanup } from "solid-js"
+import { createEffect, createMemo } from "solid-js"
 import { useLanguage } from "@/context/language"
 import { useSync } from "@/context/sync"
 import { dismissToast, showToast } from "@/utils/toast"
+
+// Module-level so the registry survives the per-directory `keyed` remounts of this
+// component: the draft route re-creates the DirectoryDataProvider subtree while the
+// draft's server/directory resolve, which would otherwise reset a component-scoped
+// map and dismiss a toast the moment it was shown. Global auth-needed MCPs are
+// identical across directories, so one shared registry is correct.
+const activeToasts = new Map<string, number>()
 
 /**
  * Fires a persistent bottom-right toast when a GLOBAL-scope MCP server needs
@@ -13,41 +20,33 @@ export function GlobalMcpAuthToast() {
   const language = useLanguage()
   const sync = useSync()
 
-  const authServers = createMemo(() =>
-    Object.entries(sync().data.mcp ?? {})
+  const authServers = createMemo(() => {
+    const mcp = sync().data.mcp ?? {}
+    return Object.entries(mcp)
       .filter(([, server]) =>
         server.scope === "global" &&
         (server.status === "needs_auth" || server.status === "needs_client_registration"),
       )
       .map(([name]) => name)
-      .sort((a, b) => a.localeCompare(b)),
-  )
-
-  // Track the live toast per MCP name so we don't re-fire while it still needs
-  // auth, and so we can dismiss when it resolves. A name re-enters the pool if
-  // its status leaves the auth set (allowing re-notification if it needs auth again).
-  const toasts = new Map<string, number>()
+      .sort((a, b) => a.localeCompare(b))
+  })
 
   createEffect(() => {
     const names = authServers()
-    for (const [name, id] of toasts) if (!names.includes(name)) {
+    for (const [name, id] of activeToasts) if (!names.includes(name)) {
       dismissToast(id)
-      toasts.delete(name)
+      activeToasts.delete(name)
     }
     for (const name of names) {
-      if (toasts.has(name)) continue
+      if (activeToasts.has(name)) continue
       const id = showToast({
         persistent: true,
         icon: "warning",
         title: language.t("mcp.auth.needsAuthentication", { name }),
         description: language.t("mcp.auth.clickToAuthenticate"),
       })
-      if (id !== undefined) toasts.set(name, id)
+      if (id !== undefined) activeToasts.set(name, id)
     }
-  })
-
-  onCleanup(() => {
-    for (const id of toasts.values()) dismissToast(id)
   })
 
   return null

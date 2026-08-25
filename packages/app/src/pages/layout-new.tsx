@@ -4,7 +4,6 @@ import { DebugBar } from "@/components/debug-bar"
 import { TabsInfoPopup } from "@/components/help-button"
 import { Titlebar, type TitlebarUpdate } from "@/components/titlebar"
 import { readyUpdateVersion } from "@/components/update-available"
-import { GlobalMcpAuthToast } from "@/components/global-mcp-auth-toast"
 import { UpdateAvailableToast } from "@/components/update-available-toast"
 import { usePlatform } from "@/context/platform"
 import { setV2Toast, ToastRegion } from "@/utils/toast"
@@ -38,7 +37,6 @@ export default function NewLayout(props: ParentProps) {
         }
       />
       <UpdateAvailableToast />
-      <GlobalMcpAuthToast />
       <main class="flex-1 min-h-0 min-w-0 overflow-x-hidden flex flex-col items-start contain-strict">
         <Suspense>{props.children}</Suspense>
       </main>

@@ -123,7 +123,9 @@ export default function LegacyLayout(props: ParentProps) {
   const command = useCommand()
   const theme = useTheme()
   const language = useLanguage()
-  createEffect(() => setV2Toast(false))
+  createEffect(() => {
+    if (!settings.general.newLayoutDesigns()) setV2Toast(false)
+  })
   const initialDirectory = decode64(params.dir)
   const route = createMemo(() => {
     const slug = params.dir
