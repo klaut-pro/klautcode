@@ -647,6 +647,8 @@ export const dict = {
 
   "toast.theme.title": "Тему змінено",
   "toast.scheme.title": "Кольорова схема",
+  "toast.agent.title": "Mode",
+  "toast.agent.description": "Switched to {{mode}}",
 
   "toast.workspace.enabled.title": "Робочі області увімкнено",
   "toast.workspace.enabled.description": "Кілька робочих дерев тепер відображаються на бічній панелі",
@@ -838,6 +840,7 @@ export const dict = {
   "browser.url.placeholder": "Search or enter address",
   "browser.webFallback": "The internal browser is available in the desktop app. Open this page externally.",
   "browser.mode": "Tab mode",
+  "browser.open": "New tab",
   "browser.newFileTab": "New file tab",
   "browser.newTab": "New browser tab",
   "browser.openActiveAsBrowser": "Open active file in browser",

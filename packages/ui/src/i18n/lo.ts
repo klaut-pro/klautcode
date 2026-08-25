@@ -155,6 +155,8 @@ export const dict = {
   "ui.tool.agent": "ຕົວແທນ {{type}}",
   "ui.tool.agent.default": "ຕົວແທນ",
   "ui.tool.skill": "ທັກສະ",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "ເອີ້ນວ່າ `{{tool}}`",
   "ui.toolErrorCard.failed": "ລົ້ມເຫລວ",
   "ui.toolErrorCard.copyError": "ການສຳເນົາຜິດພາດ",

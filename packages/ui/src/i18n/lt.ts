@@ -163,6 +163,8 @@ export const dict: Record<string, string> = {
   "ui.tool.agent": "{{type}} agentas",
   "ui.tool.agent.default": "Agentas",
   "ui.tool.skill": "Įgūdis",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "Vadinamas `{{tool}}`",
   "ui.toolErrorCard.failed": "Nepavyko",
   "ui.toolErrorCard.copyError": "Kopijavimo klaida",

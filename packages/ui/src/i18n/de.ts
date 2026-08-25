@@ -201,6 +201,8 @@ export const dict = {
   "ui.fileSearch.close": "Suche schließen",
   "ui.tool.task": "Aufgabe",
   "ui.tool.skill": "Skill",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "`{{tool}}` aufgerufen",
   "ui.toolErrorCard.failed": "Fehlgeschlagen",
   "ui.toolErrorCard.copyError": "Fehler kopieren",

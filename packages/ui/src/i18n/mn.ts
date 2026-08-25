@@ -155,6 +155,8 @@ export const dict = {
   "ui.tool.agent": "{{type}} Агент",
   "ui.tool.agent.default": "Агент",
   "ui.tool.skill": "Ур чадвар",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "`{{tool}}` дуудсан",
   "ui.toolErrorCard.failed": "Амжилтгүй",
   "ui.toolErrorCard.copyError": "Хуулбарлах алдаа",

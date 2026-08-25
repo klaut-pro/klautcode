@@ -155,6 +155,8 @@ export const dict = {
   "ui.tool.agent": "{{type}} Агент",
   "ui.tool.agent.default": "агент",
   "ui.tool.skill": "Умение",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "Наречен `{{tool}}`",
   "ui.toolErrorCard.failed": "Неуспешно",
   "ui.toolErrorCard.copyError": "Грешка при копиране",

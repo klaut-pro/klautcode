@@ -19,7 +19,7 @@ describe("browser tab load after tab switches", () => {
   })
 
   test("logs mount, resize, load, fail, and unmount", () => {
-    expect(source).toContain('console.info("[browser-tab]"')
+    expect(source).toContain('console.info(`[browser-tab]')
     expect(source).toContain("did-fail-load")
     expect(source).toContain("unmount")
     expect(source).toContain('el.style.display = "block"')

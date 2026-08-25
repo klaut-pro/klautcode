@@ -155,6 +155,8 @@ export const dict: Record<string, string> = {
   "ui.tool.agent": "Πράκτορας {{type}}",
   "ui.tool.agent.default": "Πράκτορας",
   "ui.tool.skill": "Ικανότητα",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "Καλήθηκε `{{tool}}`",
   "ui.toolErrorCard.failed": "Απέτυχε",
   "ui.toolErrorCard.copyError": "Σφάλμα αντιγραφής",
