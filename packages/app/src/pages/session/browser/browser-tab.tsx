@@ -189,6 +189,9 @@ export function BrowserTab(props: { tab: string }) {
         isMainFrame: detail.isMainFrame,
         ...webviewSnapshot(ref, el),
       })
+      // A failed main-frame load does not emit did-stop-loading, so clear the
+      // loading state here or the opaque skeleton stays up forever.
+      if (detail.isMainFrame) setStore("loading", false)
     }
     const onDomReady = () => {
       guestReady = true
@@ -357,7 +360,10 @@ export function BrowserTab(props: { tab: string }) {
       <Show
         when={platform.platform === "desktop"}
         fallback={
-          <div class="flex flex-1 items-center justify-center px-6 text-center text-12-regular text-text-weak">
+          <div
+            class="flex flex-1 items-center justify-center px-6 text-center text-12-regular text-text-weak"
+            data-component="browser-content"
+          >
             <button
               type="button"
               class="text-text-base transition-colors hover:text-text-strong"

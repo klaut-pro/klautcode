@@ -194,6 +194,8 @@ export const dict = {
   "ui.fileSearch.close": "Luk søgning",
   "ui.tool.task": "Opgave",
   "ui.tool.skill": "Færdighed",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "Kaldte værktøjet `{{tool}}`",
   "ui.toolErrorCard.failed": "Mislykkedes",
   "ui.toolErrorCard.copyError": "Kopier fejl",

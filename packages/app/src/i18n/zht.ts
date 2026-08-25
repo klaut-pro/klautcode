@@ -626,6 +626,8 @@ export const dict = {
 
   "toast.theme.title": "主題已切換",
   "toast.scheme.title": "配色方案",
+  "toast.agent.title": "Mode",
+  "toast.agent.description": "Switched to {{mode}}",
 
   "toast.workspace.enabled.title": "工作區已啟用",
   "toast.workspace.enabled.description": "側邊欄現在顯示多個工作樹",
@@ -791,6 +793,7 @@ export const dict = {
   "browser.url.placeholder": "Search or enter address",
   "browser.webFallback": "The internal browser is available in the desktop app. Open this page externally.",
   "browser.mode": "Tab mode",
+  "browser.open": "New tab",
   "browser.newFileTab": "New file tab",
   "browser.newTab": "New browser tab",
   "browser.openActiveAsBrowser": "Open active file in browser",

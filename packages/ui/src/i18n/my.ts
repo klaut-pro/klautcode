@@ -156,6 +156,8 @@ export const dict = {
   "ui.tool.agent": "{{type}} အေးဂျင့်",
   "ui.tool.agent.default": "အေးဂျင့်",
   "ui.tool.skill": "ကျွမ်းကျင်မှု",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "`{{tool}}` ဟုခေါ်သည်။",
   "ui.toolErrorCard.failed": "မအောင်မြင်ပါ။",
   "ui.toolErrorCard.copyError": "မိတ္တူအမှား",

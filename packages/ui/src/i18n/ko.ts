@@ -188,6 +188,8 @@ export const dict = {
   "ui.fileSearch.close": "검색 닫기",
   "ui.tool.task": "작업",
   "ui.tool.skill": "스킬",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "`{{tool}}` 호출됨",
   "ui.toolErrorCard.failed": "실패",
   "ui.toolErrorCard.copyError": "오류 복사",

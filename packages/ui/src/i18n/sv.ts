@@ -155,6 +155,8 @@ export const dict: Record<string, string> = {
   "ui.tool.agent": "{{type}}-agent",
   "ui.tool.agent.default": "Agent",
   "ui.tool.skill": "Färdighet",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "Anropade `{{tool}}`",
   "ui.toolErrorCard.failed": "Misslyckades",
   "ui.toolErrorCard.copyError": "Kopiera felet",

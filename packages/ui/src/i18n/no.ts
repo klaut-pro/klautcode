@@ -194,6 +194,8 @@ export const dict: Record<Keys, string> = {
   "ui.fileSearch.close": "Lukk søk",
   "ui.tool.task": "Oppgave",
   "ui.tool.skill": "Ferdighet",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "Kjørte `{{tool}}`",
   "ui.toolErrorCard.failed": "Mislyktes",
   "ui.toolErrorCard.copyError": "Kopier feil",

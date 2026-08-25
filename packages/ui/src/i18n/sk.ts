@@ -163,6 +163,8 @@ export const dict: Record<string, string> = {
   "ui.tool.agent": "{{type}} agent",
   "ui.tool.agent.default": "Agent",
   "ui.tool.skill": "Zručnosť",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "Zavolané `{{tool}}`",
   "ui.toolErrorCard.failed": "Zlyhalo",
   "ui.toolErrorCard.copyError": "Chyba kopírovania",

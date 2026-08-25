@@ -23,14 +23,17 @@ test("browser tab fills the side panel height", async ({ page }) => {
   const panel = page.locator("#review-panel")
   await expect(panel).toBeVisible()
 
-  await panel.getByRole("button", { name: "browser.open" }).click()
+  await panel.getByRole("button", { name: "New tab", exact: true }).click()
   await page.getByRole("menuitem", { name: "New browser tab" }).click()
 
   const fallback = panel.getByRole("button", { name: "The internal browser is available in the desktop app. Open this page externally." })
   await expect(fallback).toBeVisible()
 
+  const content = panel.getBy("[data-component=browser-content]")
+  await expect(content).toBeVisible()
+
   const panelBox = await panel.boundingBox()
-  const contentBox = await fallback.boundingBox()
+  const contentBox = await content.boundingBox()
   expect(panelBox, "panel must have a box").not.toBeNull()
   expect(contentBox, "browser content must have a box").not.toBeNull()
 

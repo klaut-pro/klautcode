@@ -158,6 +158,8 @@ export const dict: Record<string, string> = {
   "ui.tool.agent": "{{type}} agenti",
   "ui.tool.agent.default": "Agent",
   "ui.tool.skill": "Malaka",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "`{{tool}}` deb ataladi",
   "ui.toolErrorCard.failed": "Muvaffaqiyatsiz",
   "ui.toolErrorCard.copyError": "Nusxa olish xatosi",

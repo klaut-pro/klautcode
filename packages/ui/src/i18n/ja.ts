@@ -214,6 +214,8 @@ export const dict = {
   "ui.fileSearch.close": "検索を閉じる",
   "ui.tool.task": "タスク",
   "ui.tool.skill": "スキル",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "`{{tool}}` を呼び出しました",
   "ui.toolErrorCard.failed": "失敗",
   "ui.toolErrorCard.copyError": "エラーをコピー",

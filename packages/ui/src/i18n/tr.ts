@@ -221,6 +221,8 @@ export const dict = {
   "ui.fileSearch.close": "Aramayı kapat",
   "ui.tool.task": "Görev",
   "ui.tool.skill": "Beceri",
+  "ui.tool.memoryStore": "Store memory",
+  "ui.tool.memoryRecall": "Recall memory",
   "ui.basicTool.called": "`{{tool}}` çağrıldı",
   "ui.toolErrorCard.failed": "Başarısız",
   "ui.toolErrorCard.copyError": "Hatayı kopyala",
