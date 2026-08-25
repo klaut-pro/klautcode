@@ -3,6 +3,7 @@ import { base64Encode } from "@klautcode/core/util/encode"
 import { useParams } from "@solidjs/router"
 import { batch, createEffect, createMemo, startTransition } from "solid-js"
 import { createStore } from "solid-js/store"
+import { useLanguage } from "@/context/language"
 import { useModels } from "@/context/models"
 import { useSettings } from "@/context/settings"
 import { useProviders } from "@/hooks/use-providers"
@@ -13,6 +14,7 @@ import { useSDK } from "./sdk"
 import { useSync } from "./sync"
 import { useServerSDK } from "./server-sdk"
 import { ScopedKey, type ServerScope } from "@/utils/server-scope"
+import { showToast } from "@/utils/toast"
 
 export type ModelKey = { providerID: string; modelID: string; variant?: string }
 
@@ -65,6 +67,7 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
     const providers = useProviders(() => sdk().directory)
     const models = useModels()
     const settings = useSettings()
+    const language = useLanguage()
 
     const id = createMemo(() => params.id || undefined)
     const list = createMemo(() => sync().data.agent.filter((item) => item.mode !== "subagent" && !item.hidden))
@@ -182,6 +185,8 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
 
     const fallback = createMemo<ModelKey | undefined>(() => configuredModel() ?? recentModel() ?? defaultModel())
 
+    const modeLabel = (name: string) => (name === "general" ? language.t("agent.mode.multitask") : name)
+
     const agent = {
       list,
       visible: agentsVisible,
@@ -194,6 +199,8 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
           setStore("current", undefined)
           return
         }
+
+        const previousAgent = agent.current()?.name
 
         batch(() => {
           setStore("current", item.name)
@@ -216,6 +223,13 @@ export const { use: useLocal, provider: LocalProvider } = createSimpleContext({
           }
           setStore("draft", next)
         })
+
+        if (agentsVisible() && previousAgent !== item.name) {
+          showToast({
+            title: language.t("toast.agent.title"),
+            description: language.t("toast.agent.description", { mode: modeLabel(item.name) }),
+          })
+        }
       },
       move(direction: 1 | -1) {
         const items = list()

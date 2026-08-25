@@ -558,6 +558,9 @@ export const dict = {
   "toast.theme.title": "Theme switched",
   "toast.scheme.title": "Color scheme",
 
+  "toast.agent.title": "Mode",
+  "toast.agent.description": "Switched to {{mode}}",
+
   "toast.workspace.enabled.title": "Workspaces enabled",
   "toast.workspace.enabled.description": "Multiple worktrees are now shown in the sidebar",
   "toast.workspace.disabled.title": "Workspaces disabled",
