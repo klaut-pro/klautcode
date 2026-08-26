@@ -74,6 +74,7 @@ export type HomeSessionsViewProps = {
 export function HomeSessionsView(props: HomeSessionsViewProps) {
   return (
     <section
+      data-component="home-sessions"
       ref={props.onSetHoverTarget}
       class="min-h-0 min-w-0 flex-1 flex flex-col"
       aria-label={props.language.t("sidebar.project.recentSessions")}
@@ -101,10 +102,10 @@ export function HomeSessionsView(props: HomeSessionsViewProps) {
         <div
           ref={props.onSetThumbTrack}
           data-component="home-session-scroll-track"
-          class="relative ml-auto h-[calc(100cqh-84px)] w-3 lg:h-[calc(100cqh-108px)]"
+          class="relative ml-auto h-[calc(100dvh-84px-16px)] w-3 lg:h-[calc(100dvh-108px-16px)] supports-[height:100cqh]:h-[calc(100cqh-84px)] supports-[height:100cqh]:lg:h-[calc(100cqh-108px)]"
         />
       </div>
-      <div class="-mr-3 min-h-[calc(100cqh-72px)] lg:min-h-[calc(100cqh-96px)]">
+      <div class="-mr-3 min-h-[calc(100dvh-72px-16px)] lg:min-h-[calc(100dvh-96px-16px)] supports-[height:100cqh]:min-h-[calc(100cqh-72px)] supports-[height:100cqh]:lg:min-h-[calc(100cqh-96px)]">
         <Suspense
           fallback={
             <div class="pt-3">

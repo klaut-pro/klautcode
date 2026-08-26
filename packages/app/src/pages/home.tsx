@@ -1,4 +1,6 @@
+import { onMount } from "solid-js"
 import { ScrollView } from "@klautcode/ui/scroll-view"
+import { startLayoutDiagnostics, stopLayoutDiagnostics } from "@/utils/prod-diagnostics"
 import { createHomeController } from "./home/home-controller"
 import { createHomeProjectsController } from "./home/home-projects-controller"
 import { HomeUtilityNav } from "./home/home-projects-view"
@@ -14,6 +16,10 @@ export function NewHome() {
   const sessions = createHomeSessionsController(home)
   const search = createHomeSessionSearchController(home, sessions)
   const scroll = createHomeScrollController(sessions.data.groups)
+  onMount(() => {
+    startLayoutDiagnostics()
+    return () => stopLayoutDiagnostics()
+  })
   return (
     <div
       class={`

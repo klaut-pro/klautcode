@@ -404,7 +404,17 @@ const main = Effect.gen(function* () {
     )
 
     logger.log("loading task finished")
-  }).pipe(forwardInitializationFailure(serverReady), Effect.forkChild)
+  }).pipe(
+    Effect.tapCause((cause) =>
+      Effect.sync(() => {
+        const msg = String(cause)
+        logger.error("sidecar initialization failed", { cause: msg, stack: String(cause).slice(0, 4000) })
+        writeLog("main", "initialization failed", { cause: msg }, "error")
+      }),
+    ),
+    forwardInitializationFailure(serverReady),
+    Effect.forkChild,
+  )
 
   yield* Fiber.await(loadingTask)
 

@@ -68,6 +68,7 @@ import { ErrorPage } from "./pages/error"
 import { useCheckServerHealth } from "./utils/server-health"
 import { legacySessionHref, legacySessionServer, requireServerKey, sessionHref } from "./utils/session-route"
 import { createSessionLineage } from "@/pages/session/session-lineage"
+import { collectStartupDiagnostics, measureLayoutHeights } from "@/utils/prod-diagnostics"
 
 import { SessionPage, SessionRouteErrorBoundary, TargetSessionRouteContent } from "@/pages/session"
 import { NewHome } from "@/pages/home"
@@ -344,6 +345,16 @@ function DesktopCommands() {
         },
       })
     }
+    // Always available diagnostics - helps debug prod white-screen and layout issues
+    commands.push({
+      id: "diagnostics.show",
+      title: language.t("command.diagnostics.show"),
+      category: language.t("command.category.help"),
+      onSelect: () => {
+        const info = collectStartupDiagnostics({ trigger: "command", layout: measureLayoutHeights() })
+        console.log("[diagnostics] manual trigger", info)
+      },
+    })
     return commands
   })
 

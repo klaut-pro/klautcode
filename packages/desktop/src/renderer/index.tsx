@@ -32,6 +32,33 @@ import "./styles.css"
 import { Splash } from "@klautcode/ui/logo"
 import { useTheme } from "@klautcode/ui/theme/context"
 
+// Inline prod diagnostics setup to avoid cross-package import cycle
+function setupGlobalDiagnostics() {
+  if (typeof window === "undefined") return
+  const seen = new Set<string>()
+  const report = (kind: string, error: unknown) => {
+    const key = `${kind}:${String(error).slice(0, 200)}`
+    if (seen.has(key)) return
+    seen.add(key)
+    if (seen.size > 50) seen.clear()
+    console.error(`[diagnostics] ${kind}`, error)
+    try {
+      const api = (window as unknown as { api?: { recordFatalRendererError?: (p: unknown) => Promise<void> } }).api
+      const stack = error instanceof Error ? (error.stack ?? String(error)) : String(error)
+      void api?.recordFatalRendererError?.({
+        error: `[diagnostics] ${kind}: ${stack.slice(0, 4000)}`,
+        url: location.href,
+        version: "diagnostic",
+        platform: "desktop",
+        os: undefined,
+      } as never)
+    } catch {}
+  }
+  window.addEventListener("error", (event) => report("window.onerror", event.error ?? event.message))
+  window.addEventListener("unhandledrejection", (event) => report("unhandledrejection", event.reason))
+}
+setupGlobalDiagnostics()
+
 const root = document.getElementById("root")
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   throw new Error(t("desktop.error.dev.rootNotFound"))
@@ -387,6 +414,27 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
     return null
   }
 
+  function DiagnosticFallback(props: { title: string; details: string }) {
+    return (
+      <div class="h-dvh w-screen flex flex-col items-center justify-center bg-v2-background-bg-deep gap-6 p-6 text-center">
+        <Splash class="w-12 h-15 opacity-30" />
+        <div class="flex flex-col gap-2 max-w-lg">
+          <p class="text-sm font-medium text-v2-text-text-base">{props.title}</p>
+          <pre class="whitespace-pre-wrap break-all text-left text-[11px] leading-4 font-mono bg-v2-background-bg-base rounded-lg p-3 max-h-[40vh] overflow-auto text-v2-text-text-muted">
+            {props.details}
+          </pre>
+        </div>
+        <button
+          type="button"
+          class="text-xs text-v2-text-text-muted underline"
+          onClick={() => window.api.exportDebugLogs?.()}
+        >
+          Export debug logs
+        </button>
+      </div>
+    )
+  }
+
   function App() {
     const wslServers = useWslServers()
     const language = useLanguage()
@@ -414,9 +462,53 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
     const effectiveDefaultServer = createMemo(() =>
       ServerConnection.Key.make(availableStartupServer(defaultServer.latest, wslServers.data)),
     )
+    // Diagnostics: capture startup state for prod white-screen debugging.
+    // When effectiveDefaultServer is falsy after ready, the inner Show would
+    // previously render nothing (white screen). Now we log and show fallback.
+    createEffect(() => {
+      if (!ready()) return
+      const key = effectiveDefaultServer()
+      if (key) return
+      const snapshot = {
+        defaultServer: { loading: defaultServer.loading, latest: defaultServer.latest, error: String(defaultServer.error ?? "") },
+        sidecar: { loading: sidecar.loading, error: String((sidecar as { error?: unknown }).error ?? ""), data: sidecar() ? "present" : "missing" },
+        wslServers: { isLoading: wslServers.isLoading, error: String((wslServers as { error?: unknown }).error ?? "") },
+        availableStartup: availableStartupServer(defaultServer.latest, wslServers.data),
+        effectiveKey: String(key ?? ""),
+      }
+      console.error("[desktop] effectiveDefaultServer empty after ready", snapshot)
+      void window.api
+        .exportDebugLogs?.()
+        .catch(() => undefined)
+      // Also persist to main log via fatal renderer error for export bundle
+      void (window.api as unknown as { recordFatalRendererError?: (p: unknown) => Promise<void> }).recordFatalRendererError?.({
+        error: `[diagnostic] effectiveDefaultServer empty: ${JSON.stringify(snapshot, null, 2)}`,
+        url: location.href,
+        version: platform.version,
+        platform: platform.platform,
+        os: platform.os,
+      } as never)
+    })
     return (
       <Show when={ready()} fallback={<LoadingSplash />}>
-        <Show when={effectiveDefaultServer()} keyed>
+        <Show
+          when={effectiveDefaultServer()}
+          keyed
+          fallback={
+            <DiagnosticFallback
+              title="Startup failed: no server available"
+              details={JSON.stringify(
+                {
+                  defaultServer: { loading: defaultServer.loading, latest: defaultServer.latest, error: String(defaultServer.error ?? "") },
+                  sidecar: { loading: sidecar.loading, error: String((sidecar as { error?: unknown }).error ?? "") },
+                  wsl: { isLoading: wslServers.isLoading },
+                },
+                null,
+                2,
+              )}
+            />
+          }
+        >
           {(key) => (
             <AppInterface
               defaultServer={key}
