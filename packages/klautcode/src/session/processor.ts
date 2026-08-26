@@ -118,6 +118,8 @@ const layer = Layer.effect(
         reasoningMap: {},
       }
       let aborted = false
+      let consecutiveToolAbortRetries = 0
+      let hadAbortedTool = false
 
       const parse = (e: unknown) =>
         MessageV2.fromError(e, {
@@ -595,6 +597,7 @@ const layer = Layer.effect(
               time: { start: "time" in part.state ? part.state.time.start : end, end },
             },
           })
+          hadAbortedTool = true
         }
         ctx.toolcalls = {}
         ctx.assistantMessage.time.completed = Date.now()
@@ -698,7 +701,42 @@ const layer = Layer.effect(
           )
 
           if (ctx.needsCompaction) return "compact"
-          if (ctx.blocked || ctx.assistantMessage.error) return "stop"
+          if (ctx.blocked || ctx.assistantMessage.error) {
+            const isTransientToolAbort = yield* Effect.gen(function* () {
+              if (hadAbortedTool) return true
+              const parts = yield* MessageV2.parts(ctx.assistantMessage.id).pipe(
+                Effect.provideService(Database.Service, database),
+                Effect.catch(() => Effect.succeed([] as SessionV1.Part[])),
+              )
+              return parts.some(
+                (part) =>
+                  part.type === "tool" &&
+                  part.state.status === "error" &&
+                  (part.state.error === "Tool execution aborted" || part.state.metadata?.interrupted === true),
+              )
+            })
+            // Only retry the assistant error path, not a hard permission block.
+            // Cap at one retry to avoid looping on a persistent abort.
+            if (!ctx.blocked && isTransientToolAbort && consecutiveToolAbortRetries < 1) {
+              consecutiveToolAbortRetries++
+              hadAbortedTool = false
+              ctx.assistantMessage.error = undefined
+              ctx.toolcalls = {}
+              yield* session.updateMessage(ctx.assistantMessage)
+              yield* status.set(ctx.sessionID, { type: "busy" })
+              yield* Effect.logWarning("retrying transient tool abort", {
+                "session.id": ctx.sessionID,
+                messageID: ctx.assistantMessage.id,
+                attempt: consecutiveToolAbortRetries,
+              })
+              return "continue"
+            }
+            consecutiveToolAbortRetries = 0
+            hadAbortedTool = false
+            return "stop"
+          }
+          consecutiveToolAbortRetries = 0
+          hadAbortedTool = false
           return "continue"
         })
       })

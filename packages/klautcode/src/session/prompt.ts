@@ -1439,6 +1439,19 @@ const layer = Layer.effect(
             const bypassAgentCheck = lastUserMsg?.parts.some((p) => p.type === "agent") ?? false
             const promptOps = yield* ops()
 
+            // A prompt admitted while this turn was in flight persists a newer
+            // user message (it is the newest message in the session). Consuming
+            // it as the next turn keeps the loop alive instead of breaking with
+            // the queued message stranded.
+            const hasPendingUser = () =>
+              sessions.messages({ sessionID, limit: 1 }).pipe(
+                Effect.orDie,
+                Effect.map((latest) => {
+                  const newest = latest[0]
+                  return newest?.info.role === "user" && newest.info.id !== lastUser.id
+                }),
+              )
+
             const tools = yield* SessionTools.resolve({
               agent,
               session,
@@ -1540,6 +1553,13 @@ const layer = Layer.effect(
                   }).toObject()
                   yield* sessions.updateMessage(handle.message)
                   yield* events.publish(Session.Event.Error, { sessionID, error: handle.message.error })
+                  if (yield* hasPendingUser()) {
+                    yield* Effect.logInfo("loop continue after empty response", {
+                      "session.id": sessionID,
+                      messageID: handle.message.id,
+                    })
+                    return "continue" as const
+                  }
                   return "break" as const
                 }
                 return "continue" as const
@@ -1559,6 +1579,13 @@ const layer = Layer.effect(
                 }).toObject()
                 yield* sessions.updateMessage(handle.message)
                 yield* events.publish(Session.Event.Error, { sessionID, error: handle.message.error })
+                if (yield* hasPendingUser()) {
+                  yield* Effect.logInfo("loop continue after content filter", {
+                    "session.id": sessionID,
+                    messageID: handle.message.id,
+                  })
+                  return "continue" as const
+                }
                 return "break" as const
               }
               if (format.type === "json_schema") {
@@ -1571,7 +1598,17 @@ const layer = Layer.effect(
               }
             }
 
-            if (result === "stop") return "break" as const
+            if (result === "stop") {
+              if (yield* hasPendingUser()) {
+                yield* Effect.logInfo("loop continue after stop", {
+                  "session.id": sessionID,
+                  messageID: handle.message.id,
+                  error: handle.message.error?.name,
+                })
+                return "continue" as const
+              }
+              return "break" as const
+            }
             if (result === "compact") {
               yield* compaction.create({
                 sessionID,
