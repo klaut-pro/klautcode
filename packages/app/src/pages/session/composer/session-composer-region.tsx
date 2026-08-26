@@ -6,6 +6,7 @@ import { SessionPermissionDock } from "@/pages/session/composer/session-permissi
 import { SessionMcpAuthDock } from "@/pages/session/composer/session-mcp-auth-dock"
 import { SessionQuestionDock } from "@/pages/session/composer/session-question-dock"
 import { SessionFollowupDock } from "@/pages/session/composer/session-followup-dock"
+import { SessionErrorDock } from "@/pages/session/composer/session-error-dock"
 import { SessionRevertDock } from "@/pages/session/composer/session-revert-dock"
 import { SessionTodoDock } from "@/pages/session/composer/session-todo-dock"
 import { SessionSubagentDock } from "@/pages/session/composer/session-subagent-dock"
@@ -161,6 +162,9 @@ export function SessionComposerRegion(props: {
                   onEdit={controller.followup()!.onEdit}
                   onDelete={controller.followup()!.onDelete}
                 />
+              </Show>
+<Show when={!controller.child()}>
+                <SessionErrorDock />
               </Show>
               <Show
                 when={controller.child()}

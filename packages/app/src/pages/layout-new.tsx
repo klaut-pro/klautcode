@@ -38,7 +38,7 @@ export default function NewLayout(props: ParentProps) {
         }
       />
       <UpdateAvailableToast />
-      <GlobalMcpAuthToast />
+<GlobalMcpAuthToast />
       <main class="flex-1 min-h-0 min-w-0 overflow-x-hidden flex flex-col items-start contain-strict">
         <Suspense>{props.children}</Suspense>
       </main>

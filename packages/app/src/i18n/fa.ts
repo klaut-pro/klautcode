@@ -1188,6 +1188,7 @@ export const dict = {
   "dialog.importOpencode.chooseFolder": "Choose folder…",
   "session.subagents.active": "Active subagents",
   "session.queue.busy": "Agent is working — new prompts are queued and will run when it's free",
+  "session.error.continue": "An error occurred — you can send a message to continue",
   "session.list.title": "All sessions",
   "session.list.empty": "No sessions yet",
   "projectSidebar.title": "Project",
