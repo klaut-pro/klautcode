@@ -19,6 +19,8 @@ export const dict = {
   "command.category.permissions": "Permissions",
   "command.category.workspace": "Workspace",
   "command.category.settings": "Settings",
+  "command.category.help": "Help",
+  "command.diagnostics.show": "Show Diagnostics",
   "command.logs.export": "Export logs",
 
   "theme.scheme.system": "System",
