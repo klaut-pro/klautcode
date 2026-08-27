@@ -861,6 +861,7 @@ export const dict = {
   "settings.updates.action.installing": "Wird installiert…",
   "settings.updates.toast.latest.title": "Klautcode ist auf dem neuesten Stand",
   "settings.updates.toast.latest.description": "Die aktuelle Version von Klautcode wird verwendet.",
+  "settings.updates.toast.missingArtifacts": "Die neueste Version bietet noch kein Update für diese Plattform.",
   "sound.option.none": "Keine",
   "sound.option.alert01": "Alarm 01",
   "sound.option.alert02": "Alarm 02",

@@ -1043,6 +1043,7 @@ export const dict: Record<string, string> = {
   "settings.updates.action.installing": "स्थापना गर्दै...",
   "settings.updates.toast.latest.title": "तपाईं अद्यावधिक हुनुहुन्छ",
   "settings.updates.toast.latest.description": "तपाईं Klautcode को नवीनतम संस्करण चलाइरहनुभएको छ।",
+  "settings.updates.toast.missingArtifacts": "पछिल्लो रिलीजमा यो प्लेटफर्मका लागि अहिलेसम्म कुनै अपडेट छैन।",
   "sound.option.none": "कुनै पनि होइन",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

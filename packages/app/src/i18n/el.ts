@@ -1058,6 +1058,7 @@ export const dict = {
   "settings.updates.action.installing": "Εγκατάσταση...",
   "settings.updates.toast.latest.title": "Είστε ενημερωμένοι",
   "settings.updates.toast.latest.description": "Εκτελείτε την πιο πρόσφατη έκδοση του Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Η τελευταία έκδοση δεν έχει ακόμη ενημέρωση για αυτή την πλατφόρμα.",
   "sound.option.none": "Κανένα",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

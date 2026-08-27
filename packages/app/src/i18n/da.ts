@@ -909,6 +909,7 @@ export const dict = {
   "settings.updates.action.installing": "Installerer...",
   "settings.updates.toast.latest.title": "Du er opdateret",
   "settings.updates.toast.latest.description": "Du kører den nyeste version af Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Den nyeste udgivelse har endnu ingen opdatering til denne platform.",
 
   "sound.option.none": "Ingen",
   "sound.option.alert01": "Alarm 01",

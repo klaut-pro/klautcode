@@ -1039,6 +1039,7 @@ export const dict: Record<string, string> = {
   "settings.updates.action.installing": "ස්ථාපනය කරමින්...",
   "settings.updates.toast.latest.title": "ඔබ යාවත්කාලීනයි",
   "settings.updates.toast.latest.description": "ඔබ Klautcode හි නවතම අනුවාදය ධාවනය කරයි.",
+  "settings.updates.toast.missingArtifacts": "නවතම නිකුතුවට මෙම වේදිකාව සඳහා තවම යාවත්කාලීනයක් නොමැත.",
   "sound.option.none": "කිසිවක් නැත",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

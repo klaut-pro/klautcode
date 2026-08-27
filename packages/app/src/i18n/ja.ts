@@ -952,6 +952,7 @@ export const dict = {
   "settings.updates.action.installing": "インストール中...",
   "settings.updates.toast.latest.title": "最新です",
   "settings.updates.toast.latest.description": "Klautcode は最新バージョンです。",
+  "settings.updates.toast.missingArtifacts": "最新リリースにはこのプラットフォーム向けのアップデートがまだありません。",
   "sound.option.none": "なし",
   "sound.option.alert01": "アラート 01",
   "sound.option.alert02": "アラート 02",

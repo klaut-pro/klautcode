@@ -1059,6 +1059,7 @@ export const dict = {
   "settings.updates.action.installing": "ထည့်သွင်းနေသည်...",
   "settings.updates.toast.latest.title": "သင်သည် ခေတ်မီနေပါသည်။",
   "settings.updates.toast.latest.description": "သင်သည် Klautcode ၏ နောက်ဆုံးဗားရှင်းကို အသုံးပြုနေပါသည်။",
+  "settings.updates.toast.missingArtifacts": "နောက်ဆုံးထွက်ရှိမှုတွင် ဤပလက်ဖောင်းအတွက် အပ်ဒိတ်မရှိသေးပါ။",
   "sound.option.none": "မရှိပါ။",
   "sound.option.alert01": "သတိပေးချက် ၀၁",
   "sound.option.alert02": "သတိပေးချက် ၀၂",

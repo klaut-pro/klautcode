@@ -1038,6 +1038,7 @@ export const dict = {
   "settings.updates.action.installing": "Installimine...",
   "settings.updates.toast.latest.title": "Oled kursis",
   "settings.updates.toast.latest.description": "Kasutate rakenduse Klautcode uusimat versiooni.",
+  "settings.updates.toast.missingArtifacts": "Uusimal väljaandel pole selle platvormi jaoks veel värskendust.",
   "sound.option.none": "Mitte ühtegi",
   "sound.option.alert01": "Hoiatus 01",
   "sound.option.alert02": "Hoiatus 02",

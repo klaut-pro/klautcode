@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test"
-import { createUpdaterController, type UpdaterBackend, type UpdaterReadyRecord } from "./updater-controller"
+import {
+  classifyUpdaterError,
+  createUpdaterController,
+  type UpdaterBackend,
+  type UpdaterReadyRecord,
+} from "./updater-controller"
 
 function setup(input?: { currentVersion?: string; ready?: UpdaterReadyRecord }) {
   const calls: string[] = []
@@ -107,5 +112,51 @@ describe("updater controller", () => {
 
     await expect(failed.install()).rejects.toThrow("stop failed")
     expect(failed.getState()).toEqual({ status: "ready", version: "2.0.0" })
+  })
+
+  test("a failed check transitions to error with a classified reason", async () => {
+    const controller = createUpdaterController({
+      enabled: true,
+      currentVersion: "1.0.0",
+      backend: {
+        checkForUpdates: async () => {
+          throw new Error(
+            "Cannot find latest-mac.yml in the latest release artifacts of the release v1.18.17: HTTPError: 404",
+          )
+        },
+        downloadUpdate: async () => {},
+        quitAndInstall() {},
+      },
+      persistence: { get: () => undefined, set() {}, clear() {} },
+      stop: async () => {},
+    })
+
+    await controller.start()
+
+    expect(controller.getState()).toEqual({
+      status: "error",
+      message: "Cannot find latest-mac.yml in the latest release artifacts of the release v1.18.17: HTTPError: 404",
+      reason: "missing-artifacts",
+    })
+  })
+})
+
+describe("classifyUpdaterError", () => {
+  test("detects a release that has no build for this platform", () => {
+    expect(
+      classifyUpdaterError("Cannot find latest-mac.yml in the latest release artifacts of the release v1.18.17: HTTPError: 404"),
+    ).toBe("missing-artifacts")
+    expect(classifyUpdaterError("Cannot find latest-linux.yml in the latest release artifacts")).toBe("missing-artifacts")
+    expect(classifyUpdaterError("Cannot find latest.yml in the latest release artifacts")).toBe("missing-artifacts")
+  })
+
+  test("detects an unreachable release channel", () => {
+    expect(classifyUpdaterError("getaddrinfo ENOTFOUND github.com")).toBe("unreachable")
+    expect(classifyUpdaterError("fetch failed")).toBe("unreachable")
+    expect(classifyUpdaterError("request timed out")).toBe("unreachable")
+  })
+
+  test("leaves unrelated failures unclassified", () => {
+    expect(classifyUpdaterError("sha512 mismatch: expected abc, got def")).toBeUndefined()
   })
 })

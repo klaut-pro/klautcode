@@ -1042,6 +1042,7 @@ export const dict = {
   "settings.updates.action.installing": "Kuruluyor...",
   "settings.updates.toast.latest.title": "Güncelsiniz",
   "settings.updates.toast.latest.description": "Klautcode'un en son sürümünü kullanıyorsunuz.",
+  "settings.updates.toast.missingArtifacts": "En son sürümün bu platform için henüz bir güncellemesi yok.",
 
   "sound.option.none": "Yok",
   "sound.option.alert01": "Uyarı 01",

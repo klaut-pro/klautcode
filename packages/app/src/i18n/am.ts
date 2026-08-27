@@ -1017,6 +1017,7 @@ export const dict = {
   "settings.updates.action.installing": "በመጫን ላይ...",
   "settings.updates.toast.latest.title": "ዘመኑን ጠብቀዋል",
   "settings.updates.toast.latest.description": "የቅርብ ጊዜውን የKlautcode እትም እያሄዱ ነው።",
+  "settings.updates.toast.missingArtifacts": "የቅርቡ ልቀት ለዚህ መድረክ እስካሁን ምንም ዝማኔ የለውም።",
   "sound.option.none": "ምንም",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

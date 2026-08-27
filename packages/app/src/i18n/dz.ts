@@ -1063,6 +1063,7 @@ export const dict: Record<string, string> = {
   "settings.updates.action.installing": "གཞི་བཙུགས་འབད་དོ།",
   "settings.updates.toast.latest.title": "ཁྱོད་དུས་དང་བསྟུན།",
   "settings.updates.toast.latest.description": "ཁྱོད་ཀྱིས་ Klautcodeགི་ཐོན་རིམ་གསརཔ་འདི་གཡོག་བཀོལ་དོ།",
+  "settings.updates.toast.missingArtifacts": "གསར་ཐོན་འདིའི་ཐོག་ལ་དུས་མཐུན་ད་དུང་མེད།",
   "sound.option.none": "ག་ནི་ཡང་མེདཔ།",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

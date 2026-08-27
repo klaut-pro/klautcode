@@ -675,6 +675,7 @@ export const dict = {
   "settings.updates.action.checking": "확인 중...",
   "settings.updates.toast.latest.title": "최신 상태입니다",
   "settings.updates.toast.latest.description": "현재 최신 버전의 Klautcode를 사용 중입니다.",
+  "settings.updates.toast.missingArtifacts": "최신 릴리스에는 이 플랫폼용 업데이트가 아직 없습니다.",
   "sound.option.none": "없음",
   "sound.option.alert01": "알림 01",
   "sound.option.alert02": "알림 02",

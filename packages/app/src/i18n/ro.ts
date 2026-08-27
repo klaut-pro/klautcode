@@ -1049,6 +1049,7 @@ export const dict = {
   "settings.updates.action.installing": "Se instalează...",
   "settings.updates.toast.latest.title": "Ești la zi",
   "settings.updates.toast.latest.description": "Folosești cea mai recentă versiune Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Cea mai recentă versiune nu are încă o actualizare pentru această platformă.",
   "sound.option.none": "Fără sunet",
   "sound.option.alert01": "Avertizare 01",
   "sound.option.alert02": "Avertizare 02",

@@ -1061,6 +1061,7 @@ export const dict = {
   "settings.updates.action.installing": "Diegiama...",
   "settings.updates.toast.latest.title": "Jūs esate atnaujintas",
   "settings.updates.toast.latest.description": "Naudojate naujausią Klautcode versiją.",
+  "settings.updates.toast.missingArtifacts": "Naujausioje laidoje šiai platformai dar nėra atnaujinimo.",
   "sound.option.none": "Nėra",
   "sound.option.alert01": "Įspėjimas 01",
   "sound.option.alert02": "Įspėjimas 02",

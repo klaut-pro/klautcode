@@ -1053,6 +1053,7 @@ export const dict = {
   "settings.updates.action.installing": "Telepítés...",
   "settings.updates.toast.latest.title": "Ön naprakész",
   "settings.updates.toast.latest.description": "Ön a Klautcode legújabb verzióját futtatja.",
+  "settings.updates.toast.missingArtifacts": "A legújabb kiadásban még nincs frissítés ehhez a platformhoz.",
   "sound.option.none": "Egyik sem",
   "sound.option.alert01": "Figyelmeztetés 01",
   "sound.option.alert02": "Figyelmeztetés 02",

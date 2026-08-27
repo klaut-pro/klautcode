@@ -1053,6 +1053,7 @@ export const dict = {
   "settings.updates.action.installing": "Суулгаж байна...",
   "settings.updates.toast.latest.title": "Та шинэчлэгдсэн байна",
   "settings.updates.toast.latest.description": "Та Klautcode-н хамгийн сүүлийн хувилбарыг ажиллуулж байна.",
+  "settings.updates.toast.missingArtifacts": "Хамгийн сүүлийн хувилбарт энэ платформд зориулсан шинэчлэлт хараахан байхгүй байна.",
   "sound.option.none": "Байхгүй",
   "sound.option.alert01": "Анхааруулга 01",
   "sound.option.alert02": "Анхааруулга 02",

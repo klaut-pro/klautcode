@@ -1043,6 +1043,7 @@ export const dict = {
   "settings.updates.action.installing": "Setur upp...",
   "settings.updates.toast.latest.title": "Þú ert uppfærður",
   "settings.updates.toast.latest.description": "Þú ert að keyra nýjustu útgáfuna af Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Nýjasta útgáfan hefur enn enga uppfærslu fyrir þennan vettvang.",
   "sound.option.none": "Engin",
   "sound.option.alert01": "Viðvörun 01",
   "sound.option.alert02": "Viðvörun 02",

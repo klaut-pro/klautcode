@@ -1056,6 +1056,7 @@ export const dict = {
   "settings.updates.action.installing": "Oʻrnatilmoqda...",
   "settings.updates.toast.latest.title": "Siz yangilangansiz",
   "settings.updates.toast.latest.description": "Siz Klautcode oxirgi versiyasini ishga tushiryapsiz.",
+  "settings.updates.toast.missingArtifacts": "So'nggi relizda bu platforma uchun hali yangilanish yo'q.",
   "sound.option.none": "Yo'q",
   "sound.option.alert01": "Ogohlantirish 01",
   "sound.option.alert02": "Ogohlantirish 02",

@@ -12,6 +12,7 @@ export { loadLocaleDict, normalizeLocale, type Locale, useLanguage } from "./con
 export { useWslServers } from "./wsl/context"
 export { type DisplayBackend, type FatalRendererErrorLog, type Platform, PlatformProvider } from "./context/platform"
 export { type UpdaterPlatform, type UpdaterState } from "./updater"
+export { UpdaterNotice } from "./components/updater-notice"
 export {
   type WslDistroProbe,
   type WslInstalledDistro,

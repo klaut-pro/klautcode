@@ -375,6 +375,24 @@ jobs:
           fi
           tar -czf "$OUT_NAME" -C "$(dirname "$APP_PATH")" "$(basename "$APP_PATH")"
 
+      - name: Verify update metadata matches release version
+        if: runner.os == 'macOS' && matrix.settings.target == 'aarch64-apple-darwin' && needs.version.outputs.release
+        working-directory: packages/desktop
+        run: |
+          EXPECTED="${{ needs.version.outputs.version }}"
+          ACTUAL=$(sed -n 's/^version: *//p' dist/latest-mac.yml | head -1)
+          if [ -z "$ACTUAL" ]; then
+            echo "latest-mac.yml was not generated" >&2
+            exit 1
+          fi
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "latest-mac.yml version '$ACTUAL' does not match release version '$EXPECTED'" >&2
+            echo "The app must be packaged with the release version baked in" >&2
+            echo "(e.g. --config.extraMetadata.version=$EXPECTED), or auto-update" >&2
+            echo "will never offer this release." >&2
+            exit 1
+          fi
+
       - name: Verify signed Windows Electron artifacts
         if: runner.os == 'Windows' && env.AZURE_CLIENT_ID != ''
         shell: pwsh
