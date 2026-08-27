@@ -11,6 +11,7 @@ import { WorkspaceTable } from "../control-plane/workspace.sql"
 import { SessionMessage } from "./message"
 import { SessionMessageUpdater } from "./message-updater"
 import { SessionInput } from "./input"
+import { SessionSchema } from "./schema"
 import { WorkspaceV2 } from "../workspace"
 import { SessionContextEpoch } from "./context-epoch"
 import { MessageTable, PartTable, SessionInputTable, SessionMessageTable, SessionTable } from "./sql"
@@ -104,6 +105,15 @@ function applyUsage(
       tokens_cache_write: sql`${SessionTable.tokens_cache_write} + ${value.tokens.cache.write * sign}`,
       time_updated: sql`${SessionTable.time_updated}`,
     })
+    .where(eq(SessionTable.id, sessionID))
+    .run()
+    .pipe(Effect.orDie)
+}
+
+function touchSession(db: DatabaseService, sessionID: SessionSchema.ID, timestamp: DateTime.Utc) {
+  return db
+    .update(SessionTable)
+    .set({ time_updated: sql`max(${SessionTable.time_updated}, ${DateTime.toEpochMillis(timestamp)})` })
     .where(eq(SessionTable.id, sessionID))
     .run()
     .pipe(Effect.orDie)
@@ -358,6 +368,7 @@ const layer = Layer.effectDiscard(
           timeCreated: event.data.timestamp,
           promotedSeq: event.durable.seq,
         })
+        yield* touchSession(db, event.data.sessionID, event.data.timestamp)
         yield* run(db, event)
       }),
     )
@@ -372,6 +383,7 @@ const layer = Layer.effectDiscard(
           delivery: event.data.delivery,
           timeCreated: event.data.timestamp,
         })
+        yield* touchSession(db, event.data.sessionID, event.data.timestamp)
       }),
     )
     yield* events.project(SessionEvent.ContextUpdated, (event) => run(db, event))

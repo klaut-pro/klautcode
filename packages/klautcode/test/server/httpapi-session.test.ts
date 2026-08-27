@@ -637,6 +637,57 @@ describe("session HttpApi", () => {
   )
 
   it.instance(
+    "refreshes session time_updated when a v2 prompt is admitted",
+    () =>
+      Effect.gen(function* () {
+        const test = yield* TestInstance
+        const headers = { "x-klautcode-directory": test.directory }
+        const session = yield* createSession({ title: "v2 prompt touch" })
+
+        const before = yield* Database.Service.use(({ db }) =>
+          db
+            .select({ timeUpdated: SessionTable.time_updated })
+            .from(SessionTable)
+            .where(eq(SessionTable.id, session.id))
+            .get()
+            .pipe(Effect.orDie),
+        )
+        expect(before).toBeDefined()
+
+        const response = yield* request(`/api/session/${session.id}/prompt`, {
+          method: "POST",
+          headers: { ...headers, "content-type": "application/json" },
+          body: JSON.stringify({ id: "msg_touch_prompt", prompt: { text: "hello" }, resume: false }),
+        })
+        expect(response.status).toBe(200)
+
+        const input = yield* Database.Service.use(({ db }) =>
+          db
+            .select({ timeCreated: SessionInputTable.time_created })
+            .from(SessionInputTable)
+            .where(eq(SessionInputTable.id, SessionMessage.ID.make("msg_touch_prompt")))
+            .get()
+            .pipe(Effect.orDie),
+        )
+        expect(input).toBeDefined()
+
+        const after = yield* Database.Service.use(({ db }) =>
+          db
+            .select({ timeUpdated: SessionTable.time_updated })
+            .from(SessionTable)
+            .where(eq(SessionTable.id, session.id))
+            .get()
+            .pipe(Effect.orDie),
+        )
+        expect(after).toBeDefined()
+        // The admission projection refreshes time_updated to the prompt's admission timestamp.
+        expect(after!.timeUpdated).toBe(input!.timeCreated)
+        expect(after!.timeUpdated).toBeGreaterThanOrEqual(before!.timeUpdated)
+      }),
+    { git: true, config: { formatter: false, lsp: false } },
+  )
+
+  it.instance(
     "returns v2 public unavailable errors for unfinished session mutations",
     () =>
       Effect.gen(function* () {

@@ -209,6 +209,64 @@ describe("SessionProjector", () => {
     }),
   )
 
+  it.effect("refreshes session time_updated when prompts are admitted and promoted", () =>
+    Effect.gen(function* () {
+      const { db } = yield* Database.Service
+      yield* db
+        .insert(ProjectTable)
+        .values({ id: Project.ID.global, worktree: AbsolutePath.make("/project"), sandboxes: [] })
+        .run()
+        .pipe(Effect.orDie)
+      yield* db
+        .insert(SessionTable)
+        .values({
+          id: sessionID,
+          project_id: Project.ID.global,
+          slug: "test",
+          directory: "/project",
+          title: "test",
+          version: "test",
+        })
+        .run()
+        .pipe(Effect.orDie)
+      const events = yield* EventV2.Service
+      const timeUpdated = () =>
+        db.select({ time_updated: SessionTable.time_updated }).from(SessionTable).get().pipe(Effect.orDie)
+      const initial = (yield* timeUpdated())!.time_updated
+      const first = DateTime.makeUnsafe(initial + 10)
+      const second = DateTime.makeUnsafe(initial + 20)
+
+      yield* events.publish(SessionEvent.PromptAdmitted, {
+        sessionID,
+        messageID: SessionMessage.ID.make("msg_touch_first"),
+        timestamp: first,
+        prompt: Prompt.make({ text: "first" }),
+        delivery: "steer",
+      })
+      expect((yield* timeUpdated())!.time_updated).toBe(DateTime.toEpochMillis(first))
+
+      yield* events.publish(SessionEvent.PromptAdmitted, {
+        sessionID,
+        messageID: SessionMessage.ID.make("msg_touch_second"),
+        timestamp: second,
+        prompt: Prompt.make({ text: "second" }),
+        delivery: "steer",
+      })
+      expect((yield* timeUpdated())!.time_updated).toBe(DateTime.toEpochMillis(second))
+
+      // Promotion carries the admission timestamp; an older promotion must not
+      // move the session backwards in recency order.
+      yield* events.publish(SessionEvent.Prompted, {
+        sessionID,
+        messageID: SessionMessage.ID.make("msg_touch_first"),
+        timestamp: first,
+        prompt: Prompt.make({ text: "first" }),
+        delivery: "steer",
+      })
+      expect((yield* timeUpdated())!.time_updated).toBe(DateTime.toEpochMillis(second))
+    }),
+  )
+
   it.effect("projects durable context messages supported by the updater", () =>
     Effect.gen(function* () {
       const { db } = yield* Database.Service
