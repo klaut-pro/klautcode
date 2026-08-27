@@ -40,8 +40,13 @@ runs:
       shell: bash
       run: echo "dir=$(bun pm cache)" >> "$GITHUB_OUTPUT"
 
+    # Windows is excluded from the bun cache: a cached entry can hold a
+    # partially-extracted package dir, and bun then fails to rename over it
+    # with ENOTEMPTY during 'bun install' (seen with @ai-sdk/openai-compatible
+    # on both windows runners). Fresh installs are more reliable there.
     - name: Restore Bun dependencies
       id: bun-cache
+      if: runner.os != 'Windows'
       uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ steps.cache.outputs.dir }}
@@ -66,7 +71,7 @@ runs:
       shell: bash
 
     - name: Save Bun dependencies
-      if: steps.bun-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
+      if: runner.os != 'Windows' && steps.bun-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
       uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ steps.cache.outputs.dir }}

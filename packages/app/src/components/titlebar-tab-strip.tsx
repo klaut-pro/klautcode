@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createResource, createRoot, For, onCleanup, onMount, Show } from "solid-js"
+import { createEffect, createMemo, createResource, createRoot, createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import { createStore } from "solid-js/store"
 import { createResizeObserver } from "@solid-primitives/resize-observer"
 import { DragDropProvider, PointerSensor } from "@dnd-kit/solid"
@@ -17,6 +17,7 @@ import { useTabs } from "@/context/tabs"
 import { createTabPromptState } from "@/context/prompt"
 import { base64Encode } from "@klautcode/core/util/encode"
 import { showToast } from "@/utils/toast"
+import { isLocalSessionNotFoundError, isSessionNotFoundError } from "@/utils/server-errors"
 import { canStartTabDrag, isTabCloseTarget } from "./titlebar-tab-gesture"
 import { adjacentTabKey, mergeVisibleTabOrder } from "./titlebar-tab-order"
 import type { Session } from "@klautcode/sdk/v2"
@@ -86,15 +87,42 @@ function SessionTabEntry(props: {
   const sdk = createMemo(() => props.serverCtx()?.sdk ?? null)
   const cachedSession = createMemo(() => props.serverCtx()?.sync.session.peek(props.tab.sessionId))
   const persisted = createMemo(() => tabs.info[props.id])
+  // Keep the resource value non-throwing: reading an errored resource value
+  // re-throws to the nearest error boundary (which would render the app
+  // ErrorPage for a mere dead tab). The settle error is captured in a signal
+  // instead so dead restored tabs can be pruned (sessionGone) without any
+  // render path observing a rejected resource.
+  const [resolveError, setResolveError] = createSignal<unknown>(undefined)
   const [loadedSession] = createResource(
     () => {
       const ctx = props.serverCtx()
       return ctx ? { id: props.tab.sessionId, ctx } : null
     },
-    ({ id, ctx }) => ctx.sync.session.resolve(id).catch(() => undefined),
+    ({ id, ctx }) =>
+      ctx.sync.session.resolve(id).catch((error) => {
+        setResolveError(error)
+        return undefined
+      }),
   )
   const session = createMemo(() => cachedSession() ?? loadedSession())
   const missingSession = createMemo(() => !!props.serverCtx() && !loadedSession.loading && !session())
+  // Self-heal restored tabs whose session no longer exists: resolve() throws
+  // SessionNotFoundError for a missing session, so once the resource settles
+  // with that error the tab is dead weight - close it (cleanup path, not
+  // recorded as user-closed) so it never lingers as an "Unknown Session" tab.
+  // Network/server failures are NOT not-found and keep the tab open.
+  const sessionGone = createMemo(() => {
+    if (cachedSession() || loadedSession.loading || loadedSession() || !props.serverCtx()) return false
+    const error = resolveError()
+    if (!error) return false
+    return (
+      isSessionNotFoundError(error, props.tab.sessionId) || isLocalSessionNotFoundError(error, props.tab.sessionId)
+    )
+  })
+  createEffect(() => {
+    if (!sessionGone()) return
+    tabs.removeSessionTab({ server: props.tab.server, sessionId: props.tab.sessionId })
+  })
   const visible = createMemo(() => !!session() || missingSession() || !!persisted()?.title)
   let prefetched = false
 

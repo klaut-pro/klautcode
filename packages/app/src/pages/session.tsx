@@ -220,6 +220,23 @@ function SessionErrorFallback(props: { error: unknown; sessionID?: string; serve
     if (!props.sessionID) return
     tabs.removeSessionTab({ server: props.serverKey ?? server.key, sessionId: props.sessionID })
   }
+  // Self-heal restored tabs whose session no longer exists: the tab is dead
+  // weight (nothing can load), so close it shortly after showing why and let
+  // the tabs store navigate to the next tab (or home). Without this, a session
+  // deleted on another machine or server leaves a permanent error tab on every
+  // launch. Cancelled if the error changes (e.g. a retry resolves).
+  let closeTimer: number | undefined
+  createEffect(() => {
+    if (closeTimer !== undefined) {
+      window.clearTimeout(closeTimer)
+      closeTimer = undefined
+    }
+    if (!isCurrentSessionNotFoundError(props.error, props.sessionID)) return
+    closeTimer = window.setTimeout(closeTab, 2000)
+  })
+  onCleanup(() => {
+    if (closeTimer !== undefined) window.clearTimeout(closeTimer)
+  })
   if (isCurrentSessionNotFoundError(props.error, props.sessionID)) {
     return (
       <div class="flex-1 min-h-0 overflow-hidden">
