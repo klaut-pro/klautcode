@@ -229,7 +229,7 @@ export function ProjectChatsSidebar() {
     >
       <div
         id="project-chats-sidebar"
-        class="relative flex h-full min-h-0 flex-col shrink-0 my-2 ml-2 rounded-[10px] overflow-hidden bg-v2-background-bg-base shadow-[var(--v2-elevation-raised)]"
+        class="relative flex self-stretch min-h-0 flex-col shrink-0 my-2 ml-2 rounded-[10px] overflow-hidden bg-v2-background-bg-base shadow-[var(--v2-elevation-raised)]"
         style={{ width: `${width()}px` }}
       >
         <div class="flex items-center gap-1 px-3 h-10 shrink-0 border-b border-v2-border-border-base">

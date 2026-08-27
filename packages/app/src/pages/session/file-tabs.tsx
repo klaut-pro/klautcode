@@ -492,7 +492,7 @@ function SessionFileViewV1(props: { tab: string }) {
   )
 
   const content = () => (
-    <div class="mt-3 relative h-full min-h-0">
+    <div class="relative mt-3 h-[calc(100%-0.75rem)] min-h-0">
       <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
         <Switch>
           <Match when={state()?.loaded}>{renderFile(contents())}</Match>
@@ -783,7 +783,7 @@ function SessionFileViewV2(props: { tab: string }) {
   )
 
   const content = () => (
-    <div class="mt-3 relative h-full min-h-0">
+    <div class="relative mt-3 h-[calc(100%-0.75rem)] min-h-0">
       <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
         <Switch>
           <Match when={state()?.loaded}>{renderFile(contents())}</Match>
