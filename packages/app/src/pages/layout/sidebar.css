@@ -1,0 +1,24 @@
+/* Compact line-height for sidebar navigation items — the default text-14-*
+   line-height (150-180%) is too loose for dense sidebar lists. */
+[data-component="sidebar-nav-desktop"] .text-14-regular,
+[data-component="sidebar-nav-desktop"] .text-14-medium,
+[data-component="sidebar-nav-desktop"] .text-14-mono,
+[data-component="sidebar-nav-mobile"] .text-14-regular,
+[data-component="sidebar-nav-mobile"] .text-14-medium,
+[data-component="sidebar-nav-mobile"] .text-14-mono {
+  line-height: var(--line-height-normal);
+}
+
+[data-component="sidebar-nav-desktop"] .text-12-regular,
+[data-component="sidebar-nav-desktop"] .text-12-medium,
+[data-component="sidebar-nav-mobile"] .text-12-regular,
+[data-component="sidebar-nav-mobile"] .text-12-medium {
+  line-height: var(--line-height-normal);
+}
+
+/* Workspace preview panel (mobile / collapsed hover card) */
+[data-component="project-preview"] .text-14-medium,
+[data-component="project-preview"] .text-14-regular,
+[data-component="project-preview"] .text-12-medium {
+  line-height: var(--line-height-normal);
+}

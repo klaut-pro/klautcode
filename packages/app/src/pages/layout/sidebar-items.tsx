@@ -109,7 +109,7 @@ const SessionRow = (props: {
   return (
     <A
       href={`/${props.slug}/session/${props.session.id}`}
-      class={`flex items-center gap-2 min-w-0 w-full text-left focus:outline-none ${props.dense ? "py-0.5" : "py-1"}`}
+      class={`flex items-center gap-1.5 min-w-0 w-full text-left focus:outline-none ${props.dense ? "py-0.5" : "py-0.5"}`}
       onPointerDown={props.warmPress}
       onFocus={props.warmFocus}
       onClick={() => {
@@ -119,12 +119,12 @@ const SessionRow = (props: {
     >
       <Show when={props.isWorking() || props.hasPermissions() || props.hasError() || props.unseenCount() > 0}>
         <div
-          class="shrink-0 size-6 flex items-center justify-center"
+          class="shrink-0 size-5 flex items-center justify-center"
           style={{ color: props.tint() ?? "var(--icon-interactive-base)" }}
         >
           <Switch>
             <Match when={props.isWorking()}>
-              <Spinner class="size-[15px]" />
+              <Spinner class="size-[13px]" />
             </Match>
             <Match when={props.hasPermissions()}>
               <div class="size-1.5 rounded-full bg-surface-warning-strong" />
@@ -294,13 +294,13 @@ export const NewSessionItem = (props: {
     <A
       href={`/${props.slug}/session`}
       end
-      class={`flex items-center gap-2 min-w-0 w-full text-left focus:outline-none ${props.dense ? "py-0.5" : "py-1"}`}
+      class={`flex items-center gap-1.5 min-w-0 w-full text-left focus:outline-none ${props.dense ? "py-0.5" : "py-0.5"}`}
       onClick={() => {
         if (layout.sidebar.opened()) return
         props.clearHoverProjectSoon()
       }}
     >
-      <div class="shrink-0 size-6 flex items-center justify-center">
+      <div class="shrink-0 size-5 flex items-center justify-center">
         <IconV2 name="edit" size="small" class="text-icon-weak" />
       </div>
       <span class="text-14-regular text-text-strong min-w-0 flex-1 truncate">{label}</span>
@@ -328,7 +328,7 @@ export const SessionSkeleton = (props: { count?: number }): JSX.Element => {
   return (
     <div class="flex flex-col gap-1">
       <For each={items}>
-        {() => <div class="h-8 w-full rounded-md bg-surface-raised-base opacity-60 animate-pulse" />}
+        {() => <div class="h-7 w-full rounded-md bg-surface-raised-base opacity-60 animate-pulse" />}
       </For>
     </div>
   )

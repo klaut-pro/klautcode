@@ -88,7 +88,7 @@
   margin: 6px 0;
   padding: 0 12px;
   color: var(--v2-text-text-muted);
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 16px;
   letter-spacing: -0.04px;
@@ -146,7 +146,7 @@
   min-width: 0;
   overflow: hidden;
   color: var(--v2-text-text-base);
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 16px;
   letter-spacing: -0.04px;
@@ -159,7 +159,7 @@
   min-width: 0;
   overflow: hidden;
   color: var(--v2-text-text-muted);
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 16px;
   letter-spacing: -0.04px;
@@ -175,7 +175,7 @@
   display: flex;
   min-width: 0;
   align-items: baseline;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   line-height: 16px;
   letter-spacing: -0.04px;
 }
@@ -201,7 +201,7 @@
   min-height: 120px;
   place-items: center;
   color: var(--v2-text-text-muted);
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 16px;
   letter-spacing: -0.04px;

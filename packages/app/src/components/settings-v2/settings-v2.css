@@ -46,7 +46,7 @@
 }
 
 .settings-v2-tab-title {
-  font-size: 15px;
+  font-size: var(--font-size-large);
   font-weight: 640;
   line-height: 1;
   color: var(--v2-text-text-base);
@@ -85,7 +85,7 @@
 
 .settings-v2-section-title {
   padding-bottom: 8px;
-  font-size: 15px;
+  font-size: var(--font-size-large);
   font-weight: 640;
   line-height: 1;
   color: var(--v2-text-text-base);
@@ -137,7 +137,7 @@
 
 [data-slot="settings-v2-row-title"] {
   font-style: normal;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 1;
   letter-spacing: -0.04px;
@@ -147,7 +147,7 @@
 
 [data-slot="settings-v2-row-description"] {
   margin-block: -3.5px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 20px;
   color: var(--v2-text-text-muted);
@@ -209,7 +209,7 @@
 }
 
 .settings-v2-nav-footer > span {
-  font-size: 11px;
+  font-size: var(--font-size-x-small);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-text-text-faint);
@@ -277,7 +277,7 @@
 }
 
 .settings-v2-provider-name {
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 16px;
   color: var(--v2-text-text-base);
@@ -285,7 +285,7 @@
 
 .settings-v2-provider-description {
   margin-block: -3.5px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 20px;
   color: var(--v2-text-text-muted);
@@ -293,7 +293,7 @@
 
 .settings-v2-provider-empty {
   padding-block: 20px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-text-text-muted);
@@ -301,7 +301,7 @@
 
 .settings-v2-provider-env-hint {
   padding-inline-end: 12px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-text-text-muted);
@@ -319,7 +319,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 1;
   color: var(--v2-text-text-accent);
@@ -341,7 +341,7 @@
 
 .settings-v2-providers .settings-v2-section-title {
   padding-bottom: 0;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 1;
 }
@@ -448,7 +448,7 @@
 
 .settings-v2-models .settings-v2-section-title {
   padding-bottom: 0;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 16px;
 }
@@ -476,7 +476,7 @@
 .settings-v2-models [data-slot="settings-v2-row-title"] {
   min-width: 0;
   overflow: hidden;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 16px;
   text-overflow: ellipsis;
@@ -490,7 +490,7 @@
   justify-content: center;
   gap: 4px;
   padding-block: 48px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-text-text-muted);
@@ -507,7 +507,7 @@
 
 .settings-v2-shortcuts .settings-v2-section-title {
   padding-bottom: 0;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 1;
 }
@@ -538,7 +538,7 @@
 
 .settings-v2-shortcuts [data-component="settings-v2-list"] > div > span {
   font-weight: 440;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   line-height: 1;
   letter-spacing: -0.04px;
   color: var(--v2-text-text-base);
@@ -556,7 +556,7 @@
   cursor: pointer;
   font-style: normal;
   font-weight: 530;
-  font-size: 11px;
+  font-size: var(--font-size-x-small);
   line-height: 1;
   letter-spacing: 0.05px;
   font-variant-numeric: tabular-nums;
@@ -589,7 +589,7 @@
   justify-content: center;
   gap: 4px;
   padding-block: 48px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-text-text-muted);
@@ -666,14 +666,14 @@
 }
 
 .settings-v2-servers-name {
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 1;
   color: var(--v2-text-text-base);
 }
 
 .settings-v2-servers-meta {
-  font-size: 11px;
+  font-size: var(--font-size-x-small);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-text-text-muted);
@@ -686,7 +686,7 @@
   justify-content: center;
   gap: 4px;
   padding-block: 48px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-text-text-muted);
@@ -728,14 +728,14 @@
 }
 
 .settings-v2-server-dialog-label {
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 1;
   color: var(--v2-text-text-base);
 }
 
 .settings-v2-server-dialog-error {
-  font-size: 11px;
+  font-size: var(--font-size-x-small);
   font-weight: 440;
   line-height: 1;
   color: var(--v2-state-fg-danger);

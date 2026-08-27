@@ -51,7 +51,7 @@
 
     /* text-14-medium */
     font-family: var(--font-family-sans);
-    font-size: 14px;
+    font-size: var(--font-size-base);
     font-style: normal;
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-large); /* 142.857% */
@@ -308,7 +308,7 @@
       font-family: Inter, sans-serif;
       font-style: normal;
       font-weight: 440;
-      font-size: 13px;
+      font-size: var(--font-size-base);
       line-height: 16px;
       letter-spacing: -0.04px;
       color: var(--v2-text-text-base);
@@ -749,7 +749,7 @@ body[data-new-layout] #review-panel [data-component="tabs"][data-variant="normal
     font-family: Inter, sans-serif;
     font-style: normal;
     font-weight: 440;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     line-height: 16px;
     letter-spacing: -0.04px;
     color: var(--v2-text-text-muted);

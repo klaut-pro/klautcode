@@ -218,6 +218,29 @@ const AppearanceSection: Component<{ controller: AppearanceSettingsController }>
         <FontSetting kind="ui" fonts={props.controller.fonts} />
         <FontSetting kind="code" fonts={props.controller.fonts} />
         <FontSetting kind="terminal" fonts={props.controller.fonts} />
+
+        <SettingsRowV2
+          title={language.t("settings.general.row.fontSize.title")}
+          description={language.t("settings.general.row.fontSize.description")}
+        >
+          <div class="flex items-center gap-3" data-action="settings-font-size">
+            <span class="text-xs text-(--text-weak)">10</span>
+            <input
+              type="range"
+              min={10}
+              max={20}
+              step={1}
+              value={props.controller.fontSize.current()}
+              onChange={(event) =>
+                props.controller.fontSize.set(Number.parseInt(event.currentTarget.value, 10))
+              }
+              class="flex-1 h-1.5 accent-(--text-interactive-base) cursor-pointer"
+              aria-label={language.t("settings.general.row.fontSize.title")}
+            />
+            <span class="text-xs text-(--text-weak)">20</span>
+            <span class="w-10 text-right text-sm font-medium">{props.controller.fontSize.current()}px</span>
+          </div>
+        </SettingsRowV2>
       </SettingsListV2>
     </div>
   )

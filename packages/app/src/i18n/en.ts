@@ -1001,6 +1001,8 @@ export const dict = {
   "settings.general.row.terminalFont.description": "Customise the font used in the terminal",
   "settings.general.row.uiFont.title": "UI Font",
   "settings.general.row.uiFont.description": "Customise the font used throughout the interface",
+  "settings.general.row.fontSize.title": "UI Font Size",
+  "settings.general.row.fontSize.description": "Adjust the size of all text in the interface",
   "settings.general.row.followup.title": "Follow-up behavior",
   "settings.general.row.followup.description": "Choose whether follow-up prompts steer immediately or wait in a queue",
   "settings.general.row.followup.option.queue": "Queue",

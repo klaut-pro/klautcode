@@ -113,6 +113,10 @@ export function createAppearanceSettingsController() {
       current: createMemo(() => themes().find((option) => option.id === theme.themeId())),
       select: (option: { id: string } | null) => option && theme.setTheme(option.id),
     },
+    fontSize: {
+      current: createMemo(() => settings.appearance.fontSize()),
+      set: (value: number) => settings.appearance.setFontSize(value),
+    },
     fonts: {
       ui: createMemo(() => ({
         value: sansInput(settings.appearance.uiFont()),

@@ -82,6 +82,7 @@ import {
   WorkspaceDragOverlay,
   type WorkspaceSidebarContext,
 } from "./layout/sidebar-workspace"
+import "./layout/sidebar.css"
 import { ProjectDragOverlay, SortableProject, type ProjectSidebarContext } from "./layout/sidebar-project"
 import { SidebarContent } from "./layout/sidebar-shell"
 
@@ -2112,7 +2113,7 @@ export default function LegacyLayout(props: ParentProps) {
                   when={workspacesEnabled()}
                   fallback={
                     <>
-                      <div class="shrink-0 py-4">
+                    <div class="shrink-0 py-3">
                         <Button
                           size="large"
                           class="w-full"
@@ -2163,7 +2164,7 @@ export default function LegacyLayout(props: ParentProps) {
                           ref={(el) => {
                             if (!panelProps.mobile) scrollContainerRef = el
                           }}
-                          class="size-full flex flex-col py-2 gap-4 overflow-y-auto no-scrollbar [overflow-anchor:none]"
+                          class="size-full flex flex-col py-1 gap-2 overflow-y-auto no-scrollbar [overflow-anchor:none]"
                         >
                           <SortableProvider ids={workspaces()}>
                             <For each={workspaces()}>

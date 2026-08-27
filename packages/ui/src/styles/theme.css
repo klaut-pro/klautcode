@@ -5,13 +5,14 @@
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-family-mono--font-feature-settings: normal;
 
-  --font-size-x-small: 11px;
-  --font-size-small: 13px;
-  --font-size-base: 14px;
-  --font-size-large: 16px;
-  --font-size-x-large: 20px;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-size-scale: 1;
+  --font-size-x-small: calc(11px * var(--font-size-scale));
+  --font-size-small: calc(12px * var(--font-size-scale));
+  --font-size-base: calc(13px * var(--font-size-scale));
+  --font-size-large: calc(15px * var(--font-size-scale));
+  --font-size-x-large: calc(18px * var(--font-size-scale));
   --line-height-normal: 130%;
   --line-height-large: 150%;
   --line-height-x-large: 180%;

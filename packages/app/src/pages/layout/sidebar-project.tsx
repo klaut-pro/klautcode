@@ -197,12 +197,12 @@ const ProjectPreviewPanel = (props: {
   ctx: ProjectSidebarContext
   language: ReturnType<typeof useLanguage>
 }): JSX.Element => (
-  <div class="-m-3 p-2 flex flex-col w-72">
-    <div class="px-4 pt-2 pb-1 flex items-center gap-2">
+  <div class="-m-3 p-2 flex flex-col w-72" data-component="project-preview">
+    <div class="px-3 pt-1 pb-1 flex items-center gap-2">
       <div class="text-14-medium text-text-strong truncate grow">{displayName(props.project)}</div>
     </div>
-    <div class="px-4 pb-2 text-12-medium text-text-weak">{props.language.t("sidebar.project.recentSessions")}</div>
-    <div class="px-2 pb-2 flex flex-col gap-2">
+    <div class="px-3 pb-1 text-12-medium text-text-weak">{props.language.t("sidebar.project.recentSessions")}</div>
+    <div class="px-2 py-1 flex flex-col gap-2">
       <Show
         when={props.workspaceEnabled()}
         fallback={
@@ -226,7 +226,7 @@ const ProjectPreviewPanel = (props: {
             const sessions = createMemo(() => props.workspaceSessions(directory))
             return (
               <div class="flex flex-col gap-1">
-                <div class="px-2 py-0.5 flex items-center gap-1 min-w-0">
+    <div class="px-2 py-1 flex items-center gap-1 min-w-0">
                   <div class="shrink-0 size-6 flex items-center justify-center">
                     <Icon name="branch" size="small" class="text-icon-base" />
                   </div>
@@ -251,7 +251,7 @@ const ProjectPreviewPanel = (props: {
         </For>
       </Show>
     </div>
-    <div class="px-2 py-2 border-t border-border-weak-base">
+    <div class="px-2 py-1 border-t border-border-weak-base">
       <Button
         variant="ghost"
         class="flex w-full text-left justify-start text-text-base px-2 hover:bg-transparent active:bg-transparent"

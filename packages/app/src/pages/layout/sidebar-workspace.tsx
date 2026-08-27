@@ -99,9 +99,9 @@ const WorkspaceHeader = (props: {
   projectId?: string
 }): JSX.Element => (
   <div class="flex items-center gap-1 min-w-0 flex-1">
-    <div class="flex items-center justify-center shrink-0 size-6">
+    <div class="flex items-center justify-center shrink-0 size-5">
       <Show when={props.busy()} fallback={<Icon name="branch" size="small" />}>
-        <Spinner class="size-[15px]" />
+        <Spinner class="size-[13px]" />
       </Show>
     </div>
     <span class="text-14-medium text-text-base shrink-0">
@@ -220,7 +220,7 @@ const WorkspaceActions = (props: {
           icon={<IconV2 name="edit" size="small" />}
           variant="ghost"
           size="small"
-          class="size-6 rounded-md opacity-0 pointer-events-none group-hover/workspace:opacity-100 group-hover/workspace:pointer-events-auto group-focus-within/workspace:opacity-100 group-focus-within/workspace:pointer-events-auto"
+          class="size-5 rounded-md opacity-0 pointer-events-none group-hover/workspace:opacity-100 group-hover/workspace:pointer-events-auto group-focus-within/workspace:opacity-100 group-focus-within/workspace:pointer-events-auto"
           data-action="workspace-new-session"
           data-workspace={base64Encode(props.directory)}
           aria-label={props.language.t("command.session.new")}
@@ -276,7 +276,7 @@ const WorkspaceSessionList = (props: {
       )}
     </For>
     <Show when={props.hasMore()}>
-      <div class="relative w-full py-1">
+      <div class="relative w-full py-0.5">
         <Button
           variant="ghost"
           class="flex w-full text-left justify-start text-14-regular text-text-weak pl-2 pr-10"
@@ -373,36 +373,36 @@ export const SortableWorkspace = (props: {
       }}
     >
       <Collapsible variant="ghost" open={open()} class="shrink-0" onOpenChange={openWrapper}>
-        <div class="py-1">
-          <div
-            class="group/workspace relative"
-            data-component="workspace-item"
-            data-workspace={base64Encode(props.directory)}
-          >
-            <div class="flex items-center gap-1">
-              <Show
-                when={workspaceEditActive()}
-                fallback={
-                  <Collapsible.Trigger
-                    class={`flex items-center justify-between w-full pl-2 py-1.5 rounded-md hover:bg-surface-raised-base-hover transition-[padding] duration-200 ${
-                      menu.open ? "pr-16" : "pr-2"
-                    } group-hover/workspace:pr-16 group-focus-within/workspace:pr-16`}
-                    data-action="workspace-toggle"
-                    data-workspace={base64Encode(props.directory)}
-                  >
-                    {header()}
-                  </Collapsible.Trigger>
-                }
-              >
-                <div
-                  class={`flex items-center justify-between w-full pl-2 py-1.5 rounded-md transition-[padding] duration-200 ${
+      <div class="py-0.5">
+        <div
+          class="group/workspace relative"
+          data-component="workspace-item"
+          data-workspace={base64Encode(props.directory)}
+        >
+          <div class="flex items-center gap-1">
+            <Show
+              when={workspaceEditActive()}
+              fallback={
+                <Collapsible.Trigger
+                  class={`flex items-center justify-between w-full pl-2 py-1 rounded-md hover:bg-surface-raised-base-hover transition-[padding] duration-200 ${
                     menu.open ? "pr-16" : "pr-2"
                   } group-hover/workspace:pr-16 group-focus-within/workspace:pr-16`}
+                  data-action="workspace-toggle"
+                  data-workspace={base64Encode(props.directory)}
                 >
                   {header()}
-                </div>
-              </Show>
-              <WorkspaceActions
+                </Collapsible.Trigger>
+              }
+            >
+              <div
+                class={`flex items-center justify-between w-full pl-2 py-1 rounded-md transition-[padding] duration-200 ${
+                  menu.open ? "pr-16" : "pr-2"
+                } group-hover/workspace:pr-16 group-focus-within/workspace:pr-16`}
+              >
+                {header()}
+              </div>
+            </Show>
+            <WorkspaceActions
                 directory={props.directory}
                 local={local}
                 busy={busy}
@@ -470,7 +470,7 @@ export const LocalWorkspace = (props: {
   return (
     <div
       ref={(el) => props.ctx.setScrollContainerRef(el, props.mobile)}
-      class="size-full flex flex-col py-2 overflow-y-auto no-scrollbar [overflow-anchor:none]"
+      class="size-full flex flex-col py-1 overflow-y-auto no-scrollbar [overflow-anchor:none]"
     >
       <WorkspaceSessionList
         slug={slug}

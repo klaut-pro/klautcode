@@ -52,7 +52,7 @@
 
   [data-slot="project"] {
     font-weight: 440;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     line-height: 1.5;
     letter-spacing: -0.04px;
     color: var(--v2-text-text-muted);
@@ -60,7 +60,7 @@
 
   [data-slot="title"] {
     font-weight: 530;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     line-height: 1.5;
     letter-spacing: -0.04px;
     color: var(--v2-text-text-base);
@@ -79,7 +79,7 @@
     /* Wrap the full path onto the next line instead of clipping the end. */
     overflow-wrap: anywhere;
     font-weight: 440;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     line-height: 1.5;
     letter-spacing: -0.04px;
     color: var(--v2-text-text-muted);
@@ -87,7 +87,7 @@
 
   [data-slot="server"] {
     font-weight: 440;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     line-height: 1;
     letter-spacing: -0.04px;
     color: var(--v2-text-text-muted);

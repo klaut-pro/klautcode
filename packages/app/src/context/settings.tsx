@@ -61,7 +61,7 @@ export const sansDefault = "System Sans"
 export const terminalDefault = "JetBrainsMono Nerd Font Mono"
 const legacyNewLayoutDesignsDefault = import.meta.env.VITE_KLAUTCODE_CHANNEL !== "prod"
 export const newLayoutDesignsDefault = true
-// Existing users can switch layouts until local midnight on this date. Set new Date(YYYY, M-1, D) to show.
+export const fontSizeBase = 13
 export const oldInterfaceSunset = new Date(2026, 8, 14)
 const newLayoutDesignsUpgradeCutoff = "1.17.19"
 
@@ -201,7 +201,7 @@ const defaultSettings: Settings = {
     autoFreeMode: true,
   },
   appearance: {
-    fontSize: 14,
+    fontSize: fontSizeBase,
     mono: "",
     sans: "",
     terminal: "",
@@ -350,8 +350,11 @@ export const { use: useSettings, provider: SettingsProvider } = createSimpleCont
     createEffect(() => {
       if (typeof document === "undefined") return
       const root = document.documentElement
+      const fontSize = store.appearance?.fontSize
+      const scale = fontSize / fontSizeBase
       root.style.setProperty("--font-family-mono", monoFontFamily(store.appearance?.mono))
       root.style.setProperty("--font-family-sans", sansFontFamily(store.appearance?.sans))
+      root.style.setProperty("--font-size-scale", scale.toFixed(3))
     })
 
     return {

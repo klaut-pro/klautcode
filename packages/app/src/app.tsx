@@ -306,8 +306,8 @@ function BodyDesignClass() {
     document.body.toggleAttribute("data-new-layout", enabled)
     document.body.classList.toggle("text-12-regular", !enabled)
     document.body.classList.toggle("font-(family-name:--font-family-text)", enabled)
-    document.body.classList.toggle("text-[13px]", enabled)
     document.body.classList.toggle("font-[440]", enabled)
+    document.body.style.fontSize = enabled ? "var(--font-size-base)" : ""
   })
 
   return null
