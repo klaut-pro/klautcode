@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process"
+import { execFile, execFileSync } from "node:child_process"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
@@ -56,6 +56,21 @@ const getBase = (appId: string): Configuration => ({
     desktopName: `${appId}.desktop`,
   },
   files: ["out/**/*", "resources/**/*", "!resources/klautcode-cli*"],
+  // Never package a renderer bundle that is older than the sources it should
+  // contain — electron-builder packages out/** as-is. Run as a bun subprocess
+  // (this config itself loads under node/jiti, which lacks import.meta.dir).
+  beforePack: () => {
+    const checkScript = path.join(packageDir, "scripts", "check-renderer-fresh.ts")
+    try {
+      execFileSync("bun", [checkScript], { cwd: packageDir, stdio: "inherit" })
+    } catch (error) {
+      throw new Error(
+        "Refusing to package a stale renderer: the build output is missing or older than the sources. " +
+          `Run \"bun run build\" (or \"bun run package\", which builds first) before packaging.`,
+        { cause: error },
+      )
+    }
+  },
   extraResources: [
     ...(channel === "dev"
       ? [

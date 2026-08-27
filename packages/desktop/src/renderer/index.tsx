@@ -33,11 +33,16 @@ import { Splash } from "@klautcode/ui/logo"
 import { useTheme } from "@klautcode/ui/theme/context"
 
 // Inline prod diagnostics setup to avoid cross-package import cycle
+// Chromium dispatches benign "ResizeObserver loop" warnings through the window
+// error event; they are not real renderer errors, so don't record them.
+const BENIGN_ERROR_PATTERNS = [/ResizeObserver loop (?:completed with undelivered notifications|limit exceeded)/]
 function setupGlobalDiagnostics() {
   if (typeof window === "undefined") return
   const seen = new Set<string>()
   const report = (kind: string, error: unknown) => {
-    const key = `${kind}:${String(error).slice(0, 200)}`
+    const message = error instanceof Error ? error.message : String(error)
+    if (BENIGN_ERROR_PATTERNS.some((pattern) => pattern.test(message))) return
+    const key = `${kind}:${message.slice(0, 200)}`
     if (seen.has(key)) return
     seen.add(key)
     if (seen.size > 50) seen.clear()
@@ -94,6 +99,7 @@ const deepLinkEvent = "klautcode:deep-link"
 
 type DesktopWindowState = {
   id?: string
+  initialUrl?: string
 }
 
 const emitDeepLinks = (urls: string[]) => {
@@ -109,30 +115,58 @@ const listenForDeepLinks = () => {
   return window.api.onDeepLink((urls) => emitDeepLinks(urls))
 }
 
-function windowLastActiveUrlKey(windowID: string) {
+// The last-active-url must survive app quit, so it is committed through the
+// synchronous window-store IPC (the same path used for open tabs, whose async
+// writes would otherwise be dropped on teardown). DOM localStorage flushes
+// asynchronously and can lose the final navigation on quit/crash, which made
+// session restore flaky (boot to home instead of the last session).
+const LAST_ACTIVE_URL_KEY = "last-active-url"
+
+function windowLastActiveStore(windowID: string) {
+  const safe = (windowID || "browser").replace(/[^a-zA-Z0-9._-]/g, "-")
+  return `klautcode.window.${safe}.dat`
+}
+
+// Legacy key used by older builds (DOM localStorage); migrated on first read.
+function legacyLastActiveUrlKey(windowID: string) {
   return `klautcode.desktop.window.${windowID}.last-active-url`
 }
 
-function getLastActiveUrl(windowID: string) {
+function readLegacyLastActiveUrl(windowID: string) {
   if (typeof localStorage !== "object") return "/"
   try {
-    const value = localStorage.getItem(windowLastActiveUrlKey(windowID))
+    const value = localStorage.getItem(legacyLastActiveUrlKey(windowID))
     if (value?.startsWith("/") && !value.startsWith("//")) return value
   } catch {}
   return "/"
 }
 
-function setLastActiveUrl(windowID: string, value: string) {
-  if (typeof localStorage !== "object") return
+async function loadLastActiveUrl(windowID: string) {
   try {
-    localStorage.setItem(windowLastActiveUrlKey(windowID), value)
+    const value = await window.api.storeGet(windowLastActiveStore(windowID), LAST_ACTIVE_URL_KEY)
+    if (typeof value === "string" && value.startsWith("/") && !value.startsWith("//")) return value
   } catch {}
+  const legacy = readLegacyLastActiveUrl(windowID)
+  if (legacy !== "/") setLastActiveUrl(windowID, legacy)
+  return legacy
 }
 
-function DesktopMemoryRouter(props: BaseRouterProps & { windowID: string }) {
+function setLastActiveUrl(windowID: string, value: string) {
+  try {
+    window.api.storeSetSync(windowLastActiveStore(windowID), LAST_ACTIVE_URL_KEY, value)
+  } catch {}
+  // Keep the legacy DOM-localStorage key in sync so older builds (or a
+  // downgrade) still restore the same URL.
+  if (typeof localStorage === "object") {
+    try {
+      localStorage.setItem(legacyLastActiveUrlKey(windowID), value)
+    } catch {}
+  }
+}
+
+function DesktopMemoryRouter(props: BaseRouterProps & { windowID: string; initialUrl: string }) {
   const history = createMemoryHistory()
-  const initialUrl = getLastActiveUrl(props.windowID)
-  if (initialUrl !== "/") history.set({ value: initialUrl, replace: true, scroll: false })
+  if (props.initialUrl !== "/") history.set({ value: props.initialUrl, replace: true, scroll: false })
   onCleanup(history.listen((value) => setLastActiveUrl(props.windowID, value)))
   return <MemoryRouter {...props} history={history} />
 }
@@ -391,8 +425,12 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
 
   const [defaultServer] = createResource(() => platform.getDefaultServer?.())
   const [locale] = createResource(loadLocale)
-  const router = (props: BaseRouterProps) => (
-    <DesktopMemoryRouter {...props} windowID={platform.windowID ?? "browser"} />
+  const router = (routerProps: BaseRouterProps) => (
+    <DesktopMemoryRouter
+      {...routerProps}
+      windowID={platform.windowID ?? "browser"}
+      initialUrl={props.windowState.initialUrl ?? "/"}
+    />
   )
   const onboarding = Promise.withResolvers<void>()
 
@@ -517,7 +555,7 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
               startup={onboarding.promise}
               serverScoped={
                 <DesktopFirstLaunchOnboarding
-                  initialUrl={getLastActiveUrl(platform.windowID ?? "browser")}
+                  initialUrl={props.windowState.initialUrl ?? "/"}
                   onLoaded={onboarding.resolve}
                 />
               }
@@ -547,7 +585,8 @@ render(() => {
     const api = window.api as typeof window.api & {
       getWindowID?: () => Promise<string>
     }
-    return { id: await api.getWindowID?.() }
+    const id = (await api.getWindowID?.()) ?? "browser"
+    return { id, initialUrl: await loadLastActiveUrl(id) }
   })
 
   return (

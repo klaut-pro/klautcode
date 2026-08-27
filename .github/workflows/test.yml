@@ -74,6 +74,13 @@ jobs:
         working-directory: packages/client
         run: bun run check:generated
 
+      - name: Check desktop renderer build is fresh
+        if: runner.os == 'Linux'
+        working-directory: packages/desktop
+        run: |
+          bun x electron-vite build
+          bun run check:renderer-fresh
+
       - name: Run HttpApi exerciser gates
         if: runner.os == 'Linux'
         working-directory: packages/klautcode

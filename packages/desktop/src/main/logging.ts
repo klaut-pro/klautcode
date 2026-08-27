@@ -29,6 +29,7 @@ export function initLogging() {
     )
   log.initialize({ preload: false, spyRendererConsole: true })
   initConsoleTransport()
+  initBenignMessageFilter()
   cleanup()
   return (logger = log)
 }
@@ -186,6 +187,21 @@ async function writeZip(output: string, entries: Entry[]) {
   }
   const zip = await writer.close()
   writeFileSync(output, Buffer.from(await zip.arrayBuffer()))
+}
+
+// Chromium reports the benign "ResizeObserver loop" warning as an error-level
+// console message, which the renderer console spy forwards to the main log.
+// Drop it (and the renderer-side window-error handler filters the same events)
+// so diagnostics only contain real renderer errors.
+const BENIGN_PATTERNS = [/ResizeObserver loop (?:completed with undelivered notifications|limit exceeded)/]
+
+function initBenignMessageFilter() {
+  log.hooks.push((message, transport) => {
+    if (transport !== log.transports.file) return message
+    const text = (message.data ?? []).map(String).join(" ")
+    if (BENIGN_PATTERNS.some((pattern) => pattern.test(text))) return false
+    return message
+  })
 }
 
 function initConsoleTransport() {

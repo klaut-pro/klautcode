@@ -8,9 +8,6 @@ type LayoutMeasurement = {
   aligned: boolean
 }
 
-let layoutDiagnosticsEnabled = false
-let layoutCheckInterval: number | undefined
-
 export function collectStartupDiagnostics(snapshot: Record<string, unknown>) {
   const info = {
     timestamp: new Date().toISOString(),
@@ -35,48 +32,24 @@ export function collectStartupDiagnostics(snapshot: Record<string, unknown>) {
   return info
 }
 
+// Home-layout height sampling was removed: the home projects column is
+// intentionally sticky-capped (lg:max-h-[calc(100dvh-56px-16px)]) while the
+// sessions column scrolls, so the two heights are never equal by design and
+// the check only ever produced false positives on every home mount.
+// measureLayoutHeights remains for the manual `diagnostics.show` command.
 export function measureLayoutHeights(): LayoutMeasurement {
   if (typeof document === "undefined") return { sidebar: null, middle: null, right: null, delta: null, aligned: true }
-  const sidebar = document.querySelector<HTMLElement>("[data-component='home-projects']")?.getBoundingClientRect().height
-    ?? document.querySelector<HTMLElement>("aside")?.getBoundingClientRect().height ?? null
-  const middle = document.querySelector<HTMLElement>("[data-component='home-sessions']")?.getBoundingClientRect().height
-    ?? document.querySelector<HTMLElement>("section")?.getBoundingClientRect().height ?? null
+  // Only meaningful on the home page: both home regions must be present.
+  const sidebarEl = document.querySelector<HTMLElement>("[data-component='home-projects']")
+  const middleEl = document.querySelector<HTMLElement>("[data-component='home-sessions']")
+  if (!sidebarEl || !middleEl) return { sidebar: null, middle: null, right: null, delta: null, aligned: true }
+  const sidebar = sidebarEl.getBoundingClientRect().height
+  const middle = middleEl.getBoundingClientRect().height
   // Right sidebar is part of the chat view - approximate via grid container
   const grid = document.querySelector<HTMLElement>("[class*='grid-cols']")?.getBoundingClientRect().height ?? null
-  const delta = sidebar !== null && middle !== null ? Math.abs(sidebar - middle) : null
-  const aligned = delta === null ? true : delta < 8
+  const delta = Math.abs(sidebar - middle)
+  const aligned = delta < 8
   return { sidebar, middle, right: grid, delta, aligned }
-}
-
-export function startLayoutDiagnostics(intervalMs = 3000) {
-  if (layoutDiagnosticsEnabled) return
-  layoutDiagnosticsEnabled = true
-  let lastDelta: number | null = null
-  layoutCheckInterval = window.setInterval(() => {
-    const m = measureLayoutHeights()
-    if (m.delta === null || m.aligned) return
-    if (lastDelta !== null && Math.abs(m.delta - lastDelta) < 2) return
-    lastDelta = m.delta
-    console.warn("[diagnostics] layout height mismatch", m)
-    try {
-      const api = (window as unknown as { api?: { recordFatalRendererError?: (p: unknown) => Promise<void> } }).api
-      void api?.recordFatalRendererError?.({
-        error: `[diagnostics] layout mismatch: ${JSON.stringify(m, null, 2)}`,
-        url: location.href,
-        version: "diagnostic",
-        platform: "desktop",
-        os: undefined,
-      } as never)
-    } catch {}
-  }, intervalMs)
-}
-
-export function stopLayoutDiagnostics() {
-  if (layoutCheckInterval !== undefined) {
-    clearInterval(layoutCheckInterval)
-    layoutCheckInterval = undefined
-  }
-  layoutDiagnosticsEnabled = false
 }
 
 export function setupGlobalDiagnostics() {
