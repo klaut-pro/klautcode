@@ -37,7 +37,14 @@ import { MenuV2 } from "@klautcode/ui/v2/menu-v2"
 const reviewTabID = "session-side-panel-review-tab"
 const reviewTabPanelID = "session-side-panel-review-tabpanel"
 const fileBrowserTabPanelID = "session-side-panel-file-browser-tabpanel"
-import { SessionContextTab, SortableTab, SortableTabV2, FileVisual } from "@/components/session"
+import {
+  SessionContextTab,
+  SortableTab,
+  SortableTabV2,
+  FileVisual,
+  BrowserVisual,
+  MarkdownVisual,
+} from "@/components/session"
 import { OpenInAppV2 } from "@/components/session/open-in-app-v2"
 import { useCommand } from "@/context/command"
 import { useFile, type SelectedLineRange } from "@/context/file"
@@ -626,12 +633,19 @@ export function SessionSidePanel(props: {
                         <DragOverlay>
                           <Show when={store.activeDraggable} keyed>
                             {(tab) => {
-                              const path = file.pathFromTab(tab)
+                              const content = createMemo(() => {
+                                const value = file.pathFromTab(tab)
+                                if (value) return <FileVisual active path={value} temporary={temporaryTab() === tab} />
+                                if (browserUrlFromTab(tab))
+                                  return <BrowserVisual tab={tab} active temporary={temporaryTab() === tab} />
+                                const markdown = markdownPathFromTab(tab)
+                                if (markdown)
+                                  return <MarkdownVisual path={markdown} active temporary={temporaryTab() === tab} />
+                                return
+                              })
                               return (
                                 <div data-component="tabs-drag-preview">
-                                  <Show when={path}>
-                                    {(p) => <FileVisual active path={p()} temporary={temporaryTab() === tab} />}
-                                  </Show>
+                                  <Show when={content()}>{(value) => value()}</Show>
                                 </div>
                               )
                             }}

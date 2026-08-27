@@ -760,10 +760,16 @@ body[data-new-layout] #review-panel [data-component="tabs"][data-variant="normal
       color: var(--v2-text-text-base);
     }
 
+    /*
+      Keep tab icons flush inside the trigger: the trigger has zero
+      padding in this compact variant, so a negative margin pushes the
+      icon outside the tab button and clips its left edge (e.g. the
+      browser tab's monitor icon looking "cut" at the pill edge).
+    */
     .tab-fileicon-color,
     .tab-fileicon-mono,
     [data-slot="icon-svg"] {
-      margin-inline-start: -2px;
+      margin-inline-start: 0;
     }
   }
 

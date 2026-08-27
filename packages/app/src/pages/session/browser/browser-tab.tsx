@@ -37,6 +37,16 @@ function normalizeUrl(input: string): string | undefined {
   return `https://${trimmed}`
 }
 
+// The guest normalizes URLs (adds a trailing slash, lowercases the host), so
+// compare loosely when deciding whether a load is redundant.
+function comparableUrl(url: string): string {
+  return url.trim().replace(/\/+$/, "").toLowerCase()
+}
+function sameUrl(a: string | undefined, b: string | undefined): boolean {
+  if (!a || !b) return a === b
+  return comparableUrl(a) === comparableUrl(b)
+}
+
 function logBrowser(event: string, data?: Record<string, unknown>) {
   // Serialize to a single JSON string: electron-log's renderer console spy
   // stringifies object args to "[object Object]", losing the size data.
@@ -92,13 +102,28 @@ function logChainHeights(origin: HTMLElement | undefined, tab: string, state: st
 function openWebviewUrl(webview: WebviewTag, url: string, tab: string) {
   if (!webview || !url) return
   logBrowser("load", { tab, url, src: webview.src })
+  const onReject = (error: unknown) => {
+    const message = String(error)
+    if (message.includes("-3") || message.includes("ERR_ABORTED") || sameUrl(url, webview.src)) {
+      // The guest is already navigating to this URL (the src attribute or an
+      // earlier loadURL started it); the redundant call is aborted with -3.
+      logBrowser("loadURL redundant, navigation already in flight", { tab, url, error: message })
+      return
+    }
+    logBrowser("loadURL failed, falling back to src", { tab, url, error: message })
+    webview.src = url
+  }
   try {
-    void webview.loadURL(url).catch((error) => {
-      logBrowser("loadURL failed, falling back to src", { tab, url, error: String(error) })
-      webview.src = url
-    })
+    void webview.loadURL(url).catch(onReject)
   } catch (error) {
-    logBrowser("loadURL threw, falling back to src", { tab, url, error: String(error) })
+    const message = String(error)
+    if (message.includes("must be attached")) {
+      // Guest not attached yet (still being created); the dom-ready or
+      // visibility-recovery path drives this load instead.
+      logBrowser("loadURL deferred, guest not attached", { tab, url, error: message })
+      return
+    }
+    logBrowser("loadURL threw, falling back to src", { tab, url, error: message })
     webview.src = url
   }
 }
@@ -123,6 +148,26 @@ export function BrowserTab(props: { tab: string }) {
   let loadedUrl: string | undefined
   let guestReady = false
   let pendingUrl: string | undefined
+  // A guest created while its host is hidden (display:none ancestor) paints at
+  // 1x1 and never repaints when the panel is shown; defer loads until visible.
+  let hostVisible = false
+
+  const safeGuestUrl = () => {
+    if (!webview) return ""
+    try {
+      return webview.getURL() ?? ""
+    } catch {
+      return ""
+    }
+  }
+  const safeGuestTitle = () => {
+    if (!webview) return ""
+    try {
+      return webview.getTitle() ?? ""
+    } catch {
+      return ""
+    }
+  }
 
   const load = (url: string) => {
     if (!webview) {
@@ -131,6 +176,10 @@ export function BrowserTab(props: { tab: string }) {
       return
     }
     pendingUrl = url
+    if (!hostVisible) {
+      logBrowser("defer load until visible", { tab: props.tab, url, ...webviewSnapshot(ref, webview) })
+      return
+    }
     if (!guestReady) {
       if (loadedUrl === undefined) {
         loadedUrl = url
@@ -145,6 +194,19 @@ export function BrowserTab(props: { tab: string }) {
     openWebviewUrl(webview, url, props.tab)
   }
 
+  const drivePendingLoad = () => {
+    if (!webview || !hostVisible) return
+    if (!pendingUrl || pendingUrl === "about:blank") return
+    const current = safeGuestUrl()
+    const neverNavigated = !current || current === "about:blank"
+    // Load if the guest never navigated (the initial src can be dropped while
+    // the guest is created) or if the pending URL differs from what the guest
+    // actually loaded (the browser normalizes URLs, e.g. adds a trailing slash).
+    if (neverNavigated || !sameUrl(pendingUrl, loadedUrl)) {
+      load(pendingUrl)
+    }
+  }
+
   const recordVisit = (url: string) => {
     if (!url || url === "about:blank") return
     layout.browser.set(props.tab, { url })
@@ -152,9 +214,10 @@ export function BrowserTab(props: { tab: string }) {
   }
 
   const syncTitle = () => {
-    if (!webview || !guestReady) return
-    const title = webview.getTitle()
-    layout.browser.set(props.tab, { url: webview.getURL() || store.input, title: title || undefined })
+    if (!webview || !guestReady || !hostVisible) return
+    const url = safeGuestUrl()
+    const title = safeGuestTitle()
+    layout.browser.set(props.tab, { url: url || store.input, title: title || undefined })
   }
 
   onMount(() => {
@@ -178,11 +241,19 @@ export function BrowserTab(props: { tab: string }) {
         syncPending = false
         try {
           const size = sizeWebviewToHost(ref, el)
+          fitGuestFrame(size.width, size.height)
           logBrowser("resize", { tab, ...size, ...webviewSnapshot(ref, el) })
           const isCollapsed = size.width < 2 || size.height < 2
-          if (isCollapsed !== collapsed) {
+          const wasVisible = hostVisible
+          hostVisible = !isCollapsed
+          if (hostVisible !== wasVisible) {
             collapsed = isCollapsed
             logChainHeights(ref, tab, isCollapsed ? "collapsed" : "recovered")
+          }
+          if (hostVisible && !wasVisible) {
+            // The host just became visible; start any load that was deferred
+            // while it was hidden so the guest paints at full size.
+            drivePendingLoad()
           }
           return size
         } catch (error) {
@@ -192,7 +263,23 @@ export function BrowserTab(props: { tab: string }) {
     }
     ref.appendChild(el)
     webview = el
+    // Electron renders <webview> as a shadow-root <iframe> that stretches to
+    // the host only when the host is a flex container (the shadow's own
+    // `:host { display: flex }` rule). Our inline `display: block` above
+    // (needed so the guest doesn't collapse under flex + overflow-hidden
+    // ancestors) overrides that, so the frame's height falls back to
+    // Chromium's 150px replaced-element default and the page gets squeezed
+    // into the top 150px of the panel. Size the guest frame in pixels to
+    // match the host instead. Guarded: without a frame (older Electron, or
+    // the frame not created yet) this is a no-op and behavior is unchanged.
+    const fitGuestFrame = (width: number, height: number) => {
+      const frame = el.shadowRoot?.querySelector("iframe")
+      if (!frame) return
+      frame.style.width = `${width}px`
+      frame.style.height = `${height}px`
+    }
     syncBox()
+    fitGuestFrame(ref.getBoundingClientRect().width, ref.getBoundingClientRect().height)
     const observer = new ResizeObserver(syncBox)
     observer.observe(ref)
 
@@ -200,7 +287,7 @@ export function BrowserTab(props: { tab: string }) {
     pendingUrl = initialUrl()
 
     const onNavigate = () => {
-      const url = webview?.getURL?.() ?? ""
+      const url = safeGuestUrl()
       logBrowser("navigate", { tab, url, ...webviewSnapshot(ref, el) })
       if (url) {
         loadedUrl = url
@@ -214,7 +301,7 @@ export function BrowserTab(props: { tab: string }) {
       setStore("loading", true)
     }
     const onLoadingStop = () => {
-      logBrowser("loading-stop", { tab, url: el.getURL?.() ?? el.src, ...webviewSnapshot(ref, el) })
+      logBrowser("loading-stop", { tab, url: safeGuestUrl() || el.src, ...webviewSnapshot(ref, el) })
       setStore("loading", false)
       if (guestReady) syncTitle()
     }
@@ -241,11 +328,15 @@ export function BrowserTab(props: { tab: string }) {
     const onDomReady = () => {
       guestReady = true
       logBrowser("dom-ready", { tab, pendingUrl, ...webviewSnapshot(ref, el) })
-      if (pendingUrl && pendingUrl !== loadedUrl) load(pendingUrl)
+      // Setting `src` before the guest finished creating can be dropped, leaving
+      // the guest on about:blank; and a guest loaded while its host is hidden
+      // paints at 1x1 and never repaints. Drive the pending load now that the
+      // guest exists and the host is (or becomes) visible.
+      drivePendingLoad()
       syncBox()
     }
     const onFinish = () => {
-      logBrowser("finish-load", { tab, url: el.getURL?.() ?? el.src, ...webviewSnapshot(ref, el) })
+      logBrowser("finish-load", { tab, url: safeGuestUrl() || el.src, ...webviewSnapshot(ref, el) })
     }
 
     el.addEventListener("dom-ready", onDomReady)
@@ -282,7 +373,7 @@ export function BrowserTab(props: { tab: string }) {
   createEffect(() => {
     if (!webview || platform.platform !== "desktop") return
     const url = layout.browser.get(props.tab)?.url
-    if (url && url !== loadedUrl) {
+    if (url && !sameUrl(url, loadedUrl)) {
       logBrowser("store url changed", { tab: props.tab, url, loadedUrl })
       load(url)
     }
@@ -419,11 +510,16 @@ export function BrowserTab(props: { tab: string }) {
           </div>
         }
       >
-        <div
-          ref={ref}
-          class={BROWSER_WEBVIEW_HOST_CLASS}
-          data-component="browser-webview"
-        >
+        <div class="relative flex min-h-0 flex-1 flex-col">
+          <div
+            ref={ref}
+            class={BROWSER_WEBVIEW_HOST_CLASS}
+            data-component="browser-webview"
+          />
+          {/* The loading overlay must not live inside the host div: toggling it
+              (loading -> loaded) makes Solid clear the host's children, which
+              also detaches the imperatively-appended <webview> element and
+              leaves the browser blank. Overlay the host from a sibling. */}
           <Show when={store.loading}>
             <div
               class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background-base"
