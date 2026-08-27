@@ -19,7 +19,7 @@ export function classifyUpdaterError(message: string): "unreachable" | "missing-
     return "missing-artifacts"
   }
   if (
-    /fetch failed|enotfound|econnrefused|econnreset|etimedout|getaddrinfo|network unreachable|net::err|timed out|too many requests|rate limit|http 5\d\d| 50[234] | 403 /i.test(
+    /fetch failed|enotfound|econnrefused|econnreset|etimedout|getaddrinfo|network unreachable|net::err|timed out|too many requests|rate limit|httperror|http error|http 5\d\d| 50[234] | 403 |\b404\b/i.test(
       message,
     )
   ) {

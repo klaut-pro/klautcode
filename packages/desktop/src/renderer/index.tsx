@@ -14,7 +14,6 @@ import {
   useCommand,
   useWslServers,
   useLanguage,
-  UpdaterNotice,
 } from "@klautcode/app"
 import type { UpdaterState } from "@klautcode/app/updater"
 import * as Sentry from "@sentry/solid"
@@ -562,7 +561,6 @@ function DesktopRoot(props: { windowState: DesktopWindowState }) {
               }
             >
               <Inner />
-              <UpdaterNotice />
             </AppInterface>
           )}
         </Show>
