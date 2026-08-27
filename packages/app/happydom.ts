@@ -1,6 +1,21 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator"
 
 GlobalRegistrator.register()
+// bun test resolves `solid-js/web` via the `node` condition to the SSR build
+// (dist/server.js), which does not export `use`. Several Solid-ecosystem
+// packages (solid-dnd, solid-sonner) import `use` unconditionally, so any test
+// whose module graph includes them fails to load with "Export named 'use' not
+// found". Map the specifier to the development build (dist/dev.js), which
+// exports `use` plus the SSR render functions, so those graphs can load.
+import { mock } from "bun:test"
+
+mock.module("solid-js/web", async () => {
+  const mod = await import(
+    "../../node_modules/.bun/solid-js@1.9.10/node_modules/solid-js/web/dist/dev.js"
+  )
+  return { ...mod }
+})
+
 
 const originalGetContext = HTMLCanvasElement.prototype.getContext
 // @ts-expect-error - we're overriding with a simplified mock
