@@ -426,7 +426,10 @@ jobs:
       - build-cli
       - sign-cli-windows
       - build-electron
-    if: always() && !failure() && !cancelled()
+    # Publish whatever built: a single flaky platform (e.g. a Windows bun
+    # cache race) must not block attaching the artifacts that succeeded.
+    # The upload step fails loudly when nothing was built at all.
+    if: always() && !cancelled()
     runs-on: ubuntu-24.04
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
