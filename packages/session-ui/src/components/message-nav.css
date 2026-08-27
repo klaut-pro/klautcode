@@ -72,7 +72,7 @@
 }
 
 [data-slot="message-nav-title-preview"] {
-  font-size: 14px; /* text-14-regular */
+  font-size: calc(14px * var(--font-size-scale)); /* text-14-regular */
   color: var(--text-base);
   white-space: nowrap;
   overflow: hidden;

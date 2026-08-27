@@ -83,7 +83,7 @@ function Stage(props: { count: number }) {
           data-dock-border-underlay={v2() ? "v2" : "legacy"}
           style={{ position: "relative", "z-index": 70, "margin-top": "-18px" }}
           classList={{
-            "min-h-24 w-full rounded-[12px] px-4 py-3 text-[13px]": true,
+            "min-h-24 w-full rounded-[12px] px-4 py-3 text-(--font-size-base)": true,
             "bg-v2-background-bg-base text-v2-text-text-faint": v2(),
             "text-text-weak": !v2(),
           }}
@@ -92,7 +92,7 @@ function Stage(props: { count: number }) {
         </DockShell>
       </div>
 
-      <div class="text-[12px] text-v2-text-text-faint">
+      <div class="text-(--font-size-small) text-v2-text-text-faint">
         Restored so far:{" "}
         <For each={seed()}>
           {(item) => <span>{store.items.some((current) => current.id === item.id) ? "" : `“${item.text}” `}</span>}

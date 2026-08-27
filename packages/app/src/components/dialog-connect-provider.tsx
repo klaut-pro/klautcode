@@ -122,7 +122,7 @@ export const DialogConnectProvider: Component<{
     >
       <DialogV2
         containerClass="!h-[min(calc(100vh_-_16px),512px)] !w-[min(calc(100vw_-_16px),640px)]"
-        class="[font-family:var(--v2-font-family-sans)] [&_[data-slot=dialog-header]]:!px-5 [&_[data-slot=dialog-header-title]]:!text-[15px] [&_[data-slot=dialog-header-title]]:!tracking-[-0.13px]"
+        class="[font-family:var(--v2-font-family-sans)] [&_[data-slot=dialog-header]]:!px-5 [&_[data-slot=dialog-header-title]]:!text-(--font-size-large) [&_[data-slot=dialog-header-title]]:!tracking-[-0.13px]"
       >
         <DialogHeader closeLabel={language.t("common.close")}>
           <Show
@@ -318,7 +318,7 @@ function ProviderPickerV2(props: {
             {(group) => (
               <Show when={group.items().length > 0}>
                 <section class="flex flex-col">
-                  <div class="px-3 pb-2 text-[13px] font-[440] leading-none tracking-[-0.04px] text-v2-text-text-muted">
+                  <div class="px-3 pb-2 text-(--font-size-base) font-[440] leading-none tracking-[-0.04px] text-v2-text-text-muted">
                     {group.title}
                   </div>
                   <For each={group.items()}>
@@ -326,7 +326,7 @@ function ProviderPickerV2(props: {
                       <button
                         type="button"
                         data-provider-id={provider.id}
-                        class="flex min-h-9 w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-[13px] leading-none tracking-[-0.04px] hover:bg-v2-overlay-simple-overlay-hover focus:bg-v2-overlay-simple-overlay-hover focus:outline-none"
+                        class="flex min-h-9 w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-(--font-size-base) leading-none tracking-[-0.04px] hover:bg-v2-overlay-simple-overlay-hover focus:bg-v2-overlay-simple-overlay-hover focus:outline-none"
                         classList={{ "bg-v2-overlay-simple-overlay-hover": store.active === provider.id }}
                         onMouseEnter={() => setStore("active", provider.id)}
                         disabled={store.connecting !== undefined}
@@ -343,12 +343,12 @@ function ProviderPickerV2(props: {
                                 : "dialog.provider.opencodeGo.tagline",
                             )}
                           </span>
-                          <span class="flex h-4 shrink-0 items-center rounded-xs border-[0.5px] border-v2-border-border-base bg-v2-background-bg-layer-03 px-1 text-[11px] font-[530] leading-none tracking-[0.05px] text-v2-text-text-muted">
+                          <span class="flex h-4 shrink-0 items-center rounded-xs border-[0.5px] border-v2-border-border-base bg-v2-background-bg-layer-03 px-1 text-(--font-size-x-small) font-[530] leading-none tracking-[0.05px] text-v2-text-text-muted">
                             {language.t("dialog.provider.tag.recommended")}
                           </span>
                         </Show>
                         <Show when={provider.id === CUSTOM_ID}>
-                          <span class="flex h-4 shrink-0 items-center rounded-xs border-[0.5px] border-v2-border-border-base bg-v2-background-bg-layer-03 px-1 text-[11px] font-[530] leading-none tracking-[0.05px] text-v2-text-text-muted">
+                          <span class="flex h-4 shrink-0 items-center rounded-xs border-[0.5px] border-v2-border-border-base bg-v2-background-bg-layer-03 px-1 text-(--font-size-x-small) font-[530] leading-none tracking-[0.05px] text-v2-text-text-muted">
                             {language.t("settings.providers.tag.custom")}
                           </span>
                         </Show>
@@ -363,7 +363,7 @@ function ProviderPickerV2(props: {
             )}
           </For>
           <Show when={rows().length === 0}>
-            <div class="flex h-24 items-center justify-center text-[13px] font-[440] text-v2-text-text-muted">
+            <div class="flex h-24 items-center justify-center text-(--font-size-base) font-[440] text-v2-text-text-muted">
               {language.t("dialog.provider.empty")}
             </div>
           </Show>
@@ -737,7 +737,7 @@ function ProviderConnection(props: {
     if (newLayout())
       return (
         <div class="flex flex-col gap-2">
-          <div class="px-3 text-[13px] font-[440] leading-5 tracking-[-0.04px] text-v2-text-text-muted">
+          <div class="px-3 text-(--font-size-base) font-[440] leading-5 tracking-[-0.04px] text-v2-text-text-muted">
             {language.t("provider.connect.selectMethod", { provider: provider().name })}
           </div>
           <div class="flex flex-col">
@@ -747,7 +747,7 @@ function ProviderConnection(props: {
                 return (
                   <button
                     type="button"
-                    class="group flex h-9 w-full items-center gap-2 rounded-md px-3 text-left text-[13px] leading-5 tracking-[-0.04px] hover:bg-v2-overlay-simple-overlay-hover focus-visible:bg-v2-overlay-simple-overlay-hover focus-visible:outline-none"
+                    class="group flex h-9 w-full items-center gap-2 rounded-md px-3 text-left text-(--font-size-base) leading-5 tracking-[-0.04px] hover:bg-v2-overlay-simple-overlay-hover focus-visible:bg-v2-overlay-simple-overlay-hover focus-visible:outline-none"
                     onClick={() => void selectMethod(index())}
                   >
                     <span class="flex h-2 w-4 shrink-0 items-center justify-center rounded-[1px] bg-v2-background-bg-base shadow-[var(--v2-elevation-button-neutral)]">
@@ -833,7 +833,7 @@ function ProviderConnection(props: {
 
     if (newLayout())
       return (
-        <div class="flex flex-col gap-5 px-3 text-[13px] font-[440] leading-5 tracking-[-0.04px] text-v2-text-text-muted">
+        <div class="flex flex-col gap-5 px-3 text-(--font-size-base) font-[440] leading-5 tracking-[-0.04px] text-v2-text-text-muted">
           <Show
             when={provider().id === "klautcode"}
             fallback={language.t("provider.connect.apiKey.description", { provider: provider().name })}
@@ -971,7 +971,7 @@ function ProviderConnection(props: {
 
     if (newLayout())
       return (
-        <div class="flex flex-col gap-5 px-3 text-[13px] font-[440] leading-5 tracking-[-0.04px] text-v2-text-text-muted">
+        <div class="flex flex-col gap-5 px-3 text-(--font-size-base) font-[440] leading-5 tracking-[-0.04px] text-v2-text-text-muted">
           <div>
             {language.t("provider.connect.oauth.code.visit.prefix")}
             <ExternalLink href={store.authorization!.url} class="text-v2-text-text-base">
@@ -1116,7 +1116,7 @@ function ProviderConnection(props: {
         <div
           class={
             newLayout()
-              ? "text-[15px] font-[530] leading-5 tracking-[-0.13px] text-v2-text-text-base"
+              ? "text-(--font-size-large) font-[530] leading-5 tracking-[-0.13px] text-v2-text-text-base"
               : "text-16-medium text-text-strong"
           }
         >

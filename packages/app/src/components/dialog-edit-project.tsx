@@ -60,7 +60,7 @@ export function DialogEditProject(props: { project: LocalProject; server: Server
                         <Avatar
                           fallback={model.store.name || model.defaultName()}
                           {...getAvatarColors(model.store.color)}
-                          class="size-full text-[32px]"
+                          class="size-full text-[calc(32px*var(--font-size-scale))]"
                         />
                       </div>
                     }

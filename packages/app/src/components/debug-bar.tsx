@@ -82,7 +82,7 @@ function Cell(props: {
       >
         <div
           classList={{
-            "text-[10px] leading-none font-black uppercase tracking-[0.04em] opacity-70": true,
+            "text-[calc(10px*var(--font-size-scale))] leading-none font-black uppercase tracking-[0.04em] opacity-70": true,
           }}
         >
           {props.label}
@@ -90,8 +90,8 @@ function Cell(props: {
         <div
           classList={{
             "uppercase leading-none font-bold tabular-nums": true,
-            "text-[11px]": !!props.inline,
-            "text-[13px] sm:text-[14px]": !props.inline,
+            "text-(--font-size-x-small)": !!props.inline,
+            "text-(--font-size-base) sm:text-[calc(14px*var(--font-size-scale))]": !props.inline,
             "text-text-on-critical-base": !!props.bad,
             "opacity-70": !!props.dim,
           }}
@@ -145,8 +145,8 @@ function ToggleCell(props: {
           "flex-col items-center": !props.inline,
         }}
       >
-        <span class="text-[10px] leading-none font-black tracking-[0.04em] opacity-70">{props.label}</span>
-        <span class="text-[11px] leading-none font-bold">{props.value}</span>
+        <span class="text-[calc(10px*var(--font-size-scale))] leading-none font-black tracking-[0.04em] opacity-70">{props.label}</span>
+        <span class="text-(--font-size-x-small) leading-none font-bold">{props.value}</span>
       </span>
     </button>
   )

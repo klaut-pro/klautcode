@@ -92,7 +92,7 @@
     flex-shrink: 0;
     max-width: 100%;
     height: 20px;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     font-weight: 530;
     line-height: 20px;
     letter-spacing: -0.04px;
@@ -106,7 +106,7 @@
     justify-content: center;
     flex-shrink: 0;
     height: 20px;
-    font-size: 11px;
+    font-size: var(--font-size-x-small);
     font-weight: 530;
     line-height: 20px;
     letter-spacing: 0.05px;
@@ -124,7 +124,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     font-weight: 440;
     line-height: 20px;
     letter-spacing: -0.04px;
@@ -142,7 +142,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     font-weight: 440;
     line-height: 20px;
     letter-spacing: -0.04px;
@@ -183,7 +183,7 @@
 
   [data-slot="tool-error-card-suffix"] {
     padding: 0 0 0 24px;
-    font-size: 13px;
+    font-size: var(--font-size-base);
     font-weight: 440;
     line-height: 1;
     letter-spacing: -0.04px;

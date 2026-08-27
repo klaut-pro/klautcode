@@ -104,7 +104,7 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                         <span
                           class="whitespace-nowrap"
                           classList={{
-                            "text-[13px] leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
+                            "text-(--font-size-base) leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
                               props.newLayoutDesigns,
                             "text-v2-text-text-base": props.newLayoutDesigns,
                             "text-14-regular": !props.newLayoutDesigns,
@@ -134,7 +134,7 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                         <div
                           class="flex items-center min-w-0"
                           classList={{
-                            "text-[13px] leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
+                            "text-(--font-size-base) leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
                               props.newLayoutDesigns,
                             "text-14-regular": !props.newLayoutDesigns,
                           }}
@@ -180,7 +180,7 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                         <div
                           class="flex items-center min-w-0"
                           classList={{
-                            "text-[13px] leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
+                            "text-(--font-size-base) leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
                               props.newLayoutDesigns,
                             "text-14-regular": !props.newLayoutDesigns,
                           }}
@@ -225,7 +225,7 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                       <div
                         class="flex items-center min-w-0"
                         classList={{
-                          "text-[13px] leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
+                          "text-(--font-size-base) leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
                             props.newLayoutDesigns,
                           "text-14-regular": !props.newLayoutDesigns,
                         }}
@@ -268,7 +268,7 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                   onMouseDown={(event) => event.stopPropagation()}
                   aria-label={props.t("prompt.menu.commands")}
                   placeholder="/"
-                  class="w-full bg-transparent outline-none text-[13px] leading-5 text-v2-text-text-base placeholder:text-v2-text-text-faint"
+                  class="w-full bg-transparent outline-none text-(--font-size-base) leading-5 text-v2-text-text-base placeholder:text-v2-text-text-faint"
                 />
               </div>
             </Show>
@@ -307,7 +307,7 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                         <span
                           class="whitespace-nowrap"
                           classList={{
-                            "text-[13px] leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
+                            "text-(--font-size-base) leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
                               props.newLayoutDesigns,
                             "text-v2-text-text-base": props.newLayoutDesigns,
                             "text-14-regular": !props.newLayoutDesigns,
@@ -320,7 +320,7 @@ export const PromptPopover: Component<PromptPopoverProps> = (props) => {
                           <span
                             class="truncate"
                             classList={{
-                              "text-[13px] leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
+                              "text-(--font-size-base) leading-[calc(var(--font-size-base)*1.8)] tracking-[-0.04px] [font-weight:440]":
                                 props.newLayoutDesigns,
                               "text-v2-text-text-muted": props.newLayoutDesigns,
                               "text-14-regular": !props.newLayoutDesigns,

@@ -73,7 +73,7 @@
   align-items: center;
   gap: 6px;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--text-strong, var(--v2-text-text-base));
 }
@@ -239,7 +239,7 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--text-strong, var(--v2-text-text-base));
 }
@@ -256,7 +256,7 @@
   font-family: var(--v2-font-family-sans);
   font-style: normal;
   font-weight: 440;
-  font-size: 11px;
+  font-size: var(--font-size-x-small);
   line-height: 100%;
   letter-spacing: 0.05px;
   text-transform: uppercase;
@@ -374,7 +374,7 @@
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: var(--font-size-x-small);
   font-weight: 530;
   line-height: 1;
   letter-spacing: -0.04px;
@@ -396,7 +396,7 @@
 
 [data-component="session-review-v2"] [data-slot="session-review-v2-file-name"] {
   flex: none;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 1;
   letter-spacing: -0.04px;
@@ -407,7 +407,7 @@
 
 [data-component="session-review-v2"] [data-slot="session-review-v2-file-path"] {
   flex: none;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 1;
   letter-spacing: -0.04px;
@@ -469,7 +469,7 @@
 
 [data-slot="session-review-v2-empty-no-git-title"] {
   flex: none;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 100%;
   letter-spacing: -0.04px;
@@ -480,7 +480,7 @@
   flex: none;
   margin: 0 0 4px;
   max-width: 360px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 20px;
   text-align: center;
@@ -508,7 +508,7 @@
 [data-slot="session-review-v2-empty-changes-title"] {
   flex: none;
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 530;
   line-height: 100%;
   letter-spacing: -0.04px;
@@ -518,7 +518,7 @@
 [data-slot="session-review-v2-empty-changes-description"] {
   flex: none;
   max-width: 282px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 440;
   line-height: 20px;
   text-align: center;
