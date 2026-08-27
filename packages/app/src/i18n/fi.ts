@@ -944,6 +944,7 @@ export const dict = {
   "settings.updates.action.installing": "Asennetaan...",
   "settings.updates.toast.latest.title": "Olet ajan tasalla",
   "settings.updates.toast.latest.description": "Käytät Klautcoden uusinta versiota.",
+  "settings.updates.toast.missingArtifacts": "Uusimmassa julkaisussa ei ole vielä päivitystä tälle alustalle.",
   "sound.option.none": "Ei mitään",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

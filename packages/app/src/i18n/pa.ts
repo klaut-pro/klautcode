@@ -1047,6 +1047,7 @@ export const dict = {
   "settings.updates.action.installing": "انسٹال کر رہیا اے...",
   "settings.updates.toast.latest.title": "تسی تازہ ترین او",
   "settings.updates.toast.latest.description": "تسی Klautcode دا تازہ ترین ورژن چلا رئے او۔",
+  "settings.updates.toast.missingArtifacts": "ਤਾਜ਼ਾ ਰੀਲੀਜ਼ ਵਿੱਚ ਅਜੇ ਤੱਕ ਇਸ ਪਲੇਟਫਾਰਮ ਲਈ ਕੋਈ ਅੱਪਡੇਟ ਨਹੀਂ ਹੈ।",
   "sound.option.none": "کوئی نئیں",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

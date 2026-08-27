@@ -1059,6 +1059,7 @@ export const dict = {
   "settings.updates.action.installing": "އިންސްޓޯލް ކުރަމުން...",
   "settings.updates.toast.latest.title": "ޔޫ އާ އަޕް ޓު ޑޭޓް",
   "settings.updates.toast.latest.description": "ތިޔަ ހިންގަނީ Klautcode ގެ އެންމެ ފަހުގެ ވަރޝަން އެވެ.",
+  "settings.updates.toast.missingArtifacts": "އެންމެ ފަހުގެ ރިލީޒްގައި މި ޕްލެޓްފޯމަށް އަދި އަޕްޑޭޓެއް ނެތެވެ.",
   "sound.option.none": "އެއްޗެއްނޫން",
   "sound.option.alert01": "އެލާޓް 01",
   "sound.option.alert02": "އެލާޓް 02",

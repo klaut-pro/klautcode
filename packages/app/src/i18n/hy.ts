@@ -1049,6 +1049,7 @@ export const dict = {
   "settings.updates.action.installing": "Տեղադրվում է...",
   "settings.updates.toast.latest.title": "Դուք արդի եք",
   "settings.updates.toast.latest.description": "Դուք օգտագործում եք Klautcode-ի վերջին տարբերակը։",
+  "settings.updates.toast.missingArtifacts": "Վերջին թողարկումը դեռևս թարմացում չունի այս հարթակի համար։",
   "sound.option.none": "Ոչ մեկը",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

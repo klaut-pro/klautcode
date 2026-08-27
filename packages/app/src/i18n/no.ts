@@ -862,6 +862,7 @@ export const dict = {
   "settings.updates.action.checking": "Sjekker...",
   "settings.updates.toast.latest.title": "Klautcode er oppdatert",
   "settings.updates.toast.latest.description": "Du bruker den nyeste versjonen av Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Den nyeste utgivelsen har ennå ingen oppdatering for denne plattformen.",
   "sound.option.none": "Ingen",
   "sound.option.alert01": "Varsel 01",
   "sound.option.alert02": "Varsel 02",

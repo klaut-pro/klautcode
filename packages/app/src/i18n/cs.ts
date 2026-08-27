@@ -1052,6 +1052,7 @@ export const dict = {
   "settings.updates.action.installing": "Instalace...",
   "settings.updates.toast.latest.title": "Jste aktuální",
   "settings.updates.toast.latest.description": "Používáte nejnovější verzi Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Nejnovější vydání zatím nemá aktualizaci pro tuto platformu.",
   "sound.option.none": "žádný",
   "sound.option.alert01": "Upozornění 01",
   "sound.option.alert02": "Upozornění 02",

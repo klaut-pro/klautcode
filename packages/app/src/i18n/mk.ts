@@ -1052,6 +1052,7 @@ export const dict = {
   "settings.updates.action.installing": "Се инсталира...",
   "settings.updates.toast.latest.title": "Ажуриран си",
   "settings.updates.toast.latest.description": "Ја извршувате најновата верзија на Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Најновото издание сè уште нема ажурирање за оваа платформа.",
   "sound.option.none": "Никој",
   "sound.option.alert01": "Аларм 01",
   "sound.option.alert02": "Аларм 02",

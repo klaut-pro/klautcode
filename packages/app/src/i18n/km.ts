@@ -1037,6 +1037,7 @@ export const dict = {
   "settings.updates.action.installing": "កំពុងដំឡើង...",
   "settings.updates.toast.latest.title": "អ្នកទាន់សម័យហើយ។",
   "settings.updates.toast.latest.description": "អ្នកកំពុងដំណើរការកំណែចុងក្រោយបំផុតនៃ Klautcode ។",
+  "settings.updates.toast.missingArtifacts": "ការចេញផ្សាយចុងក្រោយមិនទាន់មានការអាប់ដេតសម្រាប់វេទិកានេះទេ។",
   "sound.option.none": "គ្មានទេ។",
   "sound.option.alert01": "ដាស់តឿន ០១",
   "sound.option.alert02": "ដាស់តឿន ០២",

@@ -1040,6 +1040,7 @@ export const dict = {
   "settings.updates.action.installing": "Seta upp...",
   "settings.updates.toast.latest.title": "Tú ert dagførdur",
   "settings.updates.toast.latest.description": "Tú koyrir nýggjastu útgávuna av Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Hin seinasta útgávan hevur enn onga dagføring fyri hesa pallinum.",
   "sound.option.none": "Eingin",
   "sound.option.alert01": "Ávaring 01",
   "sound.option.alert02": "Ávaring 02",

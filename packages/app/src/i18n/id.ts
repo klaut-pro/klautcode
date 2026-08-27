@@ -1127,6 +1127,7 @@ export const dict = {
   "settings.updates.action.installing": "Menginstal...",
   "settings.updates.toast.latest.title": "Versi Anda sudah terbaru",
   "settings.updates.toast.latest.description": "Anda menjalankan versi terbaru Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Rilis terbaru belum memiliki pembaruan untuk platform ini.",
   "sound.option.none": "Tidak ada",
   "sound.option.alert01": "Peringatan 01",
   "sound.option.alert02": "Peringatan 02",

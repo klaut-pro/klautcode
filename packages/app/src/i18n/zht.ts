@@ -1005,6 +1005,7 @@ export const dict = {
   "settings.updates.action.installing": "安裝中...",
   "settings.updates.toast.latest.title": "已是最新版本",
   "settings.updates.toast.latest.description": "你正在使用最新版本的 Klautcode。",
+  "settings.updates.toast.missingArtifacts": "最新版本尚無適用於此平台的更新。",
 
   "sound.option.none": "無",
   "sound.option.alert01": "警報 01",

@@ -1055,6 +1055,7 @@ export const dict = {
   "settings.updates.action.installing": "Quraşdırılır...",
   "settings.updates.toast.latest.title": "Ən son versiyadan istifadə edirsiniz",
   "settings.updates.toast.latest.description": "Klautcode-un ən son versiyasından istifadə edirsiniz.",
+  "settings.updates.toast.missingArtifacts": "Ən son buraxılışda hələ bu platforma üçün yeniləmə yoxdur.",
   "sound.option.none": "Yoxdur",
   "sound.option.alert01": "Alert 01",
   "sound.option.alert02": "Alert 02",

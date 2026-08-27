@@ -10,6 +10,24 @@ export type UpdaterBackend = {
   quitAndInstall(): void
 }
 
+// Classify electron-updater failures so the UI can explain what went wrong:
+// - "missing-artifacts": the release exists but has no build for this platform
+//   (its update metadata file, e.g. latest-mac.yml, is absent from the assets).
+// - "unreachable": the release channel could not be reached at all.
+export function classifyUpdaterError(message: string): "unreachable" | "missing-artifacts" | undefined {
+  if (/cannot find [a-z0-9-]+\.ya?ml in the latest release artifacts|no published versions/i.test(message)) {
+    return "missing-artifacts"
+  }
+  if (
+    /fetch failed|enotfound|econnrefused|econnreset|etimedout|getaddrinfo|network unreachable|net::err|timed out|too many requests|rate limit|http 5\d\d| 50[234] | 403 /i.test(
+      message,
+    )
+  ) {
+    return "unreachable"
+  }
+  return undefined
+}
+
 type UpdaterPersistence = {
   get(): UpdaterReadyRecord | undefined | Promise<UpdaterReadyRecord | undefined>
   set(value: UpdaterReadyRecord): void | Promise<void>
@@ -54,9 +72,10 @@ export function createUpdaterController(input: {
       await input.persistence.set({ version })
       return transition({ status: "ready", version })
     })()
-      .catch((error) =>
-        transition({ status: "error", message: error instanceof Error ? error.message : String(error) }),
-      )
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        return transition({ status: "error", message, reason: classifyUpdaterError(message) })
+      })
       .finally(() => {
         pending = undefined
       })

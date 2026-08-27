@@ -8,7 +8,7 @@ export type UpdaterState =
   | { status: "ready"; version: string }
   | { status: "up-to-date" }
   | { status: "installing"; version: string }
-  | { status: "error"; message: string }
+  | { status: "error"; message: string; reason?: "unreachable" | "missing-artifacts" }
 
 export type UpdaterPlatform = {
   state: Accessor<UpdaterState>

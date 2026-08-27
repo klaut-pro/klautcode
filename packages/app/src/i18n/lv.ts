@@ -1050,6 +1050,7 @@ export const dict = {
   "settings.updates.action.installing": "Instalē...",
   "settings.updates.toast.latest.title": "Jums ir jaunākā versija",
   "settings.updates.toast.latest.description": "Jūs izmantojat jaunāko Klautcode versiju.",
+  "settings.updates.toast.missingArtifacts": "Jaunākajā laidienā šai platformai vēl nav atjauninājuma.",
   "sound.option.none": "Nav",
   "sound.option.alert01": "Brīdinājums 01",
   "sound.option.alert02": "Brīdinājums 02",

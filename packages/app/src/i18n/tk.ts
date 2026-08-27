@@ -1045,6 +1045,7 @@ export const dict = {
   "settings.updates.action.installing": "Gurmak ...",
   "settings.updates.toast.latest.title": "Döwrebap",
   "settings.updates.toast.latest.description": "Klautcode-iň iň soňky wersiýasyny işleýärsiňiz.",
+  "settings.updates.toast.missingArtifacts": "Iň soňky neşirde bu platforma üçin entek täzelenme ýok.",
   "sound.option.none": "Hiç",
   "sound.option.alert01": "Duýduryş 01",
   "sound.option.alert02": "Duýduryş 02",

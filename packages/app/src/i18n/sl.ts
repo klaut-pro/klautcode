@@ -1053,6 +1053,7 @@ export const dict = {
   "settings.updates.action.installing": "Namestitev ...",
   "settings.updates.toast.latest.title": "Ste na tekočem",
   "settings.updates.toast.latest.description": "Uporabljate najnovejšo različico Klautcode.",
+  "settings.updates.toast.missingArtifacts": "Najnovejša izdaja še nima posodobitve za to platformo.",
   "sound.option.none": "Noben",
   "sound.option.alert01": "Opozorilo 01",
   "sound.option.alert02": "Opozorilo 02",

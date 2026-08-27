@@ -1050,6 +1050,7 @@ export const dict = {
   "settings.updates.action.installing": "Насб карда мешавад...",
   "settings.updates.toast.latest.title": "Шумо навсозӣ доред",
   "settings.updates.toast.latest.description": "Шумо версияи охирини Klautcode-ро иҷро карда истодаед.",
+  "settings.updates.toast.missingArtifacts": "Дар охирин нашр ҳанӯз барои ин платформа навсозӣ нест.",
   "sound.option.none": "Ҳеҷ",
   "sound.option.alert01": "Огоҳӣ 01",
   "sound.option.alert02": "Огоҳӣ 02",

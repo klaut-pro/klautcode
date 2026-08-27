@@ -1034,6 +1034,7 @@ export const dict = {
   "settings.updates.action.installing": "ກຳລັງຕິດຕັ້ງ...",
   "settings.updates.toast.latest.title": "ທ່ານອັບເດດແລ້ວ",
   "settings.updates.toast.latest.description": "ທ່ານກຳລັງໃຊ້ Klautcode ເວີຊັນຫຼ້າສຸດ.",
+  "settings.updates.toast.missingArtifacts": "ການອອກຮຸ່ນຫຼ້າສຸດຍັງບໍ່ມີການອັບເດດສຳລັບແພລດຟອມນີ້ເທື່ອ.",
   "sound.option.none": "ບໍ່ມີ",
   "sound.option.alert01": "ແຈ້ງເຕືອນ 01",
   "sound.option.alert02": "ແຈ້ງເຕືອນ 02",
