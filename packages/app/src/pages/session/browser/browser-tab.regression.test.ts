@@ -30,7 +30,7 @@ describe("browser tab load after tab switches", () => {
     expect(source).toContain('el.style.inset = "0"')
     expect(source).toContain("sizeWebviewToHost")
     expect(source).toContain("ResizeObserver")
-    expect(source).toContain("requestAnimationFrame(() => syncBox())")
+    expect(source).toContain("syncPending")
     expect(source).toContain("BROWSER_WEBVIEW_HOST_CLASS")
   })
 

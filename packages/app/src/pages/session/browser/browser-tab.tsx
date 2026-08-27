@@ -61,6 +61,34 @@ function webviewSnapshot(host?: HTMLElement, webview?: WebviewTag) {
   }
 }
 
+function logChainHeights(origin: HTMLElement | undefined, tab: string, state: string) {
+  if (!origin) return
+  const chain: Record<string, unknown>[] = []
+  let el: Element | null = origin
+  let depth = 0
+  while (el && depth < 16) {
+    const rect = el.getBoundingClientRect()
+    const style = getComputedStyle(el)
+    chain.push({
+      d: depth,
+      tag: el.tagName.toLowerCase(),
+      id: el.id || undefined,
+      comp: el.getAttribute("data-component") || undefined,
+      cls: el.getAttribute("class") ?? "",
+      w: Math.round(rect.width),
+      h: Math.round(rect.height),
+      height: style.height,
+      flex: style.flex,
+      display: style.display,
+      position: style.position,
+      overflow: style.overflowY,
+    })
+    el = el.parentElement
+    depth++
+  }
+  logBrowser("chain", { tab, state, chain })
+}
+
 function openWebviewUrl(webview: WebviewTag, url: string, tab: string) {
   if (!webview || !url) return
   logBrowser("load", { tab, url, src: webview.src })
@@ -106,7 +134,8 @@ export function BrowserTab(props: { tab: string }) {
     if (!guestReady) {
       if (loadedUrl === undefined) {
         loadedUrl = url
-        openWebviewUrl(webview, url, props.tab)
+        webview.src = url
+        logBrowser("defer loadURL until dom-ready", { tab: props.tab, url, ...webviewSnapshot(ref, webview) })
         return
       }
       logBrowser("defer load until dom-ready", { tab: props.tab, url, ...webviewSnapshot(ref, webview) })
@@ -123,7 +152,7 @@ export function BrowserTab(props: { tab: string }) {
   }
 
   const syncTitle = () => {
-    if (!webview) return
+    if (!webview || !guestReady) return
     const title = webview.getTitle()
     layout.browser.set(props.tab, { url: webview.getURL() || store.input, title: title || undefined })
   }
@@ -132,6 +161,7 @@ export function BrowserTab(props: { tab: string }) {
     if (!ref || platform.platform !== "desktop") return
     const tab = props.tab
     logBrowser("mount", { tab, url: initialUrl(), ...webviewSnapshot(ref) })
+    logChainHeights(ref, tab, "mount")
     const el = document.createElement("webview") as WebviewTag
     el.setAttribute("partition", "persist:klautcode-browser")
     el.setAttribute("allowpopups", "false")
@@ -139,15 +169,30 @@ export function BrowserTab(props: { tab: string }) {
     el.style.display = "block"
     el.style.position = "absolute"
     el.style.inset = "0"
+    let syncPending = false
+    let collapsed = false
     const syncBox = () => {
-      const size = sizeWebviewToHost(ref, el)
-      logBrowser("resize", { tab, ...size, ...webviewSnapshot(ref, el) })
-      return size
+      if (syncPending) return
+      syncPending = true
+      requestAnimationFrame(() => {
+        syncPending = false
+        try {
+          const size = sizeWebviewToHost(ref, el)
+          logBrowser("resize", { tab, ...size, ...webviewSnapshot(ref, el) })
+          const isCollapsed = size.width < 2 || size.height < 2
+          if (isCollapsed !== collapsed) {
+            collapsed = isCollapsed
+            logChainHeights(ref, tab, isCollapsed ? "collapsed" : "recovered")
+          }
+          return size
+        } catch (error) {
+          logBrowser("resize error", { tab, error: String(error) })
+        }
+      })
     }
     ref.appendChild(el)
     webview = el
     syncBox()
-    requestAnimationFrame(() => syncBox())
     const observer = new ResizeObserver(syncBox)
     observer.observe(ref)
 
@@ -155,14 +200,14 @@ export function BrowserTab(props: { tab: string }) {
     pendingUrl = initialUrl()
 
     const onNavigate = () => {
-      const url = webview?.getURL() ?? ""
+      const url = webview?.getURL?.() ?? ""
       logBrowser("navigate", { tab, url, ...webviewSnapshot(ref, el) })
       if (url) {
         loadedUrl = url
         setStore("input", url)
         recordVisit(url)
       }
-      syncTitle()
+      if (guestReady) syncTitle()
     }
     const onLoadingStart = () => {
       logBrowser("loading-start", { tab, src: el.src })
@@ -171,7 +216,7 @@ export function BrowserTab(props: { tab: string }) {
     const onLoadingStop = () => {
       logBrowser("loading-stop", { tab, url: el.getURL?.() ?? el.src, ...webviewSnapshot(ref, el) })
       setStore("loading", false)
-      syncTitle()
+      if (guestReady) syncTitle()
     }
     const onTitle = () => syncTitle()
     const onFail = (event: Event) => {
@@ -195,9 +240,9 @@ export function BrowserTab(props: { tab: string }) {
     }
     const onDomReady = () => {
       guestReady = true
-      const size = syncBox()
-      logBrowser("dom-ready", { tab, pendingUrl, ...size, ...webviewSnapshot(ref, el) })
+      logBrowser("dom-ready", { tab, pendingUrl, ...webviewSnapshot(ref, el) })
       if (pendingUrl && pendingUrl !== loadedUrl) load(pendingUrl)
+      syncBox()
     }
     const onFinish = () => {
       logBrowser("finish-load", { tab, url: el.getURL?.() ?? el.src, ...webviewSnapshot(ref, el) })
