@@ -29,9 +29,15 @@ export function UpdaterNotice() {
         : state.reason === "unreachable"
           ? language.t("desktop.updater.dialog.checkFailed.message")
           : state.message
-    showToast({
-      title: language.t("common.requestFailed"),
-      description,
+    // Defer past the mount flush: this effect can run while the toaster's
+    // store subscription is still being set up (solid-sonner subscribes in
+    // onMount), so a synchronous toast would be added to the store but never
+    // rendered. A microtask runs after all mount effects have flushed.
+    queueMicrotask(() => {
+      showToast({
+        title: language.t("common.requestFailed"),
+        description,
+      })
     })
   })
   return null

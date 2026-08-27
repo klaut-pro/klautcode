@@ -58,6 +58,7 @@ import { TabsInfoPopup } from "@/components/help-button"
 import { Titlebar, type TitlebarUpdate } from "@/components/titlebar"
 import { readyUpdateVersion } from "@/components/update-available"
 import { UpdateAvailableToast } from "@/components/update-available-toast"
+import { UpdaterNotice } from "@/components/updater-notice"
 import { useDirectoryPicker } from "@/components/directory-picker"
 import { ServerConnection, useServer } from "@/context/server"
 import { useLanguage, type Locale } from "@/context/language"
@@ -2269,6 +2270,7 @@ export default function LegacyLayout(props: ParentProps) {
         }
       />
       <UpdateAvailableToast />
+      <UpdaterNotice />
       <div class="flex-1 min-h-0 min-w-0 flex">
         <div class="flex-1 min-h-0 relative">
           <div class="size-full relative overflow-x-hidden">
