@@ -9,6 +9,7 @@ import { PluginV2 } from "@klautcode/core/plugin"
 import { PluginHost } from "@klautcode/core/plugin/host"
 import { KlautcodePlugin } from "@klautcode/core/plugin/provider/klautcode"
 import { ProviderV2 } from "@klautcode/core/provider"
+import { Quota } from "@klautcode/core/quota"
 import { testEffect } from "../lib/effect"
 import { PluginTestLayer } from "./fixture"
 
@@ -245,6 +246,33 @@ describe("KlautcodePlugin", () => {
         yield* addPlugin()
         expect(required(yield* catalog.provider.get(ProviderV2.ID.klautcode)).request.body.apiKey).toBe("public")
         expect(required(yield* catalog.model.get(ProviderV2.ID.klautcode, ModelV2.ID.make("free"))).enabled).toBe(true)
+      }),
+    ),
+  )
+
+  it.effect("disables quota-exhausted free models without credentials", () =>
+    withEnv({ KLAUTCODE_API_KEY: undefined }, () =>
+      Effect.gen(function* () {
+        const catalog = yield* Catalog.Service
+        yield* catalog.transform((catalog) => {
+          const provider = ProviderV2.Info.make({
+            ...ProviderV2.Info.empty(ProviderV2.ID.klautcode),
+            api: { type: "aisdk", package: "test-provider" },
+          })
+          const model = ModelV2.Info.make({
+            ...ModelV2.Info.empty(provider.id, ModelV2.ID.make("free")),
+            api: { id: ModelV2.ID.make("free"), type: "aisdk", package: "test-provider" },
+            cost: cost(0),
+          })
+          catalog.provider.update(provider.id, () => {})
+          catalog.model.update(provider.id, model.id, (draft) => {
+            draft.cost = [...model.cost]
+          })
+        })
+        Quota.recordExhaustionSync(ProviderV2.ID.klautcode, ModelV2.ID.make("free"))
+        yield* addPlugin()
+        expect(required(yield* catalog.model.get(ProviderV2.ID.klautcode, ModelV2.ID.make("free"))).enabled).toBe(false)
+        Quota.resetSync()
       }),
     ),
   )

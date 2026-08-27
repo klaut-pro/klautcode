@@ -32,3 +32,13 @@ export function selectProviderCatalog(input: ProviderCatalogInput) {
 export function isFreeModel(provider: string, cost: { input: number } | undefined) {
   return (provider === "klautcode" || provider === "opencode") && (!cost || cost.input === 0)
 }
+
+// Catalog costs are USD per 1M tokens. Keep small values readable (fractional
+// cents) while still rounding whole-dollar prices to two decimals.
+export function formatModelCost(value: number, intl: string) {
+  return new Intl.NumberFormat(intl, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 4,
+  }).format(value)
+}

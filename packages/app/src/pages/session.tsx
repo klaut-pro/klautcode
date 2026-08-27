@@ -47,7 +47,7 @@ import { DirectoryDataProvider } from "@/pages/directory-layout"
 import { useServerSync } from "@/context/server-sync"
 import { useLanguage } from "@/context/language"
 import { useLayout } from "@/context/layout"
-import { ModelsProvider } from "@/context/models"
+import { ModelsProvider, useModels } from "@/context/models"
 import { useNotification } from "@/context/notification"
 import { PromptProvider, usePrompt } from "@/context/prompt"
 import { usePlatform } from "@/context/platform"
@@ -70,6 +70,7 @@ import {
   createSessionComposerRegionController,
   SessionComposerRegion,
 } from "@/pages/session/composer"
+import { collectSubagents } from "@/pages/session/composer/session-subagents"
 import { createOpenReviewFile, createSessionTabs, createSizing, shouldShowFileTree } from "@/pages/session/helpers"
 import { MessageTimeline } from "@/pages/session/timeline/message-timeline"
 import { createTimelineModel } from "@/pages/session/timeline/model"
@@ -360,6 +361,7 @@ export default function Page() {
   const serverSync = useServerSync()
   const layout = useLayout()
   const local = useLocal()
+  const models = useModels()
   const file = useFile()
   const sync = useSync()
   const queryClient = useQueryClient()
@@ -1783,6 +1785,21 @@ export default function Page() {
     return `[${language.t("common.attachment")}]`
   }
 
+  // Full queued prompt (not the single-line preview) for delegation to subagents.
+  const followupFullText = (item: FollowupDraft) => {
+    const text = item.prompt
+      .map((part) => {
+        if (part.type === "image") return `[image:${part.filename}]`
+        if (part.type === "file") return `[file:${part.path}]`
+        if (part.type === "agent") return `@${part.name}`
+        return part.content
+      })
+      .join("")
+      .trim()
+
+    return text || `[${language.t("common.attachment")}]`
+  }
+
   const queueFollowup = (draft: FollowupDraft) => {
     setFollowup("items", draft.sessionID, (items) => [
       ...(items ?? []),
@@ -1792,7 +1809,127 @@ export default function Page() {
     setFollowup("paused", draft.sessionID, undefined)
   }
 
-  const followupDock = createMemo(() => queuedFollowups().map((item) => ({ id: item.id, text: followupText(item) })))
+  const followupDock = createMemo(() =>
+    queuedFollowups().map((item) => ({
+      id: item.id,
+      text: followupText(item),
+      model: item.model,
+      variant: item.variant,
+    })),
+  )
+
+  const changeFollowupModel = (id: string, model: { providerID: string; modelID: string }) => {
+    const sessionID = params.id
+    if (!sessionID || followupBusy(sessionID)) return
+    setFollowup("items", sessionID, (items) =>
+      (items ?? []).map((item) => {
+        if (item.id !== id) return item
+        const supported = !!item.variant && !!models.find(model)?.variants?.[item.variant]
+        return { ...item, model, variant: supported ? item.variant : undefined }
+      }),
+    )
+  }
+
+  const subagentIds = (sessionID: string) =>
+    new Set(
+      collectSubagents({
+        messages: sync().data.message[sessionID] ?? [],
+        parts: (messageID) => sync().data.part[messageID] ?? [],
+        sessionStatus: (sessionID) => sync().data.session_status[sessionID],
+      }).map((item) => item.sessionId),
+    )
+
+  // Watch the session after delegating: once the coordinator launches subagents,
+  // tell the user how many instead of leaving them guessing.
+  const [delegation, setDelegation] = createStore<{ sessionID?: string; known: Set<string> }>({
+    sessionID: undefined,
+    known: new Set(),
+  })
+
+  createEffect(() => {
+    const sessionID = delegation.sessionID
+    if (!sessionID || sessionID !== params.id) return
+    const launched = collectSubagents({
+      messages: sync().data.message[sessionID] ?? [],
+      parts: (messageID) => sync().data.part[messageID] ?? [],
+      sessionStatus: (sessionID) => sync().data.session_status[sessionID],
+    }).filter((item) => !delegation.known.has(item.sessionId))
+    if (launched.length === 0) return
+    setDelegation({ sessionID: undefined, known: new Set() })
+    showToast({ title: language.plural("session.followupDock.delegateLaunched", launched.length) })
+  })
+
+  // Sends each of the given queued messages as its own prompt to the general
+  // agent (the multitask coordinator). Each prompt is one unit of work, so the
+  // coordinator dispatches each unit with the task tool and decides how many
+  // subagents to launch. Delegation uses the model (and variant) chosen on each
+  // queued message, falling back to the composer's current model.
+  const delegateFollowups = (items: FollowupItem[]) => {
+    const sessionID = params.id
+    if (!sessionID || followupBusy(sessionID)) return
+    if (items.length === 0) return
+
+    const composerModel = local.model.current()
+    if (!composerModel) return
+
+    const instruction =
+      "The user queued this message while the agent was working. Treat it as one independent unit of work: dispatch it to a subagent using the task tool instead of doing the work yourself. Synthesize and report the result."
+
+    const drafts: FollowupDraft[] = items.map((item) => {
+      const model = item.model ?? { providerID: composerModel.provider.id, modelID: composerModel.id }
+      return {
+        sessionID,
+        sessionDirectory: item.sessionDirectory,
+        prompt: [
+          { type: "text", content: `${instruction}\n\n${followupFullText(item)}`, start: 0, end: 0 } as const,
+        ],
+        context: [],
+        agent: "general",
+        model,
+        variant: item.variant,
+      }
+    })
+
+    const ids = new Set(items.map((item) => item.id))
+    setFollowup("items", sessionID, (current) => (current ?? []).filter((item) => !ids.has(item.id)))
+    setFollowup("failed", sessionID, undefined)
+    setFollowup("paused", sessionID, undefined)
+    setFollowup("edit", sessionID, (value) => (value && ids.has(value.id) ? undefined : value))
+    setDelegation({ sessionID, known: subagentIds(sessionID) })
+
+    showToast({ title: language.plural("session.followupDock.delegated", items.length) })
+
+    const owner = sessionOwnership.capture()
+    const failed: FollowupItem[] = []
+    void (async () => {
+      for (let index = 0; index < drafts.length; index++) {
+        const draft = drafts[index]
+        const ok = await sendFollowupDraft({
+          api: sdk().api.session,
+          sync: sync(),
+          serverSync: serverSync(),
+          draft,
+          optimisticBusy: true,
+        }).catch((err) => {
+          fail(err)
+          return false
+        })
+        if (!ok) failed.push(items[index])
+      }
+      if (failed.length > 0) {
+        setFollowup("items", sessionID, (current) => [...(current ?? []), ...failed])
+        return
+      }
+      owner.run(resumeScroll)
+    })()
+  }
+
+  const delegateAllFollowups = () => delegateFollowups(queuedFollowups())
+
+  const delegateFollowup = (id: string) => {
+    const item = queuedFollowups().find((entry) => entry.id === id)
+    if (item) delegateFollowups([item])
+  }
 
   const sendFollowup = (sessionID: string, id: string, opts?: { manual?: boolean }) => {
     if (sync().session.get(sessionID)?.parentID) return Promise.resolve()
@@ -2168,6 +2305,9 @@ export default function Page() {
                     onSend: (id) => void sendFollowup(params.id!, id, { manual: true }),
                     onEdit: editFollowup,
                     onDelete: deleteFollowup,
+                    onModelChange: changeFollowupModel,
+                    onDelegateAll: delegateAllFollowups,
+                    onDelegate: delegateFollowup,
                   }
                 : undefined,
             revert: () =>

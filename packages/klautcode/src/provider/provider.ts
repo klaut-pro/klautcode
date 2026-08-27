@@ -1338,7 +1338,9 @@ function modelSuggestions(provider: Info | undefined, modelID: ModelV2.ID, enabl
       })
     : []
   const fuzzy = fuzzysort.go(modelID, available, { limit: 3, threshold: -10000 }).map((m) => m.target)
-  if (fuzzy.length) return fuzzy
+  if (fuzzy.length) {
+    return sortBy(fuzzy, [(id) => (isFreeModel(provider?.models[id]) ? 0 : 1), "asc"])
+  }
   const query = modelID
     .toLowerCase()
     .split(/[^a-z0-9]+/)
@@ -1350,6 +1352,7 @@ function modelSuggestions(provider: Info | undefined, modelID: ModelV2.ID, enabl
         score: query.filter((part) => id.toLowerCase().includes(part)).length,
       }))
       .filter((item) => item.score > 0),
+    [(item) => (isFreeModel(provider?.models[item.id]) ? 0 : 1), "asc"],
     [(item) => item.score, "desc"],
     [(item) => item.id, "asc"],
   )
@@ -2041,9 +2044,13 @@ const layer = Layer.effect(
 
 const priority = ["gpt-5", "claude-sonnet-4", "big-pickle", "gemini-3-pro"]
 const smallModelFamilyPriority = ["gemini-flash", "gpt-nano", "claude-haiku"]
-export function sort<T extends { id: string }>(models: T[]) {
+function isFreeModel(model: { cost?: { input: number } } | undefined): boolean {
+  return model?.cost?.input === 0
+}
+export function sort<T extends { id: string; cost?: { input: number } }>(models: T[]) {
   return sortBy(
     models,
+    [(model) => (isFreeModel(model) ? 0 : 1), "asc"],
     [(model) => priority.findIndex((filter) => model.id.includes(filter)), "desc"],
     [(model) => (model.id.includes("latest") ? 0 : 1), "asc"],
     [(model) => model.id, "desc"],

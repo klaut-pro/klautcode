@@ -21,6 +21,10 @@ type ModelInfo = {
   limit: {
     context: number
   }
+  cost?: {
+    input: number
+    output: number
+  }
 }
 
 function ModelTooltipRow(props: { name: JSX.Element; value: JSX.Element }) {
@@ -92,6 +96,17 @@ export const ModelTooltip: Component<{ model: ModelInfo; latest?: boolean; free?
   }
   const context = () => language.t("model.tooltip.context", { limit: props.model.limit.context.toLocaleString() })
   const contextLimit = () => props.model.limit.context.toLocaleString(language.intl())
+  const cost = () => {
+    const value = props.model.cost
+    if (!value || (value.input === 0 && value.output === 0)) return undefined
+    return value
+  }
+  const costValue = (value: number) =>
+    `${new Intl.NumberFormat(language.intl(), {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 4,
+    }).format(value)} ${language.t("model.tooltip.cost.perMillionTokens")}`
 
   if (props.v2) {
     return (
@@ -103,6 +118,14 @@ export const ModelTooltip: Component<{ model: ModelInfo; latest?: boolean; free?
         </Show>
         <ModelTooltipRow name={language.t("model.tooltip.reasoning")} value={reasoning()} />
         <ModelTooltipRow name={language.t("model.tooltip.context.label")} value={contextLimit()} />
+        <Show when={cost()}>
+          {(value) => (
+            <>
+              <ModelTooltipRow name={language.t("model.tooltip.cost.input")} value={costValue(value().input)} />
+              <ModelTooltipRow name={language.t("model.tooltip.cost.output")} value={costValue(value().output)} />
+            </>
+          )}
+        </Show>
       </div>
     )
   }
@@ -119,6 +142,16 @@ export const ModelTooltip: Component<{ model: ModelInfo; latest?: boolean; free?
       </Show>
       <div class="text-12-regular text-text-invert-base">{reasoning()}</div>
       <div class="text-12-regular text-text-invert-base">{context()}</div>
+      <Show when={cost()}>
+        {(value) => (
+          <div class="text-12-regular text-text-invert-base">
+            {language.t("model.tooltip.cost.line", {
+              input: costValue(value().input),
+              output: costValue(value().output),
+            })}
+          </div>
+        )}
+      </Show>
     </div>
   )
 }

@@ -65,7 +65,7 @@ export function SessionSubagentDock() {
             <RunningDots class="shrink-0 text-icon-info-active" />
             <span>{language.t("session.subagents.active")}</span>
           </div>
-          <div class="flex flex-col">
+          <div class="flex flex-col gap-1 overflow-y-auto max-h-42 no-scrollbar">
             <For each={active()}>
               {(subagent) => (
                 <div class="group flex items-center gap-1.5 py-0.5 text-13-regular">

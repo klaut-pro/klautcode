@@ -3,7 +3,6 @@ import { createMediaQuery } from "@solid-primitives/media"
 import { ButtonV2 } from "@klautcode/ui/v2/button-v2"
 import { SelectV2 } from "@klautcode/ui/v2/select-v2"
 import { Switch } from "@klautcode/ui/v2/switch-v2"
-import { TextInputV2 } from "@klautcode/ui/v2/text-input-v2"
 import { useDialog } from "@klautcode/ui/context/dialog"
 import { useLanguage } from "@/context/language"
 import { usePlatform } from "@/context/platform"
@@ -56,6 +55,26 @@ const fontSettings = {
     input: "setTerminal",
   },
 } as const
+const fontOptionsMap: Record<"ui" | "code" | "terminal", string[]> = {
+  ui: ["", "Inter"],
+  code: ["", "JetBrainsMono Nerd Font Mono"],
+  terminal: ["", "JetBrainsMono Nerd Font Mono"],
+}
+const fontOptionLabelKeys: Record<"ui" | "code" | "terminal", Record<string, string>> = {
+  ui: {
+    "": "settings.general.row.uiFont.option.systemSans",
+    "Inter": "settings.general.row.uiFont.option.inter",
+  },
+  code: {
+    "": "settings.general.row.font.option.systemMono",
+    "JetBrainsMono Nerd Font Mono": "settings.general.row.font.option.jetbrains",
+  },
+  terminal: {
+    "": "settings.general.row.terminalFont.option.systemMono",
+    "JetBrainsMono Nerd Font Mono": "settings.general.row.terminalFont.option.jetbrains",
+  },
+}
+
 const soundSettings = {
   agent: {
     action: "settings-sounds-agent",
@@ -252,21 +271,19 @@ const FontSetting: Component<{
 }> = (props) => {
   const language = useLanguage()
   const config = () => fontSettings[props.kind]
+  const options = fontOptionsMap[props.kind]
   return (
     <SettingsRowV2 title={language.t(config().title)} description={language.t(config().description)}>
       <div class="w-full sm:w-[220px]">
-        <TextInputV2
+        <SelectV2
+          appearance="inline"
           data-action={config().action}
-          type="text"
-          appearance="base"
-          value={props.fonts[config().font]().value}
-          onInput={(event) => props.fonts[config().input](event.currentTarget.value)}
-          placeholder={props.fonts[config().font]().placeholder}
-          spellcheck={false}
-          autocorrect="off"
-          autocomplete="off"
-          autocapitalize="off"
-          aria-label={language.t(config().title)}
+          options={options}
+          current={options.find((option) => option === props.fonts[config().font]().value) ?? options[0]}
+          placement="bottom-end"
+          gutter={6}
+          label={(option) => language.t(fontOptionLabelKeys[props.kind][option])}
+          onSelect={(option) => option !== null && props.fonts[config().input](option)}
           style={{ "font-family": props.fonts[config().font]().family }}
         />
       </div>

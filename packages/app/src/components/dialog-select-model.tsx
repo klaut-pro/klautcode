@@ -23,7 +23,25 @@ import { createMenuDismissController } from "@/utils/menu-dismiss-controller"
 import { createEventListener } from "@solid-primitives/event-listener"
 import { matchesModelSearch } from "./dialog-select-model-search"
 
-import { isFreeModel } from "@/hooks/provider-catalog"
+import { formatModelCost, isFreeModel } from "@/hooks/provider-catalog"
+
+// Compact input/output price (USD per 1M tokens) shown next to each model in
+// the picker so users know what a turn will cost before selecting.
+export function ModelCostLabel(props: {
+  cost?: { input: number; output: number }
+  intl: string
+  class?: string
+}) {
+  const cost = props.cost
+  if (!cost || (cost.input === 0 && cost.output === 0)) return null
+  return (
+    <span
+      class={`ml-auto shrink-0 whitespace-nowrap text-[11px] leading-4 text-v2-text-text-faint tabular-nums ${props.class ?? ""}`}
+    >
+      {formatModelCost(cost.input, props.intl)} / {formatModelCost(cost.output, props.intl)}
+    </span>
+  )
+}
 
 type ModelState = ReturnType<typeof useLocal>["model"]
 type ModelItem = ReturnType<ModelState["list"]>[number]
@@ -110,6 +128,7 @@ const ModelList: Component<{
           <Show when={i.latest}>
             <Tag>{language.t("model.tag.latest")}</Tag>
           </Show>
+          <ModelCostLabel cost={i.cost} intl={language.intl()} />
         </div>
       )}
     </List>
@@ -501,6 +520,7 @@ function ModelSelectorPopoverV2View(props: {
                                 <Show when={item.latest}>
                                   <TagV2 class="shrink-0">{language.t("model.tag.latest")}</TagV2>
                                 </Show>
+                                <ModelCostLabel cost={item.cost} intl={language.intl()} />
                               </MenuV2.RadioItem>
                             </TooltipV2>
                           )}

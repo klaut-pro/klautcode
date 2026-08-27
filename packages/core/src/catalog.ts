@@ -226,6 +226,10 @@ const layer = Layer.effect(
             pipe(
               yield* result.model.available(),
               Array.sortWith((item) => item.time.released, Order.flip(Order.Number)),
+              Array.sortWith(
+                (item) => item.cost.some((cost) => cost.input === 0),
+                Order.flip(Order.Boolean),
+              ),
               Array.head,
             ),
           )
@@ -261,8 +265,9 @@ const layer = Layer.effect(
               cost: model.cost[0] ? model.cost[0].input + model.cost[0].output : 999,
               age: (Date.now() - model.time.released) / (1000 * 60 * 60 * 24 * 30),
               small: SMALL_MODEL_RE.test(`${model.id} ${model.family ?? ""} ${model.name}`.toLowerCase()),
+              free: model.cost.some((cost) => cost.input === 0),
             })),
-            Array.filter((item) => item.cost > 0 && item.age <= 18),
+            Array.filter((item) => item.age <= 18),
           )
 
           const pick = (items: typeof candidates) => {
@@ -271,6 +276,7 @@ const layer = Layer.effect(
             return pipe(
               items,
               Array.sortWith((item) => (item.cost / maxCost) * 0.8 + (item.age / maxAge) * 0.2, Order.Number),
+              Array.sortWith((item) => (item.free ? 0 : 1), Order.Number),
               Array.map((item) => projectModel(item.model, provider)),
               Array.head,
             )

@@ -1597,6 +1597,31 @@ const scenarios: Scenario[] = [
       "status",
     ),
   http.protected
+    .post("/session/{sessionID}/title", "session.regenerateTitle")
+    .mutating()
+    .withLlm()
+    .seeded((ctx) =>
+      Effect.gen(function* () {
+        const session = yield* ctx.session({ title: "New session - 2024-01-01T00:00:00.000Z" })
+        yield* ctx.message(session.id, { text: "regenerate this title" })
+        yield* ctx.llmText("Regenerated title")
+        return session
+      }),
+    )
+    .at((ctx) => ({
+      path: route("/session/{sessionID}/title", { sessionID: ctx.state.id }),
+      headers: ctx.headers(),
+    }))
+    .jsonEffect(200, (body, ctx) =>
+      Effect.gen(function* () {
+        check(body === true, "regenerate title should return true")
+        const session = yield* ctx.sessionGet(ctx.state.id)
+        check(session?.title === "Regenerated title", "title should be regenerated from recent conversation")
+        yield* ctx.llmWait(1)
+      }),
+      "status",
+    ),
+  http.protected
     .post("/session/{sessionID}/revert", "session.revert")
     .mutating()
     .seeded((ctx) =>

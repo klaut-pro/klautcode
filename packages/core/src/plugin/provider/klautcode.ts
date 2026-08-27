@@ -5,6 +5,7 @@ import { define } from "@klautcode/plugin/v2/effect/plugin"
 import type { CredentialValue } from "@klautcode/sdk/v2/types"
 import { HttpClient, HttpClientRequest, HttpClientResponse } from "effect/unstable/http"
 import { EventV2 } from "../../event"
+import { Quota } from "../../quota"
 import { Credential } from "../../credential"
 import { Integration } from "../../integration"
 import { ModelV2 } from "../../model"
@@ -202,8 +203,16 @@ export const KlautcodePlugin = define({
           }
         }
       }
+      // Disable quota-exhausted models so they are skipped by model selection
+      for (const model of item.models.values()) {
+        if (!model.enabled) continue
+        if (Quota.isExhaustedSync(ProviderV2.ID.make(item.provider.id), ModelV2.ID.make(model.id))) {
+          catalog.model.update(item.provider.id, model.id, (draft) => {
+            draft.enabled = false
+          })
+        }
+      }
     })
-
     const refresh = () => loading.withPermit(load().pipe(Effect.andThen(ctx.catalog.reload())))
     yield* events.subscribe(Integration.Event.ConnectionUpdated).pipe(
       Stream.filter((event) => event.data.integrationID === Integration.ID.make("klautcode")),

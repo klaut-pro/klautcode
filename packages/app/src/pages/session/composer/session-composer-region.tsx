@@ -161,6 +161,9 @@ export function SessionComposerRegion(props: {
                   onSend={controller.followup()!.onSend}
                   onEdit={controller.followup()!.onEdit}
                   onDelete={controller.followup()!.onDelete}
+                  onModelChange={controller.followup()!.onModelChange}
+                  onDelegateAll={controller.followup()!.onDelegateAll}
+                  onDelegate={controller.followup()!.onDelegate}
                 />
               </Show>
 <Show when={!controller.child()}>
