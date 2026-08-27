@@ -144,7 +144,7 @@ export function normalizeProviderList(
         const model =
           defaultModel?.providerID === provider.id
             ? defaultModel
-            : models?.find((item) => item.providerID === provider.id && item.status !== "deprecated")
+            : models?.find((item) => item.providerID === provider.id && item.enabled && item.status !== "deprecated")
         return model ? [[provider.id, model.id]] : []
       }),
     ),

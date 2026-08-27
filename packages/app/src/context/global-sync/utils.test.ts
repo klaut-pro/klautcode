@@ -113,6 +113,42 @@ describe("normalizeProviderList", () => {
       variants: { high: {} },
     })
   })
+
+  test("skips disabled models when selecting the default", () => {
+    const result = normalizeProviderList(
+      [{ id: "openai", name: "OpenAI", package: "@ai-sdk/openai" }] as ProviderListOutput["data"],
+      [
+        {
+          id: "gpt-disabled",
+          modelID: "gpt-disabled",
+          providerID: "openai",
+          name: "GPT Disabled",
+          capabilities: { tools: true, input: ["text"], output: ["text"] },
+          variants: [],
+          time: { released: 2 },
+          cost: [{ input: 1, output: 2, cache: { read: 0.1, write: 0.2 } }],
+          status: "active",
+          enabled: false,
+          limit: { context: 128_000, output: 8_192 },
+        },
+        {
+          id: "gpt-free",
+          modelID: "gpt-free",
+          providerID: "openai",
+          name: "GPT Free",
+          capabilities: { tools: false, input: ["text"], output: ["text"] },
+          variants: [],
+          time: { released: 1 },
+          cost: [{ input: 0, output: 0, cache: { read: 0, write: 0 } }],
+          status: "active",
+          enabled: true,
+          limit: { context: 128_000, output: 8_192 },
+        },
+      ] as ModelListOutput["data"],
+    )
+
+    expect(result.default).toEqual({ openai: "gpt-free" })
+  })
 })
 
 describe("directoryKey", () => {
