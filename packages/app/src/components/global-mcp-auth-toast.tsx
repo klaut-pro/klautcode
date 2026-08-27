@@ -1,5 +1,6 @@
 import { createEffect, createMemo } from "solid-js"
 import { useLanguage } from "@/context/language"
+import { useMcpToggle } from "@/context/mcp"
 import { useSync } from "@/context/sync"
 import { dismissToast, showToast } from "@/utils/toast"
 
@@ -19,6 +20,7 @@ const activeToasts = new Map<string, number>()
 export function GlobalMcpAuthToast() {
   const language = useLanguage()
   const sync = useSync()
+  const toggleMcp = useMcpToggle()
 
   const authServers = createMemo(() => {
     const mcp = sync().data.mcp ?? {}
@@ -44,6 +46,7 @@ export function GlobalMcpAuthToast() {
         icon: "warning",
         title: language.t("mcp.auth.needsAuthentication", { name }),
         description: language.t("mcp.auth.clickToAuthenticate"),
+        actions: [{ label: language.t("mcp.auth.authenticate"), onClick: () => toggleMcp.mutate(name) }],
       })
       if (id !== undefined) activeToasts.set(name, id)
     }
