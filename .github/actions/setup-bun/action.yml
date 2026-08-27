@@ -64,7 +64,13 @@ runs:
         # e.g. ./patches/ for standard-openapi
         # https://github.com/oven-sh/bun/issues/28147
         if [ "$RUNNER_OS" = "Windows" ]; then
-          bun install --linker hoisted ${{ inputs.install-flags }}
+          # --no-cache: bun's parallel cache-dir extraction races on Windows and
+          # fails with ENOTEMPTY (oven-sh/bun#18248, #28062); skip the cache
+          # entirely. Retry once to absorb other transient file-lock flakes.
+          if ! bun install --linker hoisted --no-cache ${{ inputs.install-flags }}; then
+            echo "retrying bun install after transient Windows failure"
+            bun install --linker hoisted --no-cache ${{ inputs.install-flags }}
+          fi
         else
           bun install ${{ inputs.install-flags }}
         fi
