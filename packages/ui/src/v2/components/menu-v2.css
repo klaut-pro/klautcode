@@ -1,6 +1,6 @@
-/* Above modal dialogs (z-index 50); matches select-v2-content. */
+/* Above modal dialogs (z-index 50) and prompt input z-[70] overlays; matches select-v2-content. */
 [data-popper-positioner]:has([data-component="menu-v2-content"]) {
-  z-index: 60;
+  z-index: 100;
 }
 
 [data-component="menu-v2-content"] {
@@ -10,7 +10,7 @@
   align-items: stretch;
   padding: 2px;
   min-width: 160px;
-  z-index: 60;
+  z-index: 100;
   pointer-events: auto;
 
   background: var(--v2-background-bg-layer-01);
@@ -70,7 +70,7 @@
     gap: 8px;
     min-width: 0;
 
-    font-size: 13px;
+    font-size: var(--font-size-base);
     font-weight: 440;
     line-height: 100%;
     letter-spacing: -0.04px;
@@ -83,7 +83,7 @@
     flex: none;
     height: 11px;
 
-    font-size: 11px;
+    font-size: var(--font-size-x-small);
     font-weight: 530;
     line-height: 100%;
     letter-spacing: 0.05px;
@@ -106,7 +106,7 @@
     border: 0.5px solid var(--menu-v2-badge-border);
     border-radius: 2px;
 
-    font-size: 11px;
+    font-size: var(--font-size-x-small);
     font-weight: 530;
     line-height: 100%;
     letter-spacing: 0.05px;
@@ -169,7 +169,7 @@
   height: 28px;
   padding: 0 12px;
 
-  font-size: 11px;
+  font-size: var(--font-size-x-small);
   font-weight: 530;
   line-height: 100%;
   letter-spacing: 0.05px;
