@@ -154,6 +154,12 @@ describe("classifyUpdaterError", () => {
     expect(classifyUpdaterError("getaddrinfo ENOTFOUND github.com")).toBe("unreachable")
     expect(classifyUpdaterError("fetch failed")).toBe("unreachable")
     expect(classifyUpdaterError("request timed out")).toBe("unreachable")
+    // A bare HttpError (repo or release missing) means the channel is gone,
+    // including GitHub's raw 404 body for a nonexistent repo.
+    expect(classifyUpdaterError("HttpError: 404")).toBe("unreachable")
+    expect(classifyUpdaterError('404 \n"method: GET url: https://github.com/klaut-pro/klautcode-missing/releases.atom')).toBe(
+      "unreachable",
+    )
   })
 
   test("leaves unrelated failures unclassified", () => {

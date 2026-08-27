@@ -64,11 +64,13 @@ cd packages/desktop
 bun run package:mac -- --config.extraMetadata.version=1.18.17
 ```
 
-Verify before uploading:
+Verify before uploading (fails the build when the metadata drifts):
 
 ```bash
-head -1 dist/latest-mac.yml        # must say: version: 1.18.17
+bun run check:update-metadata 1.18.17
 ```
+
+or manually: `head -1 dist/latest-mac.yml` must say `version: 1.18.17`.
 
 ### 5. Upload the auto-update set
 
