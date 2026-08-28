@@ -82,6 +82,20 @@ export function DesignModeOverlay() {
 
   createEffect(() => {
     if (!design.active()) {
+      setSelection([])
+      setShapes([])
+      setHistory([])
+      setDraft(undefined)
+      setDrawing(undefined)
+      setHover(undefined)
+      setTextAt(undefined)
+      setTextContent("")
+      setEditingNote(undefined)
+    }
+  })
+
+  createEffect(() => {
+    if (!design.active()) {
       setHost(undefined)
       document.documentElement.removeAttribute("data-design-mode")
       return
@@ -205,6 +219,9 @@ export function DesignModeOverlay() {
 
   const onPointerDown = (event: PointerEvent) => {
     if (busy()) return
+    try {
+      ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+    } catch {}
     const point = pointFrom(event)
     const elements = probe()?.elements ?? []
     if (tool() === "text") {
@@ -274,10 +291,17 @@ export function DesignModeOverlay() {
     }
   }
 
-  const onPointerUp = () => {
+  const onPointerUp = (event?: PointerEvent) => {
+    if (event) {
+      try {
+        const target = event.currentTarget as HTMLElement | null
+        if (target?.hasPointerCapture?.(event.pointerId)) target.releasePointerCapture(event.pointerId)
+        else if (canvas?.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId)
+      } catch {}
+    }
     const currentDraft = draft()
     if (currentDraft) {
-      if (currentDraft.type === "freehand" && currentDraft.points.length > 1) commit([...shapes(), currentDraft])
+      if (currentDraft.type === "freehand" && currentDraft.points.length >= 1) commit([...shapes(), currentDraft])
       else if (currentDraft.type === "arrow" && (currentDraft.to.x !== currentDraft.from.x || currentDraft.to.y !== currentDraft.from.y)) {
         commit([...shapes(), currentDraft])
       } else if (currentDraft.type === "rect" || currentDraft.type === "circle") {
@@ -287,6 +311,19 @@ export function DesignModeOverlay() {
     setDraft(undefined)
     setDrawing(undefined)
   }
+
+  createEffect(() => {
+    const activeDraft = draft()
+    if (!activeDraft) return
+    const handleMove = (event: PointerEvent) => onPointerMove(event)
+    const handleUp = (event: PointerEvent) => onPointerUp(event)
+    window.addEventListener("pointermove", handleMove)
+    window.addEventListener("pointerup", handleUp)
+    onCleanup(() => {
+      window.removeEventListener("pointermove", handleMove)
+      window.removeEventListener("pointerup", handleUp)
+    })
+  })
 
   const commitText = () => {
     const content = textContent().trim()
@@ -453,7 +490,7 @@ export function DesignModeOverlay() {
                 return (
                   <div
                     class="dm-annotation-card"
-                    style={{ left: `${pos.left}px`, top: `${pos.top}px` }}
+                    style={{ left: `${pos.left}px`, top: `${pos.top}px`, "pointer-events": draft() ? "none" : "auto" }}
                     data-testid="design-mode-annotation"
                   >
                     <div class="dm-annotation-head">

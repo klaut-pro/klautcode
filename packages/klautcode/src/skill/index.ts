@@ -18,7 +18,6 @@ import { RuntimeFlags } from "@/effect/runtime-flags"
 import { Glob } from "@klautcode/core/util/glob"
 import { Discovery } from "./discovery"
 import { isRecord } from "@/util/record"
-import { escapeHtml } from "@/util/html"
 
 const CLAUDE_EXTERNAL_DIR = ".claude"
 const AGENTS_EXTERNAL_DIR = ".agents"
@@ -427,6 +426,8 @@ export function fmt(list: Info[], opts: { verbose: boolean }) {
   const described = list.filter((skill) => skill.description !== undefined)
   if (described.length === 0) return "No skills are currently available."
   if (opts.verbose) {
+    // Token-optimized: omit <location> (absolute paths) — keep verbose structure
+    // but avoid repeating filesystem paths per skill.
     return [
       "<available_skills>",
       ...described
@@ -435,7 +436,6 @@ export function fmt(list: Info[], opts: { verbose: boolean }) {
           "  <skill>",
           `    <name>${skill.name}</name>`,
           `    <description>${skill.description}</description>`,
-          `    <location>${escapeHtml(skill.location)}</location>`,
           "  </skill>",
         ]),
       "</available_skills>",

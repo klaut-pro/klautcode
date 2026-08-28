@@ -168,6 +168,10 @@
         letter-spacing: var(--letter-spacing-normal);
       }
 
+      [data-slot="list-message"][data-loading] {
+        gap: 8px;
+      }
+
       [data-slot="list-filter"] {
         color: var(--text-strong);
         overflow: hidden;

@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, Match, on, onCleanup, Show, Switch } from "solid-js"
+import { createEffect, createMemo, createResource, createSignal, Match, on, onCleanup, Show, Switch } from "solid-js"
 import { createStore } from "solid-js/store"
 import { Dynamic } from "solid-js/web"
 import { makeEventListener } from "@solid-primitives/event-listener"
@@ -7,6 +7,7 @@ import { useFileComponent } from "@klautcode/ui/context/file"
 import { cloneSelectedLineRange, previewSelectedLines } from "@klautcode/session-ui/pierre/selection-bridge"
 import { createLineCommentController } from "@klautcode/session-ui/line-comment-annotations"
 import { createLineCommentControllerV2 } from "@klautcode/session-ui/v2/line-comment-annotations-v2"
+import { previewKindFromPath } from "@klautcode/session-ui/pierre/media"
 import { sampledChecksum } from "@klautcode/core/util/encode"
 import { DropdownMenu } from "@klautcode/ui/dropdown-menu"
 import { IconButton } from "@klautcode/ui/icon-button"
@@ -14,6 +15,10 @@ import { LineCommentV2OverflowIcon } from "@klautcode/ui/v2/line-comment-v2"
 import { MenuV2 } from "@klautcode/ui/v2/menu-v2"
 import { Tabs } from "@klautcode/ui/tabs"
 import { ScrollView } from "@klautcode/ui/scroll-view"
+import { SegmentedControlItemV2, SegmentedControlV2 } from "@klautcode/ui/v2/segmented-control-v2"
+import { marked } from "marked"
+import { codeToHtml } from "shiki"
+import markedShiki from "marked-shiki"
 import { showToast } from "@/utils/toast"
 import { selectionFromLines, useFile, type FileSelection, type SelectedLineRange } from "@/context/file"
 import { useComments } from "@/context/comments"
@@ -23,9 +28,45 @@ import { useSettings } from "@/context/settings"
 import { getSessionHandoff } from "@/pages/session/handoff"
 import { useSessionLayout } from "@/pages/session/session-layout"
 import { createSessionTabs } from "@/pages/session/helpers"
+import "./browser/markdown-preview.css"
 
 type SessionFileViewProps = {
   tab: string
+}
+
+const markedWithShiki = marked.use(
+  {
+    renderer: {
+      link({ href, title, text }) {
+        const titleAttr = title ? ` title="${title}"` : ""
+        return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`
+      },
+    },
+  },
+  markedShiki({
+    highlight(code, lang) {
+      return codeToHtml(code, {
+        lang: lang || "text",
+        themes: {
+          light: "github-light",
+          dark: "github-dark",
+        },
+      })
+    },
+  }),
+)
+
+function FileMarkdownPreview(props: { content: string }) {
+  const [html] = createResource(
+    () => props.content,
+    (markdown) => (markdown ? markedWithShiki.parse(markdown) : ""),
+  )
+
+  return (
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      <div data-slot="markdown" class="markdown-preview" innerHTML={html()} />
+    </div>
+  )
 }
 
 const selectionSide = (range: SelectedLineRange) => range.endSide ?? range.side ?? "additions"
@@ -263,6 +304,11 @@ function SessionFileViewV1(props: { tab: string }) {
     view,
   })
 
+  const previewKind = createMemo(() => previewKindFromPath(path()))
+  const isMarkdown = createMemo(() => previewKind() === "markdown")
+  const [markdownMode, setMarkdownMode] = createSignal<"preview" | "source">("preview")
+  createEffect(on(path, () => setMarkdownMode("preview"), { defer: true }))
+
   const selectionPreview = (source: string, selection: FileSelection) => {
     return previewSelectedLines(source, {
       start: selection.startLine,
@@ -492,16 +538,39 @@ function SessionFileViewV1(props: { tab: string }) {
   )
 
   const content = () => (
-    <div class="relative mt-3 h-[calc(100%-0.75rem)] min-h-0">
-      <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
-        <Switch>
-          <Match when={state()?.loaded}>{renderFile(contents())}</Match>
-          <Match when={state()?.loading}>
-            <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
-          </Match>
-          <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
-        </Switch>
-      </ScrollView>
+    <div class="relative mt-3 h-[calc(100%-0.75rem)] min-h-0 flex flex-col">
+      <Show when={isMarkdown() && state()?.loaded}>
+        <div class="flex shrink-0 items-center justify-end border-b border-border-weaker-base px-3 py-1.5 bg-background-base">
+          <SegmentedControlV2
+            value={markdownMode()}
+            onChange={(v) => {
+              if (v) setMarkdownMode(v as "preview" | "source")
+            }}
+            aria-label={language.t("file.preview.toggle.ariaLabel")}
+          >
+            <SegmentedControlItemV2 value="preview">
+              {language.t("file.preview.mode.preview")}
+            </SegmentedControlItemV2>
+            <SegmentedControlItemV2 value="source">{language.t("file.preview.mode.source")}</SegmentedControlItemV2>
+          </SegmentedControlV2>
+        </div>
+      </Show>
+      <Show
+        when={isMarkdown() && markdownMode() === "preview" && state()?.loaded}
+        fallback={
+          <ScrollView class="h-full flex-1 min-h-0" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
+            <Switch>
+              <Match when={state()?.loaded}>{renderFile(contents())}</Match>
+              <Match when={state()?.loading}>
+                <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
+              </Match>
+              <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
+            </Switch>
+          </ScrollView>
+        }
+      >
+        <FileMarkdownPreview content={contents()} />
+      </Show>
     </div>
   )
 
@@ -547,6 +616,11 @@ function SessionFileViewV2(props: { tab: string }) {
     tab: () => props.tab,
     view,
   })
+
+  const previewKind = createMemo(() => previewKindFromPath(path()))
+  const isMarkdown = createMemo(() => previewKind() === "markdown")
+  const [markdownMode, setMarkdownMode] = createSignal<"preview" | "source">("preview")
+  createEffect(on(path, () => setMarkdownMode("preview"), { defer: true }))
 
   const selectionPreview = (source: string, selection: FileSelection) => {
     return previewSelectedLines(source, {
@@ -783,16 +857,39 @@ function SessionFileViewV2(props: { tab: string }) {
   )
 
   const content = () => (
-    <div class="relative mt-3 h-[calc(100%-0.75rem)] min-h-0">
-      <ScrollView class="h-full" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
-        <Switch>
-          <Match when={state()?.loaded}>{renderFile(contents())}</Match>
-          <Match when={state()?.loading}>
-            <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
-          </Match>
-          <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
-        </Switch>
-      </ScrollView>
+    <div class="relative mt-3 h-[calc(100%-0.75rem)] min-h-0 flex flex-col">
+      <Show when={isMarkdown() && state()?.loaded}>
+        <div class="flex shrink-0 items-center justify-end border-b border-border-weaker-base px-3 py-1.5 bg-background-base">
+          <SegmentedControlV2
+            value={markdownMode()}
+            onChange={(v) => {
+              if (v) setMarkdownMode(v as "preview" | "source")
+            }}
+            aria-label={language.t("file.preview.toggle.ariaLabel")}
+          >
+            <SegmentedControlItemV2 value="preview">
+              {language.t("file.preview.mode.preview")}
+            </SegmentedControlItemV2>
+            <SegmentedControlItemV2 value="source">{language.t("file.preview.mode.source")}</SegmentedControlItemV2>
+          </SegmentedControlV2>
+        </div>
+      </Show>
+      <Show
+        when={isMarkdown() && markdownMode() === "preview" && state()?.loaded}
+        fallback={
+          <ScrollView class="h-full flex-1 min-h-0" viewportRef={scrollSync.setViewport} onScroll={scrollSync.handleScroll as any}>
+            <Switch>
+              <Match when={state()?.loaded}>{renderFile(contents())}</Match>
+              <Match when={state()?.loading}>
+                <div class="px-6 py-4 text-text-weak">{language.t("common.loading")}...</div>
+              </Match>
+              <Match when={state()?.error}>{(err) => <div class="px-6 py-4 text-text-weak">{err()}</div>}</Match>
+            </Switch>
+          </ScrollView>
+        }
+      >
+        <FileMarkdownPreview content={contents()} />
+      </Show>
     </div>
   )
 

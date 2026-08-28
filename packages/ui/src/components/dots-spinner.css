@@ -1,0 +1,62 @@
+[data-component="dots-spinner"] {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 4px);
+  grid-template-rows: repeat(3, 4px);
+  gap: 3px;
+  width: 16px;
+  height: 16px;
+  align-content: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+[data-component="dots-spinner"] [data-slot="dots-spinner-dot"] {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dots-spinner-pulse 1.2s ease-in-out infinite both;
+}
+
+[data-component="dots-spinner"] [data-slot="dots-spinner-dot"]:nth-child(1) {
+  animation-delay: 0s;
+}
+
+[data-component="dots-spinner"] [data-slot="dots-spinner-dot"]:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+[data-component="dots-spinner"] [data-slot="dots-spinner-dot"]:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+[data-component="dots-spinner"] [data-slot="dots-spinner-dot"]:nth-child(4) {
+  animation-delay: 0.36s;
+}
+
+[data-component="dots-spinner"] [data-slot="dots-spinner-dot"]:nth-child(5) {
+  animation-delay: 0.48s;
+}
+
+[data-component="dots-spinner"] [data-slot="dots-spinner-dot"]:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+@keyframes dots-spinner-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-component="dots-spinner"] [data-slot="dots-spinner-dot"] {
+    animation: none;
+    opacity: 0.6;
+  }
+}

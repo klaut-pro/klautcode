@@ -1279,4 +1279,8 @@ export const dict = {
   "designMode.count.notes": "notes",
   "designMode.visionWarning": "The current model may not support images",
   "designMode.toast.error": "Could not attach design mode output",
+
+  "file.preview.mode.preview": "Preview",
+  "file.preview.mode.source": "Source",
+  "file.preview.toggle.ariaLabel": "Toggle preview mode",
 }

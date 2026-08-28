@@ -138,6 +138,16 @@ html[data-design-mode] [data-component="browser-webview"] webview {
   resize: vertical;
 }
 
+.dm-annotation-card {
+  pointer-events: none;
+}
+
+.dm-annotation-card .dm-annotation-head,
+.dm-annotation-card .dm-annotation-note,
+.dm-annotation-card .dm-annotation-remove {
+  pointer-events: auto;
+}
+
 .dm-hover-label {
   position: absolute;
   transform: translateX(-50%);

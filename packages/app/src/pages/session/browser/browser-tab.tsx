@@ -8,6 +8,7 @@ import { TooltipV2 } from "@klautcode/ui/v2/tooltip-v2"
 import { useLanguage } from "@/context/language"
 import { useLayout } from "@/context/layout"
 import { usePlatform } from "@/context/platform"
+import { useDesignMode } from "@/components/design-mode/controller"
 import { browserUrlFromTab } from "@/pages/session/helpers"
 import { BROWSER_HOME_URL } from "./browser-state"
 import { BROWSER_WEBVIEW_HOST_CLASS, sizeWebviewToHost } from "./webview-layout"
@@ -132,6 +133,7 @@ export function BrowserTab(props: { tab: string }) {
   const language = useLanguage()
   const platform = usePlatform()
   const layout = useLayout()
+  const design = useDesignMode()
   const initialUrl = createMemo(() => {
     const state = layout.browser.get(props.tab)
     if (state?.url) return state.url
@@ -289,6 +291,7 @@ export function BrowserTab(props: { tab: string }) {
     const onNavigate = () => {
       const url = safeGuestUrl()
       logBrowser("navigate", { tab, url, ...webviewSnapshot(ref, el) })
+      if (design.active()) design.exit()
       if (url) {
         loadedUrl = url
         setStore("input", url)
