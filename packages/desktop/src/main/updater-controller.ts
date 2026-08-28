@@ -102,7 +102,16 @@ export function createUpdaterController(input: {
       await input
         .stop()
         .then(() => {
-          input.backend.quitAndInstall()
+          try {
+            input.backend.quitAndInstall()
+          } catch (error) {
+            // quitAndInstall may fail (e.g. code signing on macOS).
+            // The sidecar was already stopped, but auto-restart will
+            // bring it back.
+            input.log?.("quitAndInstall failed, sidecar will auto-respawn", {
+              error: error instanceof Error ? error.message : String(error),
+            })
+          }
           transition({ status: "ready", version })
         })
         .catch((error) => {

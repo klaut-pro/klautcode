@@ -77,6 +77,10 @@ export function setAppQuitting(quitting = true) {
   registry.setQuitting(quitting)
 }
 
+export function isAppQuitting() {
+  return registry.isQuitting()
+}
+
 export function setBackgroundColor(color: string) {
   backgroundColor = color
   BrowserWindow.getAllWindows().forEach((win) => {

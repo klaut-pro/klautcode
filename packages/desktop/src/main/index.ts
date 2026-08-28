@@ -38,6 +38,7 @@ import {
   registerRendererProtocol,
   setRelaunchHandler,
   setAppQuitting,
+  isAppQuitting,
   setBackgroundColor,
   setDockIcon,
   restoreMainWindows,
@@ -66,6 +67,8 @@ const jsCallStackFeature = "DocumentPolicyIncludeJSCallStacksInCrashReports"
 
 let logger: ReturnType<typeof initLogging>
 let server: SidecarListener | null = null
+let sidecarParams: { hostname: string; port: number; password: string; userDataPath: string } | null = null
+let respawnTimer: ReturnType<typeof setTimeout> | null = null
 
 const pendingDeepLinks: string[] = []
 
@@ -86,10 +89,53 @@ function emitDeepLinks(urls: string[]) {
 }
 
 async function killSidecar() {
+  if (respawnTimer) {
+    clearTimeout(respawnTimer)
+    respawnTimer = null
+  }
   if (!server) return
   const current = server
   server = null
   await current.stop()
+}
+
+function scheduleRespawn() {
+  if (isAppQuitting()) {
+    writeLog("utility", "sidecar exit during app quit, skipping respawn", {}, "warn")
+    return
+  }
+  if (!sidecarParams) {
+    writeLog("utility", "sidecar exit with no saved params, skipping respawn", {}, "warn")
+    return
+  }
+  if (respawnTimer) return
+  writeLog("utility", "scheduling sidecar respawn", {}, "warn")
+  respawnTimer = setTimeout(() => {
+    respawnTimer = null
+    void respawnSidecar()
+  }, 1000)
+}
+
+async function respawnSidecar() {
+  if (!sidecarParams || isAppQuitting()) return
+  const { hostname, port, password, userDataPath } = sidecarParams
+  logger.log("respawning sidecar", { url: `http://${hostname}:${port}` })
+  try {
+    const { listener } = await spawnLocalServer(hostname, port, password, {
+      userDataPath,
+      onStdout: (message) => writeLog("server", "stdout", { message }),
+      onStderr: (message) => writeLog("server", "stderr", { message }, "warn"),
+      onExit: (code) => {
+        writeLog("utility", "sidecar exited", { code }, "warn")
+        scheduleRespawn()
+      },
+    })
+    server = listener
+    logger.log("sidecar respawned", { url: `http://${hostname}:${port}` })
+  } catch (error) {
+    logger.error("sidecar respawn failed", { error: String(error) })
+    scheduleRespawn()
+  }
 }
 
 function ensureLoopbackNoProxy() {
@@ -373,14 +419,21 @@ const main = Effect.gen(function* () {
     const hostname = "127.0.0.1"
     const url = `http://${hostname}:${port}`
     const password = randomUUID()
+    const userDataPath = app.getPath("userData")
+
+    // Save params so the sidecar can be respawned after an unexpected exit.
+    sidecarParams = { hostname, port, password, userDataPath }
 
     logger.log("spawning sidecar", { url })
     const { listener, health } = yield* Effect.promise(() =>
       spawnLocalServer(hostname, port, password, {
-        userDataPath: app.getPath("userData"),
+        userDataPath,
         onStdout: (message) => writeLog("server", "stdout", { message }),
         onStderr: (message) => writeLog("server", "stderr", { message }, "warn"),
-        onExit: (code) => writeLog("utility", "sidecar exited", { code }, "warn"),
+        onExit: (code) => {
+          writeLog("utility", "sidecar exited", { code }, "warn")
+          scheduleRespawn()
+        },
       }),
     )
     server = listener
