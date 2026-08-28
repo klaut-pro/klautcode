@@ -172,6 +172,8 @@ function DesktopMemoryRouter(props: BaseRouterProps & { windowID: string; initia
 }
 
 const createPlatform = (windowState: DesktopWindowState): Platform => {
+  const [sidecarStatus, setSidecarStatus] = createSignal<"connected" | "reconnecting" | "failed">("connected")
+  void window.api.onSidecarStatus(setSidecarStatus)
   const attachmentPaths = new WeakMap<File, string>()
   const os = (() => {
     const ua = navigator.userAgent
@@ -236,6 +238,7 @@ const createPlatform = (windowState: DesktopWindowState): Platform => {
     os,
     version: pkg.version,
     windowID: windowState.id,
+    sidecarStatus,
 
     async openDirectoryPickerDialog(opts) {
       return window.api.openDirectoryPicker({

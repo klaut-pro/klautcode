@@ -1,4 +1,4 @@
-import { createEffect, Suspense, type ParentProps } from "solid-js"
+import { createEffect, Show, Suspense, type ParentProps } from "solid-js"
 import { createStore } from "solid-js/store"
 import { DebugBar } from "@/components/debug-bar"
 import { TabsInfoPopup } from "@/components/help-button"
@@ -37,6 +37,18 @@ export default function NewLayout(props: ParentProps) {
             : undefined
         }
       />
+      <Show when={platform.sidecarStatus?.() === "reconnecting"}>
+        <div class="flex items-center justify-center gap-2 px-3 py-1.5 text-xs bg-amber-500/15 text-amber-400 border-b border-amber-500/20">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+          Reconnecting to server…
+        </div>
+      </Show>
+      <Show when={platform.sidecarStatus?.() === "failed"}>
+        <div class="flex items-center justify-center gap-2 px-3 py-1.5 text-xs bg-red-500/15 text-red-400 border-b border-red-500/20">
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-400" />
+          Server disconnected — restart the app to reconnect
+        </div>
+      </Show>
       <UpdateAvailableToast />
       <UpdaterNotice />
       <main class="flex-1 min-h-0 min-w-0 overflow-x-hidden flex flex-col items-start">
