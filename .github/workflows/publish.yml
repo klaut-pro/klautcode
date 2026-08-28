@@ -444,11 +444,13 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: needs.build-cli.result == 'success'
         with:
           name: klautcode-cli
           path: packages/klautcode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: needs.build-cli.result == 'success'
         with:
           name: klautcode-cli-windows
           path: packages/klautcode/dist
@@ -460,6 +462,7 @@ jobs:
           path: packages/klautcode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: needs.build-cli.result == 'success'
         with:
           name: klautcode-preview-cli
           path: packages/cli/dist
