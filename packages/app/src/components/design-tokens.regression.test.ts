@@ -1,9 +1,14 @@
 import { describe, expect, test } from "bun:test"
 import { readdirSync } from "node:fs"
+import { fileURLToPath } from "node:url"
+import { dirname, join } from "node:path"
 
-const appSrc = `${new URL("../..", import.meta.url).pathname}/src`
-const sessionUiSrc = new URL("../../../session-ui/src", import.meta.url).pathname
-const uiSrc = new URL("../../../ui/src", import.meta.url).pathname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+const appSrc = join(__dirname, "../..", "src")
+const sessionUiSrc = join(__dirname, "../../../session-ui/src")
+const uiSrc = join(__dirname, "../../../ui/src")
 
 const RAW_PX_TSX = /text-\[(\d+)px\]/
 const RAW_PX_CSS = /font-size:\s*\d+px/
@@ -11,7 +16,7 @@ const RAW_PX_CSS = /font-size:\s*\d+px/
 function walk(dir: string): string[] {
   return readdirSync(dir, { recursive: true })
     .filter((entry): entry is string => typeof entry === "string")
-    .map((entry) => `${dir}/${entry}`)
+    .map((entry) => join(dir, entry))
 }
 
 function sourceFiles(dir: string, ext: string): string[] {
