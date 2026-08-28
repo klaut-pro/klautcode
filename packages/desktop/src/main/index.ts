@@ -69,6 +69,10 @@ let logger: ReturnType<typeof initLogging>
 let server: SidecarListener | null = null
 let sidecarParams: { hostname: string; port: number; password: string; userDataPath: string } | null = null
 let respawnTimer: ReturnType<typeof setTimeout> | null = null
+let respawnAttempts = 0
+const MAX_RESPAWN_DELAY_MS = 30_000
+const INITIAL_RESPAWN_DELAY_MS = 1_000
+const MAX_RESPAWN_ATTEMPTS = 10
 
 const pendingDeepLinks: string[] = []
 
@@ -99,6 +103,12 @@ async function killSidecar() {
   await current.stop()
 }
 
+function respawnDelay(): number {
+  // Exponential backoff: 1s, 2s, 4s, 8s, 16s, capped at 30s
+  const delay = Math.min(INITIAL_RESPAWN_DELAY_MS * 2 ** respawnAttempts, MAX_RESPAWN_DELAY_MS)
+  return delay
+}
+
 function scheduleRespawn() {
   if (isAppQuitting()) {
     writeLog("utility", "sidecar exit during app quit, skipping respawn", {}, "warn")
@@ -109,11 +119,20 @@ function scheduleRespawn() {
     return
   }
   if (respawnTimer) return
-  writeLog("utility", "scheduling sidecar respawn", {}, "warn")
+  if (respawnAttempts >= MAX_RESPAWN_ATTEMPTS) {
+    logger.error("sidecar respawn limit reached, giving up", { attempts: respawnAttempts })
+    writeLog("utility", "sidecar respawn limit reached", { attempts: respawnAttempts }, "error")
+    broadcastSidecarStatus("failed")
+    return
+  }
+  const delay = respawnDelay()
+  respawnAttempts++
+  broadcastSidecarStatus("reconnecting")
+  writeLog("utility", "scheduling sidecar respawn", { delay, attempt: respawnAttempts }, "warn")
   respawnTimer = setTimeout(() => {
     respawnTimer = null
     void respawnSidecar()
-  }, 1000)
+  }, delay)
 }
 
 async function respawnSidecar() {
@@ -131,10 +150,18 @@ async function respawnSidecar() {
       },
     })
     server = listener
+    respawnAttempts = 0
+    broadcastSidecarStatus("connected")
     logger.log("sidecar respawned", { url: `http://${hostname}:${port}` })
   } catch (error) {
     logger.error("sidecar respawn failed", { error: String(error) })
     scheduleRespawn()
+  }
+}
+
+function broadcastSidecarStatus(status: "connected" | "reconnecting" | "failed") {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (!win.isDestroyed()) win.webContents.send("sidecar-status", status)
   }
 }
 
@@ -456,6 +483,7 @@ const main = Effect.gen(function* () {
       ),
     )
 
+    broadcastSidecarStatus("connected")
     logger.log("loading task finished")
   }).pipe(
     Effect.tapCause((cause) =>

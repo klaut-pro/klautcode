@@ -107,6 +107,9 @@ type PlatformBase = {
   /** Manage WSL sidecar servers (Electron on Windows only) */
   wslServers?: WslServersPlatform
 
+  /** Sidecar connection status (desktop only) */
+  sidecarStatus?: Accessor<"connected" | "reconnecting" | "failed">
+
   /** Get the preferred display backend (desktop only) */
   getDisplayBackend?(): Promise<DisplayBackend | null> | DisplayBackend | null
 

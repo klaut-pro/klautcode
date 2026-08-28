@@ -22,6 +22,8 @@ export type ServerReadyData = {
   password: string | null
 }
 
+export type SidecarStatus = "connected" | "reconnecting" | "failed"
+
 export type WslServersAPI = WslServersPlatform
 export type UpdaterAPI = {
   subscribe: (cb: (state: UpdaterState) => void) => Promise<() => void>
@@ -95,6 +97,7 @@ export type ElectronAPI = {
   getWindowID: () => Promise<string>
   onMenuCommand: (cb: (id: string) => void) => () => void
   onDeepLink: (cb: (urls: string[]) => void) => () => void
+  onSidecarStatus: (cb: (status: SidecarStatus) => void) => () => void
 
   openDirectoryPicker: (opts?: {
     multiple?: boolean
