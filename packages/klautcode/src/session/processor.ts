@@ -29,9 +29,9 @@ import { Usage, type LLMEvent } from "@klautcode/llm"
 const DOOM_LOOP_THRESHOLD = 3
 // Idle (not total) timeout for the LLM stream. If no chunk arrives within this
 // window the stream is considered stalled and is failed with a retryable error
-// so the existing Effect.retry auto-retries it. 120s absorbs slow providers and
-// long "thinking" pauses while still recovering a hung connection promptly.
-const LLM_STREAM_IDLE_TIMEOUT = Duration.seconds(120)
+// so the existing Effect.retry auto-retries it. 120s default, overridable per-provider
+// via `provider.<id>.options.streamIdleTimeout` (ms or false to disable).
+const LLM_STREAM_IDLE_TIMEOUT_DEFAULT = Duration.seconds(120)
 export type Result = "compact" | "stop" | "continue"
 
 export interface Handle {
@@ -638,7 +638,14 @@ const layer = Layer.effect(
           messageID: input.assistantMessage.id,
         })
         ctx.needsCompaction = false
-        ctx.shouldBreak = (yield* config.get()).experimental?.continue_loop_on_deny !== true
+        const cfg = yield* config.get()
+        ctx.shouldBreak = cfg.experimental?.continue_loop_on_deny !== true
+        const rawIdle = (cfg.provider?.[input.model.providerID]?.options as any)?.streamIdleTimeout as
+          | number
+          | false
+          | undefined
+        const idleDuration =
+          rawIdle === false ? undefined : typeof rawIdle === "number" ? Duration.millis(rawIdle) : LLM_STREAM_IDLE_TIMEOUT_DEFAULT
 
         return yield* Effect.gen(function* () {
           yield* Effect.gen(function* () {
@@ -648,26 +655,28 @@ const layer = Layer.effect(
             const stream = llm.stream(streamInput)
 
             // Stall detection: race each pull against a timer that fails the
-            // stream if it stays silent for LLM_STREAM_IDLE_TIMEOUT. The timer
-            // restarts on every chunk, so this is an idle timeout, not a total
-            // timeout. While a tool is in flight the AI SDK stream is
-            // legitimately silent (it runs the tool before emitting
-            // tool-result), so the check is suspended until the tool settles.
+            // stream if it stays silent. Configurable per-provider via
+            // `provider.<id>.options.streamIdleTimeout` (ms, or false to disable).
+            // While a tool is in flight the stream is legitimately silent.
             const stall = Effect.fnUntraced(function* () {
               while (true) {
-                yield* Effect.sleep(LLM_STREAM_IDLE_TIMEOUT)
+                yield* Effect.sleep(idleDuration!)
                 if (Object.keys(ctx.toolcalls).length > 0) continue
                 return yield* Effect.fail(new Error("LLM stream timed out: no chunks received"))
               }
             })
 
-            yield* Stream.transformPull(stream, (pull, _scope) =>
-              Effect.succeed(Effect.raceFirst(pull, stall())),
-            ).pipe(
-              Stream.tap((event) => handleEvent(event)),
+            const baseStream = Stream.tap(stream, (event) => handleEvent(event)).pipe(
               Stream.takeUntil(() => ctx.needsCompaction),
-              Stream.runDrain,
             )
+            const stalledStream = idleDuration
+              ? Stream.transformPull(stream, (pull, _scope) => Effect.succeed(Effect.raceFirst(pull, stall()))).pipe(
+                  Stream.tap((event) => handleEvent(event)),
+                  Stream.takeUntil(() => ctx.needsCompaction),
+                )
+              : baseStream
+
+            yield* Stream.runDrain(idleDuration ? stalledStream : baseStream)
           }).pipe(
             Effect.onInterrupt(() =>
               Effect.gen(function* () {
