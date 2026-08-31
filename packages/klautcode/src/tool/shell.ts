@@ -344,7 +344,7 @@ export const ShellTool = Tool.define(
     const trunc = yield* Truncate.Service
     const plugin = yield* Plugin.Service
     const flags = yield* RuntimeFlags.Service
-    const defaultTimeoutMs = flags.bashDefaultTimeoutMs ?? 15 * 60 * 1000
+    const defaultTimeoutMs = flags.bashDefaultTimeoutMs ?? 0
 
     const cygpath = Effect.fn("ShellTool.cygpath")(function* (shell: string, text: string) {
       const lines = yield* spawner
@@ -537,13 +537,16 @@ export const ShellTool = Tool.define(
             return Effect.sync(() => ctx.abort.removeEventListener("abort", handler))
           })
 
-          const timeout = Effect.sleep(`${input.timeout + 100} millis`)
+          const timeout =
+            input.timeout > 0 ? Effect.sleep(`${input.timeout + 100} millis`) : Effect.never
 
-          const exit = yield* Effect.raceAll([
+          const racers: Array<Effect.Effect<{ kind: "exit" | "abort" | "timeout"; code: number | null }>> = [
             handle.exitCode.pipe(Effect.map((code) => ({ kind: "exit" as const, code }))),
             abort.pipe(Effect.map(() => ({ kind: "abort" as const, code: null }))),
-            timeout.pipe(Effect.map(() => ({ kind: "timeout" as const, code: null }))),
-          ])
+          ]
+          if (input.timeout > 0) racers.push(timeout.pipe(Effect.map(() => ({ kind: "timeout" as const, code: null }))))
+
+          const exit = yield* Effect.raceAll(racers)
 
           if (exit.kind === "abort") {
             aborted = true

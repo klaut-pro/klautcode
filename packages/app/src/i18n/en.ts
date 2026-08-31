@@ -135,6 +135,10 @@ export const dict = {
   "dialog.model.manage": "Manage models",
   "dialog.model.manage.description": "Customize which models appear in the model selector.",
   "dialog.model.manage.provider.toggle": "Toggle all {{provider}} models",
+  "dialog.model.autodiscover.tooltip": "Discover models from Ollama/ROCm",
+  "dialog.model.autodiscover.noProviders": "No Ollama/ROCm providers configured",
+  "dialog.model.autodiscover.success": "Discovered {{count}} models",
+  "dialog.model.autodiscover.empty": "No new models found",
 
   "dialog.model.unpaid.freeModels.title": "Free models provided by Klautcode",
   "dialog.model.unpaid.addMore.title": "Add more models from popular providers",
