@@ -1801,7 +1801,7 @@ const layer = Layer.effect(
 
         const customFetch = options["fetch"]
         const chunkTimeout = options["chunkTimeout"] ?? 300_000
-        const headerTimeout = options["headerTimeout"]
+        const headerTimeout = options["headerTimeout"] ?? 300_000
         delete options["chunkTimeout"]
         delete options["headerTimeout"]
         delete options["streamIdleTimeout"]
