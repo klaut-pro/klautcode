@@ -33,6 +33,16 @@ export function isFreeModel(provider: string, cost: { input: number } | undefine
   return (provider === "klautcode" || provider === "opencode") && (!cost || cost.input === 0)
 }
 
+export function resolveDefaultModel(
+  current: NormalizedProviderListResponse["defaultModel"],
+  legacy: string | undefined,
+) {
+  if (current !== undefined) return current ?? undefined
+  if (!legacy) return undefined
+  const [providerID, modelID] = legacy.split("/")
+  return { providerID, modelID }
+}
+
 // Catalog costs are USD per 1M tokens. Keep small values readable (fractional
 // cents) while still rounding whole-dollar prices to two decimals.
 export function formatModelCost(value: number, intl: string) {

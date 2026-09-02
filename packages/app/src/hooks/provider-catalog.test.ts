@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 import type { NormalizedProviderListResponse } from "@klautcode/session-ui/context"
-import { isFreeModel, selectProviderCatalog } from "./provider-catalog"
+import { isFreeModel, resolveDefaultModel, selectProviderCatalog } from "./provider-catalog"
 
 const catalog = (id: string): NormalizedProviderListResponse => ({
   all: new Map([[id, { id, name: id, source: "api", env: [], options: {}, models: {} }]]),
@@ -81,5 +81,23 @@ describe("isFreeModel", () => {
     expect(isFreeModel("openai", { input: 0 })).toBe(false)
     expect(isFreeModel("anthropic", { input: 0 })).toBe(false)
     expect(isFreeModel("hetzner", { input: 0 })).toBe(false)
+  })
+})
+
+test("uses the current server default model", () => {
+  expect(resolveDefaultModel({ providerID: "openai", modelID: "gpt-5" }, "anthropic/claude")).toEqual({
+    providerID: "openai",
+    modelID: "gpt-5",
+  })
+})
+
+test("does not use legacy config when the current server has no default", () => {
+  expect(resolveDefaultModel(null, "anthropic/claude")).toBeUndefined()
+})
+
+test("uses config for legacy servers", () => {
+  expect(resolveDefaultModel(undefined, "anthropic/claude")).toEqual({
+    providerID: "anthropic",
+    modelID: "claude",
   })
 })
