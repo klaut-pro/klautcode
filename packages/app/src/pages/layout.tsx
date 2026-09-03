@@ -12,7 +12,7 @@ import {
   type Accessor,
 } from "solid-js"
 import { makeEventListener } from "@solid-primitives/event-listener"
-import { useNavigate, useParams } from "@solidjs/router"
+import { useLocation, useNavigate, useParams } from "@solidjs/router"
 import { useLayout, LocalProject } from "@/context/layout"
 import { useServerSync } from "@/context/server-sync"
 import { Persist, persisted } from "@/utils/persist"
@@ -120,6 +120,7 @@ export default function LegacyLayout(props: ParentProps) {
   const notification = useNotification()
   const permission = usePermission()
   const navigate = useNavigate()
+  const location = useLocation()
   const providers = useProviders(() => undefined)
   const dialog = useDialog()
   const command = useCommand()
@@ -538,20 +539,30 @@ export default function LegacyLayout(props: ParentProps) {
     return projects.find((p) => p.worktree === root)
   })
 
+  let autoselectFired = false
   const [autoselecting] = createResource(async () => {
     await ready.promise
     await layout.ready.promise
+    if (autoselectFired) return
+    if (untrack(() => location.pathname) !== "/") return
     if (!untrack(() => state.autoselect)) return
+    autoselectFired = true
 
     const list = layout.projects.list()
     const last = server.projects.last()
 
     if (list.length === 0) {
-      if (!last) return
+      if (!last) {
+        autoselectFired = false
+        return
+      }
       await openProject(last, true)
     } else {
       const next = list.find((project) => project.worktree === last) ?? list[0]
-      if (!next) return
+      if (!next) {
+        autoselectFired = false
+        return
+      }
       await openProject(next.worktree, true)
     }
   })

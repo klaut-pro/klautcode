@@ -3,6 +3,7 @@ import { createEffect, For, type JSX, on, Show } from "solid-js"
 import { createStore } from "solid-js/store"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { useI18n } from "../context/i18n"
+import { DotsSpinner } from "./dots-spinner"
 import { Icon, type IconProps } from "./icon"
 import { IconButton } from "./icon-button"
 import { TextField } from "./text-field"
@@ -320,7 +321,12 @@ export function List<T>(props: ListProps<T> & { ref?: (ref: ListRef) => void }) 
           when={flat().length > 0 || showAdd()}
           fallback={
             <div data-slot="list-empty-state">
-              <div data-slot="list-message">{emptyMessage()}</div>
+              <div data-slot="list-message" data-loading={grouped.loading || undefined}>
+                <Show when={grouped.loading}>
+                  <DotsSpinner />
+                </Show>
+                <span>{emptyMessage()}</span>
+              </div>
             </div>
           }
         >

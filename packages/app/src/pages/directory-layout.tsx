@@ -13,6 +13,7 @@ import type { ServerConnection } from "@/context/server"
 import { sessionHref } from "@/utils/session-route"
 import { useServerSync } from "@/context/server-sync"
 import { GlobalMcpAuthToast } from "@/components/global-mcp-auth-toast"
+import { pathKey } from "@/utils/path-key"
 
 export function DirectoryDataProvider(
   props: ParentProps<{
@@ -34,11 +35,18 @@ export function DirectoryDataProvider(
     return `/${slug()}/session/${sessionID}`
   }
 
+  const redirected = new Set<string>()
   createEffect(() => {
     // A draft lives at /new-session?draftId=… and has no directory segment to normalize.
     if (props.draftID || props.server?.()) return
+    if (sync().status !== "complete") return
     const next = sync().data.path.directory
-    if (!next || next === directory()) return
+    if (!next) return
+    const currentKey = pathKey(directory())
+    const nextKey = pathKey(next)
+    if (nextKey === currentKey) return
+    if (redirected.has(currentKey)) return
+    redirected.add(currentKey)
     const path = location.pathname.slice(slug().length + 1)
     navigate(`/${base64Encode(next)}${path}${location.search}${location.hash}`, { replace: true })
   })

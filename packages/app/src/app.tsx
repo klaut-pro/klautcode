@@ -98,10 +98,13 @@ const SessionRoute = () => {
 
   // When the new layout is enabled, the legacy new-session route (/:dir/session with no id)
   // is replaced by a draft at /new-session?draftId=…
+  let draftCreated = false
   createEffect(() => {
+    if (draftCreated) return
     if (!settings.general.newLayoutDesigns()) return
     if (params.id || search.draftId) return
     if (!tabs.ready() || !sdk().directory) return
+    draftCreated = true
     tabs.newDraft({ server: server.key, directory: sdk().directory }, search.prompt)
   })
 

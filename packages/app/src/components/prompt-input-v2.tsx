@@ -53,6 +53,63 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
   const command = useCommand()
   const language = useLanguage()
   const settings = useSettings()
+  const sdk = useSDK()
+  const sync = useSync()
+
+  const autodiscover = async () => {
+    const providers = sync.data.provider
+    const targets = providers.filter((p) => p.id === "ollama" || p.id === "rocm")
+    if (targets.length === 0) {
+      showToast({ title: language.t("dialog.model.autodiscover.noProviders") })
+      return
+    }
+    let discovered = 0
+    for (const provider of targets) {
+      const baseURL = (provider as unknown as { baseURL?: string }).baseURL ?? (provider as unknown as { options?: { baseURL?: string } }).options?.baseURL
+      const base = baseURL?.replace(/\/v1\/?$/, "") ?? `http://${provider.id === "rocm" ? "10.63.81.100:8061" : "10.63.81.100:11434"}`
+      try {
+        const tagsRes = await fetch(`${base}/api/tags`)
+        if (tagsRes.ok) {
+          const data = (await tagsRes.json()) as {
+            models: Array<{ name: string; details: { context_length: number }; capabilities: string[] }>
+          }
+          for (const m of data.models) {
+            const limit = { context: m.details.context_length ?? 262144, output: 16384 }
+            const reasoning = m.capabilities?.includes("thinking") ?? false
+            const tool_call = m.capabilities?.includes("tools") ?? false
+            await sdk.client.config.update({
+              provider: {
+                [provider.id]: {
+                  models: { [m.name]: { name: m.name.replace(/:latest$/, ""), reasoning, tool_call, limit } as unknown as Record<string, unknown> },
+                },
+              },
+            } as unknown as Parameters<typeof sdk.client.config.update>[0])
+            discovered++
+          }
+          continue
+        }
+      } catch {}
+      try {
+        const v1Res = await fetch(`${base}/v1/models`)
+        if (v1Res.ok) {
+          const v1 = (await v1Res.json()) as { data: Array<{ id: string }> }
+          for (const m of v1.data ?? []) {
+            await sdk.client.config.update({
+              provider: {
+                [provider.id]: {
+                  models: { [m.id]: { name: m.id, limit: { context: 262144, output: 16384 } } as unknown as Record<string, unknown> },
+                },
+              },
+            } as unknown as Parameters<typeof sdk.client.config.update>[0])
+            discovered++
+          }
+        }
+      } catch {}
+    }
+    showToast({
+      title: discovered > 0 ? language.t("dialog.model.autodiscover.success", { count: discovered }) : language.t("dialog.model.autodiscover.empty"),
+    })
+  }
 
   return (
     <div class="flex flex-col gap-3">
@@ -79,6 +136,18 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
                 dialog.show(() => <DialogSelectModelUnpaidV2 model={props.controller.model.selection} />)
               }
             />
+            <TooltipV2 placement="top" gutter={4} value={language.t("dialog.model.autodiscover.tooltip")}>
+              <ButtonV2
+                variant="ghost-muted"
+                size="small"
+                data-action="prompt-autodiscover"
+                class="size-7 p-0"
+                onClick={() => void autodiscover()}
+                aria-label={language.t("dialog.model.autodiscover.tooltip")}
+              >
+                <Icon name="arrow-path" size="small" />
+              </ButtonV2>
+            </TooltipV2>
             <TooltipV2
               placement="top"
               gutter={4}

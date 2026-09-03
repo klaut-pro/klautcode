@@ -7,6 +7,11 @@ const positiveInteger = (name: string) =>
     Config.map((value) => (Number.isInteger(value) && value > 0 ? value : undefined)),
     Config.orElse(() => Config.succeed(undefined)),
   )
+const nonNegativeInteger = (name: string) =>
+  Config.number(name).pipe(
+    Config.map((value) => (Number.isInteger(value) && value >= 0 ? value : undefined)),
+    Config.orElse(() => Config.succeed(undefined)),
+  )
 const experimental = bool("KLAUTCODE_EXPERIMENTAL")
 const enabledByExperimental = (name: string) =>
   Config.all({ experimental, enabled: Config.boolean(name).pipe(Config.option) }).pipe(
@@ -50,7 +55,7 @@ export class Service extends ConfigService.Service<Service>()("@klautcode/Runtim
   experimentalWorkspaces: enabledByExperimental("KLAUTCODE_EXPERIMENTAL_WORKSPACES"),
   experimentalIconDiscovery: enabledByExperimental("KLAUTCODE_EXPERIMENTAL_ICON_DISCOVERY"),
   outputTokenMax: positiveInteger("KLAUTCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX"),
-  bashDefaultTimeoutMs: positiveInteger("KLAUTCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS"),
+  bashDefaultTimeoutMs: nonNegativeInteger("KLAUTCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS"),
   experimentalNativeLlm: bool("KLAUTCODE_EXPERIMENTAL_NATIVE_LLM"),
   experimentalWebSockets: bool("KLAUTCODE_EXPERIMENTAL_WEBSOCKETS"),
   client: Config.string("KLAUTCODE_CLIENT").pipe(Config.withDefault("cli")),

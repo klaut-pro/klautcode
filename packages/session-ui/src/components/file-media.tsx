@@ -9,6 +9,7 @@ import {
   mediaKindFromPath,
   normalizeMimeType,
   svgTextFromValue,
+  type MediaKind,
 } from "../pierre/media"
 
 export type FileMediaOptions = {
@@ -20,12 +21,12 @@ export type FileMediaOptions = {
   deleted?: boolean
   readFile?: (path: string) => Promise<FileContent | undefined>
   onLoad?: () => void
-  onError?: (ctx: { kind: "image" | "audio" | "svg" }) => void
+  onError?: (ctx: { kind: MediaKind }) => void
 }
 
-function mediaValue(cfg: FileMediaOptions, mode: "image" | "audio") {
+function mediaValue(cfg: FileMediaOptions, mode: MediaKind) {
   if (cfg.current !== undefined) return cfg.current
-  if (mode === "image") return cfg.after ?? cfg.before
+  if (mode === "image" || mode === "video" || mode === "pdf") return cfg.after ?? cfg.before
   return cfg.after ?? cfg.before
 }
 
@@ -67,14 +68,14 @@ export function FileMedia(props: { media?: FileMediaOptions; fallback: () => JSX
   const direct = createMemo(() => {
     const media = cfg()
     const k = kind()
-    if (!media || (k !== "image" && k !== "audio")) return
+    if (!media || (k !== "image" && k !== "audio" && k !== "video" && k !== "pdf")) return
     return dataUrlFromMediaValue(mediaValue(media, k), k)
   })
 
   const request = createMemo(() => {
     const media = cfg()
     const k = kind()
-    if (!media || (k !== "image" && k !== "audio")) return
+    if (!media || (k !== "image" && k !== "audio" && k !== "video" && k !== "pdf")) return
     if (media.current !== undefined) return
     if (deleted()) return
     if (direct()) return
@@ -116,7 +117,10 @@ export function FileMedia(props: { media?: FileMediaOptions; fallback: () => JSX
           loading: false,
           error: false,
           src,
-          mime: input.kind === "audio" ? normalizeMimeType(result?.mimeType) : undefined,
+          mime:
+            input.kind === "audio" || input.kind === "video"
+              ? normalizeMimeType(result?.mimeType)
+              : undefined,
         })
       },
       () => {
@@ -150,6 +154,12 @@ export function FileMedia(props: { media?: FileMediaOptions; fallback: () => JSX
     if (!input || remote.key !== input.key) return
     return remote.mime
   })
+  const videoMime = createMemo(() => {
+    const input = request()
+    if (!input || remote.key !== input.key) return
+    if (input.kind !== "video") return
+    return remote.mime
+  })
 
   const svgSource = createMemo(() => {
     const media = cfg()
@@ -180,8 +190,13 @@ export function FileMedia(props: { media?: FileMediaOptions; fallback: () => JSX
     ),
   )
 
-  const kindLabel = (value: "image" | "audio") =>
-    i18n.t(value === "image" ? "ui.fileMedia.kind.image" : "ui.fileMedia.kind.audio")
+  const kindLabel = (value: MediaKind) => {
+    if (value === "image") return i18n.t("ui.fileMedia.kind.image")
+    if (value === "audio") return i18n.t("ui.fileMedia.kind.audio")
+    if (value === "video") return i18n.t("ui.fileMedia.kind.video" as never) || "video"
+    if (value === "pdf") return i18n.t("ui.fileMedia.kind.pdf" as never) || "pdf"
+    return value
+  }
 
   return (
     <Switch>
@@ -192,7 +207,7 @@ export function FileMedia(props: { media?: FileMediaOptions; fallback: () => JSX
             const media = cfg()
             const k = kind()
             if (!media || (k !== "image" && k !== "audio")) return props.fallback()
-            const label = kindLabel(k)
+            const label = kindLabel(k as MediaKind)
 
             if (deleted()) {
               return (
@@ -246,6 +261,107 @@ export function FileMedia(props: { media?: FileMediaOptions; fallback: () => JSX
               </div>
             )
           }}
+        </Show>
+      </Match>
+      <Match when={kind() === "video"}>
+        <Show
+          when={src()}
+          fallback={(() => {
+            const media = cfg()
+            const k = kind()
+            if (!media || k !== "video") return props.fallback()
+            const label = kindLabel(k as MediaKind)
+
+            if (deleted()) {
+              return (
+                <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                  {i18n.t("ui.fileMedia.state.removed", { kind: label })}
+                </div>
+              )
+            }
+            if (status() === "loading") {
+              return (
+                <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                  {i18n.t("ui.fileMedia.state.loading", { kind: label })}
+                </div>
+              )
+            }
+            if (status() === "error") {
+              return (
+                <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                  {i18n.t("ui.fileMedia.state.error", { kind: label })}
+                </div>
+              )
+            }
+            return (
+              <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                {i18n.t("ui.fileMedia.state.unavailable", { kind: label })}
+              </div>
+            )
+          })()}
+        >
+          {(value) => (
+            <div class="flex justify-center bg-background-stronger px-6 py-4">
+              <video
+                class="max-h-[60vh] w-full max-w-3xl rounded border border-border-weak-base bg-background-base"
+                controls
+                preload="metadata"
+                onLoadedMetadata={onLoad}
+                onCanPlay={onLoad}
+              >
+                <source src={value()} type={videoMime() || undefined} />
+              </video>
+            </div>
+          )}
+        </Show>
+      </Match>
+      <Match when={kind() === "pdf"}>
+        <Show
+          when={src()}
+          fallback={(() => {
+            const media = cfg()
+            const k = kind()
+            if (!media || k !== "pdf") return props.fallback()
+            const label = kindLabel(k as MediaKind)
+
+            if (deleted()) {
+              return (
+                <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                  {i18n.t("ui.fileMedia.state.removed", { kind: label })}
+                </div>
+              )
+            }
+            if (status() === "loading") {
+              return (
+                <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                  {i18n.t("ui.fileMedia.state.loading", { kind: label })}
+                </div>
+              )
+            }
+            if (status() === "error") {
+              return (
+                <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                  {i18n.t("ui.fileMedia.state.error", { kind: label })}
+                </div>
+              )
+            }
+            return (
+              <div class="flex min-h-40 items-center justify-center px-6 py-4 text-center text-text-weak">
+                {i18n.t("ui.fileMedia.state.unavailable", { kind: label })}
+              </div>
+            )
+          })()}
+        >
+          {(value) => (
+            <div class="flex flex-col gap-2 bg-background-stronger p-4">
+              <iframe
+                src={value()}
+                title={cfg()?.path}
+                class="h-[70vh] w-full rounded border border-border-weak-base bg-background-base"
+                onLoad={onLoad}
+              />
+            </div>
+          )}
         </Show>
       </Match>
       <Match when={kind() === "svg"}>

@@ -135,6 +135,10 @@ export const dict = {
   "dialog.model.manage": "Manage models",
   "dialog.model.manage.description": "Customize which models appear in the model selector.",
   "dialog.model.manage.provider.toggle": "Toggle all {{provider}} models",
+  "dialog.model.autodiscover.tooltip": "Discover models from Ollama/ROCm",
+  "dialog.model.autodiscover.noProviders": "No Ollama/ROCm providers configured",
+  "dialog.model.autodiscover.success": "Discovered {{count}} models",
+  "dialog.model.autodiscover.empty": "No new models found",
 
   "dialog.model.unpaid.freeModels.title": "Free models provided by Klautcode",
   "dialog.model.unpaid.addMore.title": "Add more models from popular providers",
@@ -1279,4 +1283,8 @@ export const dict = {
   "designMode.count.notes": "notes",
   "designMode.visionWarning": "The current model may not support images",
   "designMode.toast.error": "Could not attach design mode output",
+
+  "file.preview.mode.preview": "Preview",
+  "file.preview.mode.source": "Source",
+  "file.preview.toggle.ariaLabel": "Toggle preview mode",
 }

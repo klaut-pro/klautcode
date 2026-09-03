@@ -1462,6 +1462,48 @@ export function Prompt(props: PromptProps) {
                             {local.model.parsed().model}
                           </text>
                           <text fg={fadeColor(theme.textMuted, modelMetaAlpha())}>{currentProviderLabel()}</text>
+                          <text
+                            fg={fadeColor(theme.textMuted, modelMetaAlpha())}
+                            onMouseDown={async () => {
+                              const providers = sync.data.provider.filter((p) => p.id === "ollama" || p.id === "rocm")
+                              if (providers.length === 0) {
+                                toast.show({ message: "No Ollama/ROCm providers", variant: "warning" })
+                                return
+                              }
+                              let discovered = 0
+                              for (const provider of providers) {
+                                const base = (provider as unknown as { baseURL?: string }).baseURL ?? `http://${provider.id === "rocm" ? "10.63.81.100:8061" : "10.63.81.100:11434"}`
+                                const clean = base.replace(/\/v1\/?$/, "")
+                                try {
+                                  const res = await fetch(`${clean}/api/tags`)
+                                  if (res.ok) {
+                                    const data = (await res.json()) as { models: Array<{ name: string; details: { context_length: number }; capabilities: string[] }> }
+                                    for (const m of data.models) {
+                                      const limit = { context: m.details.context_length ?? 262144, output: 16384 }
+                                      const reasoning = m.capabilities?.includes("thinking") ?? false
+                                      const tool_call = m.capabilities?.includes("tools") ?? false
+                                      await sdk.client.config.update({ provider: { [provider.id]: { models: { [m.name]: { name: m.name.replace(/:latest$/, ""), reasoning, tool_call, limit } } } } } as unknown as Parameters<typeof sdk.client.config.update>[0])
+                                      discovered++
+                                    }
+                                    continue
+                                  }
+                                } catch {}
+                                try {
+                                  const res = await fetch(`${clean}/v1/models`)
+                                  if (res.ok) {
+                                    const v1 = (await res.json()) as { data: Array<{ id: string }> }
+                                    for (const m of v1.data ?? []) {
+                                      await sdk.client.config.update({ provider: { [provider.id]: { models: { [m.id]: { name: m.id, limit: { context: 262144, output: 16384 } } } } } as unknown as Parameters<typeof sdk.client.config.update>[0])
+                                      discovered++
+                                    }
+                                  }
+                                } catch {}
+                              }
+                              toast.show({ message: discovered > 0 ? `Discovered ${discovered} models` : "No new models", variant: discovered > 0 ? "success" : "warning" })
+                            }}
+                          >
+                            ↻
+                          </text>
                           <Show when={showVariant()}>
                             <text fg={fadeColor(theme.textMuted, variantMetaAlpha())}>·</text>
                             <text>

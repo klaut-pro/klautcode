@@ -282,6 +282,11 @@ function wireNavigationPolicy(win: BrowserWindow) {
 // navigate to the app's own renderer URL.
 function wireWebviewGuests(win: BrowserWindow) {
   win.webContents.on("did-attach-webview", (_event, contents) => {
+    // Use a standard Chrome UA for the in-app browser so Google OAuth and other
+    // sites see a normal browser (same links as a regular Chrome tab). Keep the
+    // main window's Electron UA for app API traffic.
+    contents.setUserAgent(contents.getUserAgent().replace(/\sElectron\/[^\s]+/, "").replace(/\sklautcode\/[^\s]+/, ""))
+
     webviewGuests.set(win, contents)
     contents.once("destroyed", () => {
       if (webviewGuests.get(win) === contents) webviewGuests.delete(win)

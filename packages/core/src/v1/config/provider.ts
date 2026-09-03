@@ -118,6 +118,10 @@ export const Info = Schema.Struct({
           description:
             "Timeout in milliseconds between streamed SSE chunks for this provider. If no chunk arrives within this window, the request is aborted.",
         }),
+        streamIdleTimeout: Schema.optional(Schema.Union([PositiveInt, Schema.Literal(false)]).annotate({
+          description:
+            "Idle timeout in milliseconds for the LLM stream. If no chunk arrives within this window the stream is considered stalled. Set to false to disable. Default 120000.",
+        })),
       }),
       [Schema.Record(Schema.String, Schema.Any)],
     ),

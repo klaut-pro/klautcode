@@ -102,10 +102,10 @@ const layer = Layer.effect(
       memory: Effect.fn("SystemPrompt.memory")(function* () {
         const ctx = yield* InstanceState.context
         const projectID = ProjectV2.ID.make(ctx.project.id)
-        const nodes = yield* knowledge.recent({ scope: "project", projectID, limit: 8 }).pipe(Effect.orDie)
+        const nodes = yield* knowledge.recent({ scope: "project", projectID, limit: 4 }).pipe(Effect.orDie)
         if (nodes.length === 0) return undefined
         const entries = nodes.map((node) => {
-          const body = node.body && node.body.length > 600 ? `${node.body.slice(0, 599)}…` : node.body
+          const body = node.body && node.body.length > 400 ? `${node.body.slice(0, 399)}…` : node.body
           const lines = [`  <entry>`, `    <title>${node.title}</title>`]
           if (body) lines.push(`    <body>${body}</body>`)
           lines.push("  </entry>")
@@ -128,9 +128,8 @@ const layer = Layer.effect(
         return [
           "Skills provide specialized instructions and workflows for specific tasks.",
           "Use the skill tool to load a skill when a task matches its description.",
-          // the agents seem to ingest the information about skills a bit better if we present a more verbose
-          // version of them here and a less verbose version in tool description, rather than vice versa.
-          Skill.fmt(list, { verbose: true }),
+          // Token-optimized: concise catalog avoids repeating absolute paths.
+          Skill.fmt(list, { verbose: false }),
         ].join("\n")
       }),
 
