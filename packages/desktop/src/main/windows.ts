@@ -282,14 +282,20 @@ function wireNavigationPolicy(win: BrowserWindow) {
 // navigate to the app's own renderer URL.
 function wireWebviewGuests(win: BrowserWindow) {
   win.webContents.on("did-attach-webview", (_event, contents) => {
-    // Use a standard Chrome UA for the in-app browser so Google OAuth and other
-    // sites see a normal browser (same links as a regular Chrome tab). Keep the
-    // main window's Electron UA for app API traffic.
-    contents.setUserAgent(contents.getUserAgent().replace(/\sElectron\/[^\s]+/, "").replace(/\sklautcode\/[^\s]+/, ""))
+    // Use the system's Chrome UA for the in-app browser so sites see a normal
+    // Chromium (same links as a regular browser tab). Keep the main window's
+    // Electron UA for app API traffic.
+    const chromeVersion = process.versions.chrome ?? "131.0.0.0"
+    const systemChromeUA = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion} Safari/537.36`
+    contents.setUserAgent(systemChromeUA)
 
     const tag = `webview:${contents.id}`
     const logNav = (event: string, url: string, extra: Record<string, unknown> = {}) => {
-      console.info(`[${tag}] ${event} ${JSON.stringify({ url, ...extra })}`)
+      const line = `[${tag}] ${event} ${JSON.stringify({ url, ...extra })}`
+      console.info(line)
+      try {
+        writeLog(line)
+      } catch {}
     }
 
     webviewGuests.set(win, contents)
