@@ -287,25 +287,47 @@ function wireWebviewGuests(win: BrowserWindow) {
     // main window's Electron UA for app API traffic.
     contents.setUserAgent(contents.getUserAgent().replace(/\sElectron\/[^\s]+/, "").replace(/\sklautcode\/[^\s]+/, ""))
 
+    const tag = `webview:${contents.id}`
+    const logNav = (event: string, url: string, extra: Record<string, unknown> = {}) => {
+      console.info(`[${tag}] ${event} ${JSON.stringify({ url, ...extra })}`)
+    }
+
     webviewGuests.set(win, contents)
     contents.once("destroyed", () => {
       if (webviewGuests.get(win) === contents) webviewGuests.delete(win)
     })
-    contents.setWindowOpenHandler(({ url }) => {
+    contents.setWindowOpenHandler((details) => {
+      logNav("window-open", details.url, { disposition: details.disposition, features: details.features })
+      if (isRendererUrl(details.url)) {
+        openExternalURL(details.url)
+        return { action: "deny" }
+      }
       // Keep all popups from the in-app browser in-app (same webview) — covers
       // Google, GitHub, Microsoft and any OAuth provider. Same links as a normal
       // browser tab, no external browser hop.
-      if (isRendererUrl(url)) {
-        openExternalURL(url)
-        return { action: "deny" }
-      }
-      void contents.loadURL(url)
+      void contents.loadURL(details.url).catch((e) => logNav("loadURL-failed", details.url, { error: String(e) }))
       return { action: "deny" }
     })
     contents.on("will-navigate", (event, url) => {
+      logNav("will-navigate", url)
       if (!isRendererUrl(url)) return
       event.preventDefault()
       openExternalURL(url)
+    })
+    contents.on("will-redirect", (_event, url) => logNav("will-redirect", url))
+    contents.on("did-redirect-navigation", (_event, url) => logNav("did-redirect-navigation", url))
+    contents.on("did-navigate", (_event, url) => logNav("did-navigate", url))
+    contents.on("did-navigate-in-page", (_event, url) => logNav("did-navigate-in-page", url))
+    contents.on("did-fail-load", (_event, code, desc, url, isMain) =>
+      logNav("did-fail-load", url, { code, desc, isMain }),
+    )
+    contents.session.webRequest.onBeforeRedirect((details) => {
+      logNav("webRequest-before-redirect", details.url, { redirectURL: details.redirectURL, statusCode: details.statusCode })
+    })
+    contents.session.webRequest.onCompleted((details) => {
+      if (details.url.includes("agentic-book") || details.url.includes("accounts.google")) {
+        logNav("webRequest-completed", details.url, { statusCode: details.statusCode, method: details.method })
+      }
     })
   })
 }
