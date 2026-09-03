@@ -229,7 +229,7 @@ export function BrowserTab(props: { tab: string }) {
     logChainHeights(ref, tab, "mount")
     const el = document.createElement("webview") as WebviewTag
     el.setAttribute("partition", "persist:klautcode-browser")
-    el.setAttribute("allowpopups", "false")
+    el.setAttribute("allowpopups", "true")
     // Native guest views collapse under `display:flex` + overflow-hidden ancestors.
     el.style.display = "block"
     el.style.position = "absolute"

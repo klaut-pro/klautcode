@@ -292,6 +292,19 @@ function wireWebviewGuests(win: BrowserWindow) {
       if (webviewGuests.get(win) === contents) webviewGuests.delete(win)
     })
     contents.setWindowOpenHandler(({ url }) => {
+      // Keep OAuth and same-site popups in-app so window.open Google flow stays in the webview
+      if (URL.canParse(url)) {
+        const host = new URL(url).hostname.toLowerCase()
+        if (
+          host === "accounts.google.com" ||
+          host.endsWith(".accounts.google.com") ||
+          host === "agentic-book.org" ||
+          host.endsWith(".agentic-book.org")
+        ) {
+          void contents.loadURL(url)
+          return { action: "deny" }
+        }
+      }
       openExternalURL(url)
       return { action: "deny" }
     })
