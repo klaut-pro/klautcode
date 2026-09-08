@@ -477,7 +477,7 @@ function ModelSelectorPopoverV2View(props: {
                 <For each={groups()}>
                   {(group) => (
                     <MenuV2.Group>
-                      <MenuV2.GroupLabel class="gap-2 px-3">
+                      <MenuV2.GroupLabel class="sticky top-0 z-10 gap-2 bg-v2-background-bg-layer-01 px-3">
                         <span class="min-w-0 truncate">
                           {group.category === freeModelsKey
                             ? language.t("dialog.model.unpaid.freeModels.title")
