@@ -1,6 +1,6 @@
 import { LayerNode } from "@klautcode/core/effect/layer-node"
 import { Context, Effect, Layer } from "effect"
-import open from "open"
+import { openUrl } from "@klautcode/core/open"
 
 export interface Interface {
   readonly open: (url: string) => Effect.Effect<void, Error>
@@ -13,7 +13,7 @@ const layer = Layer.succeed(
   Service.of({
     open: Effect.fn("McpBrowser.open")(function* (url: string) {
       const subprocess = yield* Effect.tryPromise({
-        try: () => open(url),
+        try: () => openUrl(url),
         catch: (error) => (error instanceof Error ? error : new Error(String(error))),
       })
       yield* Effect.callback<void, Error>((resume) => {

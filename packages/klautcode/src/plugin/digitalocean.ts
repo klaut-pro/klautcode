@@ -3,7 +3,7 @@ import type { Model } from "@klautcode/sdk/v2"
 import { InstallationVersion } from "@klautcode/core/installation/version"
 import { OauthCallbackPage } from "@klautcode/core/oauth/page"
 import { createServer } from "http"
-import open from "open"
+import { openUrl } from "@klautcode/core/open"
 
 const DO_OAUTH_CLIENT_ID = "b1a6c5158156caac821fd1b30253ca8acb52454a48fa744420e41889cb589f82"
 const DO_AUTHORIZE_URL = "https://cloud.digitalocean.com/v1/oauth/authorize"
@@ -279,7 +279,7 @@ export async function DigitalOceanAuthPlugin(input: PluginInput): Promise<Hooks>
             const state = generateState()
             const callbackPromise = waitForOAuthCallback(state)
             const url = buildAuthorizeUrl(state)
-            await open(url).catch(() => undefined)
+            await openUrl(url).catch(() => undefined)
             return {
               url,
               instructions:
