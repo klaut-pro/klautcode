@@ -185,6 +185,8 @@ export const prepare = Effect.fn("LLMRequestPrep.prepare")(function* (input: Pre
     params,
     messageTransformOptions: options,
     headers: {
+      "x-klautcode-session-id": input.sessionID,
+      ...(input.parentSessionID ? { "x-klautcode-parent-session-id": input.parentSessionID } : {}),
       ...(input.model.providerID.startsWith("klautcode")
         ? {
             ...(klautcodeProjectID ? { "x-klautcode-project": klautcodeProjectID } : {}),
