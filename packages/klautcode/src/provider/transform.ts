@@ -555,7 +555,10 @@ export function topP(model: Provider.Model) {
   }
   if (
     ["deepseek-v4-flash-0731", "deepseek-v4-flash:0731"].some((name) => id.includes(name)) ||
-    (id.includes("deepseek-v4-flash") && (model.providerID === "deepseek" || model.providerID.startsWith("klautcode")))
+    (id.includes("deepseek-v4-flash") &&
+      (model.providerID === "deepseek" ||
+        model.providerID.startsWith("klautcode") ||
+        model.providerID.startsWith("opencode")))
   ) {
     return 0.95
   }
