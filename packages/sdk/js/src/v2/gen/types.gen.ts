@@ -1766,7 +1766,20 @@ export type ProviderConfig = {
      * Timeout in milliseconds between streamed SSE chunks for this provider (default: 300000). If no chunk arrives within this window, the request is aborted. Set to false to disable timeout.
      */
     chunkTimeout?: number | false
-    [key: string]: unknown | string | boolean | number | false | number | false | number | false | undefined
+    streamIdleTimeout?: number | false
+    [key: string]:
+      | unknown
+      | string
+      | boolean
+      | number
+      | false
+      | number
+      | false
+      | number
+      | false
+      | number
+      | false
+      | undefined
   }
   models?: {
     [key: string]: {
@@ -7420,7 +7433,7 @@ export type GlobalDisposeResponse = GlobalDisposeResponses[keyof GlobalDisposeRe
 
 export type GlobalUpgradeData = {
   body?: {
-    target?: string
+    target: string
   }
   path?: never
   query?: never
@@ -12205,6 +12218,47 @@ export type V2ModelListResponses = {
 }
 
 export type V2ModelListResponse = V2ModelListResponses[keyof V2ModelListResponses]
+
+export type V2ModelDefaultData = {
+  body?: never
+  path?: never
+  query?: {
+    location?: {
+      directory?: string
+      workspace?: string
+    }
+  }
+  url: "/api/model/default"
+}
+
+export type V2ModelDefaultErrors = {
+  /**
+   * InvalidRequestError
+   */
+  400: InvalidRequestError
+  /**
+   * UnauthorizedError
+   */
+  401: UnauthorizedError
+  /**
+   * ServiceUnavailableError
+   */
+  503: ServiceUnavailableError
+}
+
+export type V2ModelDefaultError = V2ModelDefaultErrors[keyof V2ModelDefaultErrors]
+
+export type V2ModelDefaultResponses = {
+  /**
+   * Success
+   */
+  200: {
+    location: LocationInfo
+    data?: ModelV2Info
+  }
+}
+
+export type V2ModelDefaultResponse = V2ModelDefaultResponses[keyof V2ModelDefaultResponses]
 
 export type V2ProviderListData = {
   body?: never

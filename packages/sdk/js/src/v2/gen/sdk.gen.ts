@@ -301,6 +301,8 @@ import type {
   V2IntegrationListResponses,
   V2LocationGetErrors,
   V2LocationGetResponses,
+  V2ModelDefaultErrors,
+  V2ModelDefaultResponses,
   V2ModelListErrors,
   V2ModelListResponses,
   V2PermissionRequestListErrors,
@@ -1359,7 +1361,7 @@ export class Global extends HeyApiClient {
   /**
    * Upgrade klautcode
    *
-   * Upgrade klautcode to the specified version or latest if not specified.
+   * Upgrade klautcode to the specified version.
    */
   public upgrade<ThrowOnError extends boolean = false>(
     parameters?: {
@@ -5952,6 +5954,28 @@ export class Model extends HeyApiClient {
     const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "location" }] }])
     return (options?.client ?? this.client).get<V2ModelListResponses, V2ModelListErrors, ThrowOnError>({
       url: "/api/model",
+      ...options,
+      ...params,
+    })
+  }
+
+  /**
+   * Get default model
+   *
+   * Retrieve the default model respecting enabled state and free model preference. Returns no model when the catalog has none available.
+   */
+  public default<ThrowOnError extends boolean = false>(
+    parameters?: {
+      location?: {
+        directory?: string
+        workspace?: string
+      }
+    },
+    options?: Options<never, ThrowOnError>,
+  ) {
+    const params = buildClientParams([parameters], [{ args: [{ in: "query", key: "location" }] }])
+    return (options?.client ?? this.client).get<V2ModelDefaultResponses, V2ModelDefaultErrors, ThrowOnError>({
+      url: "/api/model/default",
       ...options,
       ...params,
     })

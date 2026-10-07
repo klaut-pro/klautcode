@@ -548,7 +548,7 @@
             }
           }
         },
-        "description": "Upgrade klautcode to the specified version or latest if not specified.",
+        "description": "Upgrade klautcode to the specified version.",
         "summary": "Upgrade klautcode",
         "requestBody": {
           "content": {
@@ -560,6 +560,7 @@
                     "type": "string"
                   }
                 },
+                "required": ["target"],
                 "additionalProperties": false
               }
             }
@@ -2995,7 +2996,7 @@
                 "schema": {
                   "type": "object",
                   "additionalProperties": {
-                    "$ref": "#/components/schemas/MCPStatus"
+                    "$ref": "#/components/schemas/MCPPublicStatus"
                   },
                   "description": "MCP server status"
                 }
@@ -8054,6 +8055,87 @@
         ]
       }
     },
+    "/session/{sessionID}/title": {
+      "post": {
+        "tags": ["session"],
+        "operationId": "session.regenerateTitle",
+        "parameters": [
+          {
+            "name": "sessionID",
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "pattern": "^ses"
+            },
+            "required": true
+          },
+          {
+            "name": "directory",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "name": "workspace",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Title regenerated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "description": "Title regenerated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest | InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/effect_HttpApiError_BadRequest"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidRequestError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NotFoundError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Regenerate the session title from the recent conversation using the small model. Explicit manual action; ignores the auto-refresh cadence.",
+        "summary": "Regenerate session title",
+        "x-codeSamples": [
+          {
+            "lang": "js",
+            "source": "import { createKlautcodeClient } from \"@klautcode/sdk\n\nconst client = createKlautcodeClient()\nawait client.session.regenerateTitle({\n  ...\n})"
+          }
+        ]
+      }
+    },
     "/sync/start": {
       "post": {
         "tags": ["sync"],
@@ -8404,6 +8486,77 @@
           {
             "lang": "js",
             "source": "import { createKlautcodeClient } from \"@klautcode/sdk\n\nconst client = createKlautcodeClient()\nawait client.sync.history.list({\n  ...\n})"
+          }
+        ]
+      }
+    },
+    "/tool-output/content": {
+      "get": {
+        "tags": ["tool-output"],
+        "operationId": "tool-output.read",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full tool output",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["content"],
+                  "additionalProperties": false,
+                  "description": "Full tool output"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BadRequest | InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/effect_HttpApiError_BadRequest"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidRequestError"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Read the full output of a truncated tool result saved in the tool output directory.",
+        "summary": "Read full tool output",
+        "x-codeSamples": [
+          {
+            "lang": "js",
+            "source": "import { createKlautcodeClient } from \"@klautcode/sdk\n\nconst client = createKlautcodeClient()\nawait client.tool-output.read({\n  ...\n})"
           }
         ]
       }
@@ -11745,6 +11898,94 @@
           {
             "lang": "js",
             "source": "import { createKlautcodeClient } from \"@klautcode/sdk\n\nconst client = createKlautcodeClient()\nawait client.v2.model.list({\n  ...\n})"
+          }
+        ]
+      }
+    },
+    "/api/model/default": {
+      "get": {
+        "tags": ["models"],
+        "operationId": "v2.model.default",
+        "parameters": [
+          {
+            "name": "location",
+            "in": "query",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "directory": {
+                  "type": "string"
+                },
+                "workspace": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "required": false,
+            "style": "deepObject",
+            "explode": true
+          }
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "$ref": "#/components/schemas/LocationInfo"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ModelV2Info"
+                    }
+                  },
+                  "required": ["location"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "InvalidRequestError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidRequestError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UnauthorizedError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "ServiceUnavailableError",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableError"
+                }
+              }
+            }
+          }
+        },
+        "description": "Retrieve the default model respecting enabled state and free model preference. Returns no model when the catalog has none available.",
+        "summary": "Get default model",
+        "x-codeSamples": [
+          {
+            "lang": "js",
+            "source": "import { createKlautcodeClient } from \"@klautcode/sdk\n\nconst client = createKlautcodeClient()\nawait client.v2.model.default({\n  ...\n})"
           }
         ]
       }
@@ -15471,6 +15712,9 @@
           },
           {
             "$ref": "#/components/schemas/EventMcpToolsChanged"
+          },
+          {
+            "$ref": "#/components/schemas/EventMcpStatusChanged"
           },
           {
             "$ref": "#/components/schemas/EventMcpBrowserOpenFailed"
@@ -19929,6 +20173,31 @@
                   },
                   "type": {
                     "type": "string",
+                    "enum": ["mcp.status.changed"]
+                  },
+                  "properties": {
+                    "type": "object",
+                    "properties": {
+                      "server": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["server"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["id", "type", "properties"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^evt_"
+                  },
+                  "type": {
+                    "type": "string",
                     "enum": ["mcp.browser.open.failed"]
                   },
                   "properties": {
@@ -20793,6 +21062,18 @@
                   }
                 ],
                 "description": "Timeout in milliseconds between streamed SSE chunks for this provider (default: 300000). If no chunk arrives within this window, the request is aborted. Set to false to disable timeout."
+              },
+              "streamIdleTimeout": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0
+                  },
+                  {
+                    "type": "boolean",
+                    "enum": [false]
+                  }
+                ]
               }
             },
             "additionalProperties": {}
@@ -21288,6 +21569,19 @@
           "subagent_depth": {
             "type": "integer",
             "minimum": 0
+          },
+          "subagent_workers": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "enum": ["auto"]
+              }
+            ],
+            "description": "Maximum number of subagents that may run in parallel (multitask mode). 'auto' (default) sizes the worker pool to the machine's CPU core count."
           },
           "username": {
             "type": "string"
@@ -22614,6 +22908,90 @@
         },
         "required": ["name", "extensions", "enabled"],
         "additionalProperties": false
+      },
+      "McpScope": {
+        "type": "string",
+        "enum": ["project", "global"]
+      },
+      "MCPPublicStatus": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["connected"]
+              },
+              "scope": {
+                "$ref": "#/components/schemas/McpScope"
+              }
+            },
+            "required": ["status", "scope"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["disabled"]
+              },
+              "scope": {
+                "$ref": "#/components/schemas/McpScope"
+              }
+            },
+            "required": ["status", "scope"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["failed"]
+              },
+              "error": {
+                "type": "string"
+              },
+              "scope": {
+                "$ref": "#/components/schemas/McpScope"
+              }
+            },
+            "required": ["status", "error", "scope"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["needs_auth"]
+              },
+              "scope": {
+                "$ref": "#/components/schemas/McpScope"
+              }
+            },
+            "required": ["status", "scope"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["needs_client_registration"]
+              },
+              "error": {
+                "type": "string"
+              },
+              "scope": {
+                "$ref": "#/components/schemas/McpScope"
+              }
+            },
+            "required": ["status", "error", "scope"],
+            "additionalProperties": false
+          }
+        ]
       },
       "MCPStatusConnected": {
         "type": "object",
@@ -24223,6 +24601,9 @@
           },
           {
             "$ref": "#/components/schemas/McpToolsChanged"
+          },
+          {
+            "$ref": "#/components/schemas/McpStatusChanged"
           },
           {
             "$ref": "#/components/schemas/McpBrowserOpenFailed"
@@ -33001,6 +33382,53 @@
         "required": ["id", "type", "data"],
         "additionalProperties": false
       },
+      "McpStatusChanged": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^evt_"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["mcp.status.changed"]
+          },
+          "durable": {
+            "type": "object",
+            "properties": {
+              "aggregateID": {
+                "type": "string"
+              },
+              "seq": {
+                "type": "integer"
+              },
+              "version": {
+                "type": "integer"
+              }
+            },
+            "required": ["aggregateID", "seq", "version"],
+            "additionalProperties": false
+          },
+          "location": {
+            "$ref": "#/components/schemas/LocationRef"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "server": {
+                "type": "string"
+              }
+            },
+            "required": ["server"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["id", "type", "data"],
+        "additionalProperties": false
+      },
       "McpBrowserOpenFailed": {
         "type": "object",
         "properties": {
@@ -36194,6 +36622,31 @@
         "required": ["id", "type", "properties"],
         "additionalProperties": false
       },
+      "EventMcpStatusChanged": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^evt_"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["mcp.status.changed"]
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "server": {
+                "type": "string"
+              }
+            },
+            "required": ["server"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["id", "type", "properties"],
+        "additionalProperties": false
+      },
       "EventMcpBrowserOpenFailed": {
         "type": "object",
         "properties": {
@@ -36869,6 +37322,10 @@
     {
       "name": "sync",
       "description": "Experimental HttpApi sync routes."
+    },
+    {
+      "name": "tool-output",
+      "description": "Experimental HttpApi tool output routes."
     },
     {
       "name": "tui",
