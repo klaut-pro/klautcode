@@ -1493,7 +1493,7 @@ export function Prompt(props: PromptProps) {
                                   if (res.ok) {
                                     const v1 = (await res.json()) as { data: Array<{ id: string }> }
                                     for (const m of v1.data ?? []) {
-                                      await sdk.client.config.update({ provider: { [provider.id]: { models: { [m.id]: { name: m.id, limit: { context: 262144, output: 16384 } } } } } as unknown as Parameters<typeof sdk.client.config.update>[0])
+                                      await sdk.client.config.update({ provider: { [provider.id]: { models: { [m.id]: { name: m.id, limit: { context: 262144, output: 16384 } } } } } } as unknown as Parameters<typeof sdk.client.config.update>[0])
                                       discovered++
                                     }
                                   }
