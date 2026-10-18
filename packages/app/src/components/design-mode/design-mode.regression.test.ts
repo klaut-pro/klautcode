@@ -53,6 +53,10 @@ describe("design-mode chrome", () => {
     expect(css).not.toContain(".dm-footer")
   })
 
+  test("leaving design mode clears the add-to-chat busy latch", () => {
+    expect(overlay).toMatch(/setEditingNote\(undefined\)\s*setBusy\(false\)/)
+  })
+
   test("Escape exits design mode", () => {
     expect(overlay).toMatch(/event\.key === "Escape"[\s\S]*design\.exit\(\)/)
   })

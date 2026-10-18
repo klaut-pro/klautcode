@@ -91,6 +91,7 @@ export function DesignModeOverlay() {
       setTextAt(undefined)
       setTextContent("")
       setEditingNote(undefined)
+      setBusy(false)
     }
   })
 

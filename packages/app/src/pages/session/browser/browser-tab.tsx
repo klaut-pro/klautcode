@@ -294,6 +294,7 @@ export function BrowserTab(props: { tab: string }) {
       if (design.active()) design.exit()
       if (url) {
         loadedUrl = url
+        pendingUrl = url
         setStore("input", url)
         recordVisit(url)
       }
