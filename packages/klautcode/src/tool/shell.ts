@@ -541,7 +541,10 @@ export const ShellTool = Tool.define(
             input.timeout > 0 ? Effect.sleep(`${input.timeout + 100} millis`) : Effect.never
 
           const racers: Array<Effect.Effect<{ kind: "exit" | "abort" | "timeout"; code: number | null }>> = [
-            handle.exitCode.pipe(Effect.map((code) => ({ kind: "exit" as const, code }))),
+            handle.exitCode.pipe(
+              Effect.map((code) => ({ kind: "exit" as const, code })),
+              Effect.orDie,
+            ),
             abort.pipe(Effect.map(() => ({ kind: "abort" as const, code: null }))),
           ]
           if (input.timeout > 0) racers.push(timeout.pipe(Effect.map(() => ({ kind: "timeout" as const, code: null }))))

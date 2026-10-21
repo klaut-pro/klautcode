@@ -294,7 +294,7 @@ function wireWebviewGuests(win: BrowserWindow) {
       const line = `[${tag}] ${event} ${JSON.stringify({ url, ...extra })}`
       console.info(line)
       try {
-        writeLog(line)
+        writeLog("window", line)
       } catch {}
     }
 

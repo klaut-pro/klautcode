@@ -25,7 +25,7 @@ import { useLayout } from "@/context/layout"
 import { usePermission } from "@/context/permission"
 import { type ImageAttachmentPart, usePrompt } from "@/context/prompt"
 import { usePlatform } from "@/context/platform"
-import { useSDK } from "@/context/sdk"
+import { type DirectorySDK, useSDK } from "@/context/sdk"
 import { useSettings } from "@/context/settings"
 import { useSync } from "@/context/sync"
 import { createSessionTabs } from "@/pages/session/helpers"
@@ -57,7 +57,7 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
   const sync = useSync()
 
   const autodiscover = async () => {
-    const providers = sync.data.provider
+    const providers = Array.from(sync().data.provider?.all.values() ?? [])
     const targets = providers.filter((p) => p.id === "ollama" || p.id === "rocm")
     if (targets.length === 0) {
       showToast({ title: language.t("dialog.model.autodiscover.noProviders") })
@@ -77,13 +77,13 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
             const limit = { context: m.details.context_length ?? 262144, output: 16384 }
             const reasoning = m.capabilities?.includes("thinking") ?? false
             const tool_call = m.capabilities?.includes("tools") ?? false
-            await sdk.client.config.update({
+            await sdk().client.config.update({
               provider: {
                 [provider.id]: {
                   models: { [m.name]: { name: m.name.replace(/:latest$/, ""), reasoning, tool_call, limit } as unknown as Record<string, unknown> },
                 },
               },
-            } as unknown as Parameters<typeof sdk.client.config.update>[0])
+            } as unknown as Parameters<DirectorySDK["client"]["config"]["update"]>[0])
             discovered++
           }
           continue
@@ -94,13 +94,13 @@ export function PromptInputV2Composer(props: PromptInputV2ComposerProps) {
         if (v1Res.ok) {
           const v1 = (await v1Res.json()) as { data: Array<{ id: string }> }
           for (const m of v1.data ?? []) {
-            await sdk.client.config.update({
+            await sdk().client.config.update({
               provider: {
                 [provider.id]: {
                   models: { [m.id]: { name: m.id, limit: { context: 262144, output: 16384 } } as unknown as Record<string, unknown> },
                 },
               },
-            } as unknown as Parameters<typeof sdk.client.config.update>[0])
+            } as unknown as Parameters<DirectorySDK["client"]["config"]["update"]>[0])
             discovered++
           }
         }
